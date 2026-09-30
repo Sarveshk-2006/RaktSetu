@@ -1,440 +1,581 @@
-// RAKTSETU — Response Cascade Page (HERO EXPERIENCE #1)
-import { useState, useEffect, useRef } from 'react'
+// RAKTSETU — Response Cascade Workspace Page
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  CheckCircle2, XCircle, AlertCircle,
-  Zap, ArrowDown, ArrowRight
+  Zap, CheckCircle2, ShieldCheck, Phone,
+  Clock, MapPin, Building2, ArrowRight,
+  RefreshCw, Users, Activity
 } from 'lucide-react'
-import { BloodGroupBadge } from '@/components/ui/BloodGroupBadge'
-import { cn, formatTime } from '@/lib/utils'
-import { CASCADE_FEED, DEMO_INCIDENT } from '@/data/demoData'
-import type { ResponseEvent } from '@/types'
-
-type CascadePhase =
-  | 'idle'
-  | 'wave1'
-  | 'wave1_insufficient'
-  | 'wave2'
-  | 'fulfilled'
-
-interface CascadeState {
-  phase: CascadePhase
-  events: ResponseEvent[]
-  wave1Confirmed: number
-  wave2Confirmed: number
-  unitsSec: number
-  unitsNeeded: number
-  totalContacted: number
-  duplicatesAvoided: number
-}
-
-function ResponseRow({ event, delay }: { event: ResponseEvent; delay: number }) {
-  const [visible, setVisible] = useState(false)
-
-  useEffect(() => {
-    const t = setTimeout(() => setVisible(true), delay)
-    return () => clearTimeout(t)
-  }, [delay])
-
-  const icon = event.response === 'Accepted'
-    ? <CheckCircle2 size={15} className="text-emerald-400 flex-shrink-0" />
-    : event.response === 'Declined'
-    ? <XCircle size={15} className="text-rose-400 flex-shrink-0" />
-    : <AlertCircle size={15} className="text-slate-500 flex-shrink-0" />
-
-  const responseText: Record<string, string> = {
-    Accepted:   'I CAN HELP',
-    Declined:   'NOT AVAILABLE',
-    NoResponse: 'NO RESPONSE',
-    Pending:    'PENDING…',
-  }
-
-  return (
-    <div className={cn(
-      'flex items-center gap-3 py-2 border-b border-[#1F2937] transition-all duration-300 font-mono text-xs',
-      visible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4',
-    )}>
-      {icon}
-      <div className="flex-1 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="text-slate-400">{formatTime(event.timestamp)}</span>
-          <span className="font-bold text-white">{event.donor_id}</span>
-          <BloodGroupBadge group={event.blood_group} size="sm" />
-          <span className="text-slate-400">{event.distance_km} km</span>
-        </div>
-        <span className={cn(
-          'font-semibold tracking-wider uppercase text-[11px]',
-          event.response === 'Accepted' ? 'text-emerald-400' :
-          event.response === 'Declined' ? 'text-rose-400' : 'text-slate-500',
-        )}>
-          {responseText[event.response]}
-        </span>
-      </div>
-    </div>
-  )
-}
-
-function WaveBlock({
-  waveNum, status, contacted, confirmed, unitsSec, active
-}: {
-  waveNum: number; status: 'pending' | 'active' | 'insufficient' | 'complete'
-  contacted: number; confirmed: number; unitsSec: number; active: boolean
-}) {
-  const statusStyles = {
-    pending:      'border-[#1F2937] bg-[#111827] text-slate-500',
-    active:       'border-amber-800/60 bg-amber-950/20 text-amber-400',
-    insufficient: 'border-rose-900/60 bg-rose-950/20 text-rose-400',
-    complete:     'border-emerald-900/60 bg-emerald-950/20 text-emerald-400',
-  }
-
-  return (
-    <div className={cn(
-      'rounded border p-4 transition-all duration-300',
-      statusStyles[status],
-    )}>
-      <div className="flex items-center justify-between mb-3 font-mono">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-bold tracking-wider uppercase">
-            WAVE {waveNum} · {waveNum === 1 ? 'HIGH CONFIDENCE' : 'SECONDARY NETWORK'}
-          </span>
-          {status === 'active' && (
-            <span className="text-[10px] text-amber-400 bg-amber-950/80 border border-amber-800/60 px-2 py-0.5 rounded animate-pulse">
-              LIVE
-            </span>
-          )}
-          {status === 'insufficient' && (
-            <span className="text-[10px] text-rose-400 bg-rose-950/80 border border-rose-800/60 px-2 py-0.5 rounded">
-              INSUFFICIENT
-            </span>
-          )}
-          {status === 'complete' && (
-            <span className="text-[10px] text-emerald-400 bg-emerald-950/80 border border-emerald-800/60 px-2 py-0.5 rounded flex items-center gap-1">
-              <CheckCircle2 size={10} /> COMPLETE
-            </span>
-          )}
-        </div>
-        {active && <div className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />}
-      </div>
-
-      <div className="grid grid-cols-3 gap-3 text-center font-mono">
-        <div className="bg-[#0B0F14] border border-[#1F2937] p-2 rounded">
-          <div className="text-xl font-bold text-white">{contacted}</div>
-          <div className="text-[10px] text-slate-400 uppercase">Contacted</div>
-        </div>
-        <div className="bg-[#0B0F14] border border-[#1F2937] p-2 rounded">
-          <div className="text-xl font-bold text-white">{confirmed}</div>
-          <div className="text-[10px] text-slate-400 uppercase">Confirmed</div>
-        </div>
-        <div className="bg-[#0B0F14] border border-[#1F2937] p-2 rounded">
-          <div className={cn('text-xl font-bold', unitsSec > 0 ? 'text-emerald-400' : 'text-white')}>{unitsSec}</div>
-          <div className="text-[10px] text-slate-400 uppercase">Units Secured</div>
-        </div>
-      </div>
-    </div>
-  )
-}
+import { cn } from '@/lib/utils'
+import { DEMO_INCIDENT } from '@/data/demoData'
 
 export function ResponseCascadePage() {
   const navigate = useNavigate()
-  const [state, setState] = useState<CascadeState>({
-    phase: 'idle',
-    events: [],
-    wave1Confirmed: 0,
-    wave2Confirmed: 0,
-    unitsSec: 0,
-    unitsNeeded: 2,
-    totalContacted: 0,
-    duplicatesAvoided: 0,
-  })
+  const incident = DEMO_INCIDENT
+
+  // Cascade Simulation State
+  const [phase, setPhase] = useState<'idle' | 'wave1' | 'wave1_insufficient' | 'wave2' | 'fulfilled'>('idle')
+  const [contactedDonors, setContactedDonors] = useState<string[]>([])
+  const [confirmedDonors, setConfirmedDonors] = useState<string[]>([])
+  const [unitsSecured, setUnitsSecured] = useState(1) // Starts with 1 from DEMO_INCIDENT
+  const [showToast, setShowToast] = useState(false)
+  const [toastMsg, setToastMsg] = useState('')
   const timerRef = useRef<ReturnType<typeof setTimeout>[]>([])
+
+  const totalRequired = incident.requirement.units_required // 2
 
   function clearTimers() {
     timerRef.current.forEach(t => clearTimeout(t))
     timerRef.current = []
   }
 
-  function startDemo() {
+  // Handle individual donor outreach
+  const handleContactDonor = (donorId: string) => {
+    if (!contactedDonors.includes(donorId)) {
+      setContactedDonors(prev => [...prev, donorId])
+      setToastMsg(`Outreach request dispatched to ${donorId}. Audit logged.`)
+      setShowToast(true)
+      setTimeout(() => setShowToast(false), 3500)
+    }
+  }
+
+  // Full Response Cascade Simulation Workflow
+  function startSimulation() {
     clearTimers()
-    setState({
-      phase: 'wave1', events: [], wave1Confirmed: 0, wave2Confirmed: 0,
-      unitsSec: 0, unitsNeeded: 2, totalContacted: 0, duplicatesAvoided: 0,
-    })
+    setPhase('wave1')
+    setContactedDonors(['D1042'])
+    setConfirmedDonors(['D1042'])
+    setUnitsSecured(1)
 
-    const schedule = [
-      { delay: 600,  event: CASCADE_FEED[0] },  // D1042: Accepted
-      { delay: 1500, event: CASCADE_FEED[1] },  // D3819: Declined
-      { delay: 2400, event: CASCADE_FEED[2] },  // D5127: NoResponse
-    ]
-
-    schedule.forEach(({ delay, event }) => {
-      const t = setTimeout(() => {
-        setState(prev => {
-          const newEvents = [...prev.events, event]
-          const accepted = newEvents.filter(e => e.response === 'Accepted').length
-          return {
-            ...prev,
-            events: newEvents,
-            wave1Confirmed: accepted,
-            unitsSec: accepted,
-            totalContacted: prev.totalContacted + 1,
-          }
-        })
-      }, delay)
-      timerRef.current.push(t)
-    })
-
+    // Step 1: D3819 declined
     const t1 = setTimeout(() => {
-      setState(prev => ({ ...prev, phase: 'wave1_insufficient' }))
-    }, 3400)
+      setContactedDonors(prev => [...prev, 'D3819'])
+    }, 1200)
     timerRef.current.push(t1)
 
+    // Step 2: D5127 NoResponse -> Wave 1 Insufficient
     const t2 = setTimeout(() => {
-      setState(prev => ({ ...prev, phase: 'wave2', duplicatesAvoided: 6 }))
-    }, 4500)
+      setContactedDonors(prev => [...prev, 'D5127'])
+      setPhase('wave1_insufficient')
+    }, 2400)
     timerRef.current.push(t2)
 
+    // Step 3: Trigger Wave 2
     const t3 = setTimeout(() => {
-      const event = CASCADE_FEED[3] // D8821: Accepted
-      setState(prev => ({
-        ...prev,
-        events: [...prev.events, event],
-        wave2Confirmed: 1,
-        unitsSec: 2,
-        totalContacted: prev.totalContacted + 1,
-      }))
-    }, 5800)
+      setPhase('wave2')
+      setContactedDonors(prev => [...prev, 'D8821'])
+    }, 3800)
     timerRef.current.push(t3)
 
+    // Step 4: D8821 Accepts -> Requirement Fulfilled!
     const t4 = setTimeout(() => {
-      const event = CASCADE_FEED[4] // D2234: Declined
-      setState(prev => ({
-        ...prev,
-        events: [...prev.events, event],
-        totalContacted: prev.totalContacted + 1,
-      }))
-    }, 7000)
+      setConfirmedDonors(prev => [...prev, 'D8821'])
+      setUnitsSecured(2)
+      setPhase('fulfilled')
+    }, 5200)
     timerRef.current.push(t4)
-
-    const t5 = setTimeout(() => {
-      setState(prev => ({ ...prev, phase: 'fulfilled' }))
-    }, 8200)
-    timerRef.current.push(t5)
   }
 
-  function resetDemo() {
+  function resetSimulation() {
     clearTimers()
-    setState({
-      phase: 'idle', events: [], wave1Confirmed: 0, wave2Confirmed: 0,
-      unitsSec: 0, unitsNeeded: 2, totalContacted: 0, duplicatesAvoided: 0,
-    })
+    setPhase('idle')
+    setContactedDonors([])
+    setConfirmedDonors([])
+    setUnitsSecured(1)
   }
-
-  const wave1Events = state.events.slice(0, 3)
-  const wave2Events = state.events.slice(3)
-
-  const wave1Status =
-    state.phase === 'idle' || state.phase === 'wave1' ? (state.phase === 'wave1' && state.events.length > 0 ? 'active' : 'pending') :
-    'insufficient'
-
-  const wave2Status =
-    state.phase === 'wave2' || state.phase === 'fulfilled'
-      ? (state.phase === 'fulfilled' ? 'complete' : 'active')
-      : 'pending'
 
   return (
-    <div className="max-w-[1200px] animate-fade-in space-y-6">
-      <div className="border-b border-[#1F2937] pb-4">
-        <h1 className="text-2xl font-bold font-display text-white tracking-tight flex items-center gap-2.5">
-          <Zap className="text-amber-400" size={24} />
-          RESPONSE CASCADE
-        </h1>
-        <p className="text-slate-400 text-xs font-mono mt-1 max-w-2xl">
-          "Progressively mobilise capacity instead of broadcasting every request to everyone."
-        </p>
+    <div className="space-y-6 animate-fade-in font-body text-[#111827] max-w-[1600px] mx-auto pb-16">
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="fixed bottom-6 right-6 z-50 bg-[#111827] text-white px-4 py-3 rounded-xl shadow-xl border border-gray-800 flex items-center gap-3 animate-slide-up">
+          <Phone size={18} className="text-[#10B981]" />
+          <div className="text-xs">
+            <span className="font-bold block">Donor Dispatch Initiated</span>
+            <span className="text-gray-400">{toastMsg}</span>
+          </div>
+          <button onClick={() => setShowToast(false)} className="text-gray-400 hover:text-white ml-2">
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
+        <div>
+          <h1 className="text-2xl font-bold font-display text-[#111827] tracking-tight flex items-center gap-2.5">
+            <Zap size={24} className="text-[#E11D48]" />
+            <span>Response Cascade</span>
+          </h1>
+          <p className="text-xs text-[#6B7280] mt-0.5">
+            Progressively mobilise capacity instead of broadcasting every request to everyone.
+          </p>
+        </div>
+
+        <button
+          onClick={() => navigate(`/incidents/${incident.incident_id}`)}
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-[#E5E7EB] hover:bg-gray-50 text-xs font-semibold text-[#4B5563] transition-colors self-start sm:self-auto"
+        >
+          <span>View Incident Command</span>
+          <ArrowRight size={14} />
+        </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-5">
-        <div className="col-span-2 space-y-4">
-          <div className="rounded bg-[#111827] border border-rose-900/60 border-l-4 border-l-[#E11D48] p-4 flex items-center justify-between font-mono">
-            <div className="flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#E11D48] animate-pulse" />
-              <span className="text-sm font-bold text-white">{DEMO_INCIDENT.incident_id}</span>
-              <BloodGroupBadge group="O-" size="sm" />
-              <span className="text-xs text-rose-400 font-semibold">CRITICAL · 2 UNITS</span>
-            </div>
-            <span className="text-xs text-slate-400">Wagholi · Sahyadri Hospital</span>
+      {/* Incident Header Summary Banner */}
+      <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="w-3 h-3 rounded-full bg-[#E11D48] animate-ping" />
+            <span className="text-lg font-bold font-mono text-[#111827]">{incident.incident_id}</span>
+            <span className="px-2.5 py-0.5 rounded bg-[#FFE4E6] text-[#E11D48] font-bold text-xs font-mono">
+              {incident.requirement.blood_group}
+            </span>
+            <span className="px-3 py-1 rounded-full bg-[#FFE4E6] text-[#E11D48] border border-[#FECDD3] text-xs font-bold uppercase">
+              {incident.requirement.urgency} · {totalRequired} UNITS
+            </span>
           </div>
 
+          <div className="flex items-center gap-4 text-xs text-[#6B7280]">
+            <span className="flex items-center gap-1">
+              <Clock size={14} /> Created 08m 42s ago
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#D1FAE5] text-[#059669]">
+              <CheckCircle2 size={13} /> Verified Incident
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 text-xs text-[#4B5563] pt-1 border-t border-[#F3F4F6]">
+          <span className="flex items-center gap-1 font-medium">
+            <MapPin size={14} className="text-[#E11D48]" /> Location: {incident.requirement.location.zone}, Pune
+          </span>
+          <span className="flex items-center gap-1 font-medium">
+            <Building2 size={14} className="text-[#2563EB]" /> Facility: {incident.requirement.requesting_facility}
+          </span>
+        </div>
+
+        {/* 5-Stage Horizontal Workflow Tracker */}
+        <div className="pt-2">
+          <div className="grid grid-cols-5 gap-2 text-center text-xs">
+            {/* Stage 1: Wave 1 */}
+            <div className="p-3 rounded-xl border border-[#E11D48] bg-[#FFF1F2] space-y-1 relative">
+              <div className="w-7 h-7 rounded-full bg-[#E11D48] text-white font-bold flex items-center justify-center mx-auto text-xs">
+                1
+              </div>
+              <div className="font-bold text-[#111827]">Wave 1</div>
+              <div className="text-[10px] text-[#6B7280]">Local Donors</div>
+              <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-bold bg-[#E11D48] text-white mt-1">
+                Current Stage
+              </span>
+            </div>
+
+            {/* Stage 2: Wave 2 */}
+            <div className={cn(
+              'p-3 rounded-xl border space-y-1 transition-all',
+              phase === 'wave2' || phase === 'fulfilled' ? 'border-[#2563EB] bg-[#EFF6FF]' : 'border-[#E5E7EB] bg-gray-50'
+            )}>
+              <div className={cn('w-7 h-7 rounded-full font-bold flex items-center justify-center mx-auto text-xs', phase === 'wave2' || phase === 'fulfilled' ? 'bg-[#2563EB] text-white' : 'bg-gray-200 text-gray-600')}>
+                2
+              </div>
+              <div className="font-bold text-[#111827]">Wave 2</div>
+              <div className="text-[10px] text-[#6B7280]">Extended Network</div>
+              <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-bold bg-gray-200 text-gray-600 mt-1">
+                {phase === 'wave2' ? 'Active' : phase === 'fulfilled' ? 'Complete' : 'Pending'}
+              </span>
+            </div>
+
+            {/* Stage 3: Wave 3 */}
+            <div className="p-3 rounded-xl border border-[#E5E7EB] bg-gray-50 space-y-1">
+              <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-600 font-bold flex items-center justify-center mx-auto text-xs">
+                3
+              </div>
+              <div className="font-bold text-[#111827]">Wave 3</div>
+              <div className="text-[10px] text-[#6B7280]">Partner Network</div>
+              <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-bold bg-gray-200 text-gray-600 mt-1">
+                Pending
+              </span>
+            </div>
+
+            {/* Stage 4: On Route */}
+            <div className="p-3 rounded-xl border border-[#E5E7EB] bg-gray-50 space-y-1">
+              <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-600 font-bold flex items-center justify-center mx-auto text-xs">
+                4
+              </div>
+              <div className="font-bold text-[#111827]">On Route</div>
+              <div className="text-[10px] text-[#6B7280]">Units in Transit</div>
+              <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-bold bg-gray-200 text-gray-600 mt-1">
+                Pending
+              </span>
+            </div>
+
+            {/* Stage 5: Fulfilled */}
+            <div className={cn(
+              'p-3 rounded-xl border space-y-1 transition-all',
+              phase === 'fulfilled' ? 'border-[#10B981] bg-[#D1FAE5]' : 'border-[#E5E7EB] bg-gray-50'
+            )}>
+              <div className={cn('w-7 h-7 rounded-full font-bold flex items-center justify-center mx-auto text-xs', phase === 'fulfilled' ? 'bg-[#10B981] text-white' : 'bg-gray-200 text-gray-600')}>
+                5
+              </div>
+              <div className="font-bold text-[#111827]">Fulfilled</div>
+              <div className="text-[10px] text-[#6B7280]">Requirement Met</div>
+              <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-bold bg-gray-200 text-gray-600 mt-1">
+                {phase === 'fulfilled' ? 'Complete' : 'Pending'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* MAIN WORKSPACE GRID */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* LEFT COLUMN: Active Wave & Candidate List (Col 8 / ~65%) */}
+        <div className="lg:col-span-8 space-y-5">
+          {/* Card 1: Wave 1 Active Card */}
+          <div className="bg-white rounded-2xl border border-[#E11D48] p-5 shadow-2xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#F3F4F6] pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#E11D48] text-white font-bold flex items-center justify-center shrink-0">
+                  1
+                </div>
+                <div>
+                  <h3 className="text-base font-bold font-display text-[#111827]">Wave 1 — Local Donor Activation</h3>
+                  <p className="text-xs text-[#6B7280]">Contacting best matched donors within 5km radius.</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                <span className="px-2.5 py-1 rounded-full bg-[#FEF3C7] text-[#D97706] text-xs font-bold border border-[#FDE68A]">
+                  In Progress
+                </span>
+                <span className="text-xs text-[#6B7280] font-mono">⏱ 08m 42s</span>
+              </div>
+            </div>
+
+            {/* 4 Compact Wave Metrics Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] space-y-0.5">
+                <div className="flex items-center gap-1.5 text-xs text-[#6B7280]">
+                  <Users size={14} className="text-[#E11D48]" />
+                  <span>Candidates</span>
+                </div>
+                <div className="text-xl font-bold font-display text-[#111827]">3</div>
+                <span className="text-[10px] text-[#059669] font-semibold">High match score</span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] space-y-0.5">
+                <div className="flex items-center gap-1.5 text-xs text-[#6B7280]">
+                  <Phone size={14} className="text-[#2563EB]" />
+                  <span>Contacted</span>
+                </div>
+                <div className="text-xl font-bold font-display text-[#111827]">
+                  {contactedDonors.length}
+                </div>
+                <span className="text-[10px] text-[#2563EB] font-semibold">
+                  {Math.round((contactedDonors.length / 3) * 100)}% completed
+                </span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] space-y-0.5">
+                <div className="flex items-center gap-1.5 text-xs text-[#6B7280]">
+                  <CheckCircle2 size={14} className="text-[#10B981]" />
+                  <span>Confirmed</span>
+                </div>
+                <div className="text-xl font-bold font-display text-[#111827]">
+                  {confirmedDonors.length}
+                </div>
+                <span className="text-[10px] text-[#10B981] font-semibold">
+                  {Math.round((confirmedDonors.length / totalRequired) * 100)}% secured
+                </span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] space-y-0.5">
+                <div className="flex items-center gap-1.5 text-xs text-[#6B7280]">
+                  <Zap size={14} className="text-[#E11D48]" />
+                  <span>Secured</span>
+                </div>
+                <div className="text-xl font-bold font-display text-[#E11D48]">
+                  {unitsSecured} / {totalRequired}
+                </div>
+                <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden mt-1">
+                  <div className="h-full bg-[#E11D48]" style={{ width: `${(unitsSecured / totalRequired) * 100}%` }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Candidate Donors List */}
+            <div className="space-y-3 pt-2">
+              <span className="text-xs font-bold text-[#111827] block">Selected Donors for Wave 1</span>
+
+              {/* Donor #1: D1042 */}
+              <div className="p-3.5 rounded-xl border border-[#E5E7EB] hover:border-[#E11D48] transition-all bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="font-bold text-xs text-[#6B7280]">#1</span>
+                  <span className="font-mono font-bold text-sm text-[#111827]">D1042</span>
+                  <span className="px-2 py-0.5 rounded bg-[#FFE4E6] text-[#E11D48] font-bold text-xs font-mono">
+                    O-
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#D1FAE5] text-[#059669]">
+                    Ready
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-4 text-xs text-[#6B7280]">
+                  <span>📍 3.2 km</span>
+                  <span className="text-[#10B981] font-semibold">⚡ 92% response likelihood</span>
+                  <button
+                    onClick={() => handleContactDonor('D1042')}
+                    className={cn(
+                      'px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5',
+                      contactedDonors.includes('D1042')
+                        ? 'bg-[#D1FAE5] text-[#059669] border border-[#A7F3D0]'
+                        : 'bg-white text-[#E11D48] border border-[#E11D48] hover:bg-[#FFF1F2]'
+                    )}
+                  >
+                    <Phone size={13} />
+                    <span>{contactedDonors.includes('D1042') ? 'Contacted ✓' : 'Contact Donor'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Donor #2: D3819 */}
+              <div className="p-3.5 rounded-xl border border-[#E5E7EB] hover:border-[#E11D48] transition-all bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="font-bold text-xs text-[#6B7280]">#2</span>
+                  <span className="font-mono font-bold text-sm text-[#111827]">D3819</span>
+                  <span className="px-2 py-0.5 rounded bg-[#FFE4E6] text-[#E11D48] font-bold text-xs font-mono">
+                    O-
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#FEF3C7] text-[#D97706]">
+                    Available
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-4 text-xs text-[#6B7280]">
+                  <span>📍 5.7 km</span>
+                  <span className="text-[#10B981] font-semibold">⚡ 86% response likelihood</span>
+                  <button
+                    onClick={() => handleContactDonor('D3819')}
+                    className={cn(
+                      'px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5',
+                      contactedDonors.includes('D3819')
+                        ? 'bg-[#D1FAE5] text-[#059669] border border-[#A7F3D0]'
+                        : 'bg-white text-[#E11D48] border border-[#E11D48] hover:bg-[#FFF1F2]'
+                    )}
+                  >
+                    <Phone size={13} />
+                    <span>{contactedDonors.includes('D3819') ? 'Contacted ✓' : 'Contact Donor'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Donor #3: D5127 */}
+              <div className="p-3.5 rounded-xl border border-[#E5E7EB] hover:border-[#E11D48] transition-all bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="font-bold text-xs text-[#6B7280]">#3</span>
+                  <span className="font-mono font-bold text-sm text-[#111827]">D5127</span>
+                  <span className="px-2 py-0.5 rounded bg-[#FFE4E6] text-[#E11D48] font-bold text-xs font-mono">
+                    O-
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#FEF3C7] text-[#D97706]">
+                    Available
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-4 text-xs text-[#6B7280]">
+                  <span>📍 7.1 km</span>
+                  <span className="text-[#10B981] font-semibold">⚡ 81% response likelihood</span>
+                  <button
+                    onClick={() => handleContactDonor('D5127')}
+                    className={cn(
+                      'px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5',
+                      contactedDonors.includes('D5127')
+                        ? 'bg-[#D1FAE5] text-[#059669] border border-[#A7F3D0]'
+                        : 'bg-white text-[#E11D48] border border-[#E11D48] hover:bg-[#FFF1F2]'
+                    )}
+                  >
+                    <Phone size={13} />
+                    <span>{contactedDonors.includes('D5127') ? 'Contacted ✓' : 'Contact Donor'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Future Cascade Waves Rows */}
           <div className="space-y-3">
-            <div className="rounded bg-emerald-950/20 border border-emerald-800/40 p-3 flex items-center gap-2.5 font-mono text-xs text-emerald-400 font-semibold">
-              <CheckCircle2 size={16} />
-              <span>VERIFIED INCIDENT REQUISITION</span>
+            {/* Wave 2 */}
+            <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 flex items-center justify-between opacity-85">
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-full bg-gray-100 text-gray-600 font-bold flex items-center justify-center text-xs">
+                  2
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-[#111827]">Wave 2 — Extended Network</h4>
+                  <p className="text-[11px] text-[#6B7280]">Expands to city-wide donor network if required.</p>
+                </div>
+              </div>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
+                Pending
+              </span>
             </div>
 
-            <div className="flex justify-center"><ArrowDown size={16} className="text-slate-600" /></div>
-
-            <WaveBlock
-              waveNum={1}
-              status={wave1Status === 'pending' && state.phase !== 'idle' ? 'active' : wave1Status === 'active' ? 'active' : wave1Status}
-              contacted={state.phase === 'idle' ? 0 : 5}
-              confirmed={state.wave1Confirmed}
-              unitsSec={state.wave1Confirmed}
-              active={state.phase === 'wave1'}
-            />
-
-            {wave1Events.length > 0 && (
-              <div className="ml-4 rounded bg-[#0B0F14] border border-[#1F2937] p-3 space-y-1">
-                {wave1Events.map(e => (
-                  <ResponseRow key={e.donor_id} event={e} delay={0} />
-                ))}
-              </div>
-            )}
-
-            {(state.phase === 'wave1_insufficient' || state.phase === 'wave2' || state.phase === 'fulfilled') && (
-              <div className="rounded bg-amber-950/30 border border-amber-900/50 p-3 flex items-center justify-between font-mono text-xs text-amber-400">
-                <div className="flex items-center gap-2">
-                  <AlertCircle size={15} />
-                  <span className="font-bold">INSUFFICIENT CAPACITY — Wave 2 Activated</span>
+            {/* Wave 3 */}
+            <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 flex items-center justify-between opacity-85">
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-full bg-gray-100 text-gray-600 font-bold flex items-center justify-center text-xs">
+                  3
                 </div>
-                <span className="text-[11px] text-amber-500">{state.duplicatesAvoided} duplicate outreach requests avoided</span>
-              </div>
-            )}
-
-            {(state.phase === 'wave2' || state.phase === 'fulfilled') && (
-              <>
-                <div className="flex justify-center"><ArrowDown size={16} className="text-slate-600" /></div>
-
-                <WaveBlock
-                  waveNum={2}
-                  status={wave2Status}
-                  contacted={wave2Events.length > 0 ? 4 : 0}
-                  confirmed={state.wave2Confirmed}
-                  unitsSec={state.wave2Confirmed}
-                  active={state.phase === 'wave2'}
-                />
-
-                {wave2Events.length > 0 && (
-                  <div className="ml-4 rounded bg-[#0B0F14] border border-[#1F2937] p-3 space-y-1">
-                    {wave2Events.map(e => (
-                      <ResponseRow key={e.donor_id} event={e} delay={0} />
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-
-            {state.phase === 'fulfilled' && (
-              <div className="rounded bg-emerald-950/40 border border-emerald-700/60 p-5 space-y-4 font-mono animate-scale-in">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle2 size={24} className="text-emerald-400" />
-                    <div>
-                      <h3 className="text-emerald-400 font-bold text-base font-display">INCIDENT FULFILLED ✓</h3>
-                      <p className="text-slate-300 text-xs">2 / 2 units secured in 11m 24s</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-4 gap-3 text-center text-xs">
-                  <div className="bg-[#0B0F14] border border-[#1F2937] p-2.5 rounded">
-                    <div className="text-lg font-bold text-white">11m 24s</div>
-                    <div className="text-[10px] text-slate-400 uppercase">Response Time</div>
-                  </div>
-                  <div className="bg-[#0B0F14] border border-[#1F2937] p-2.5 rounded">
-                    <div className="text-lg font-bold text-white">{state.totalContacted}</div>
-                    <div className="text-[10px] text-slate-400 uppercase">Donors Contacted</div>
-                  </div>
-                  <div className="bg-[#0B0F14] border border-[#1F2937] p-2.5 rounded">
-                    <div className="text-lg font-bold text-white">3</div>
-                    <div className="text-[10px] text-slate-400 uppercase">Responses</div>
-                  </div>
-                  <div className="bg-[#0B0F14] border border-[#1F2937] p-2.5 rounded">
-                    <div className="text-lg font-bold text-emerald-400">{state.duplicatesAvoided}</div>
-                    <div className="text-[10px] text-slate-400 uppercase">Duplicates Avoided</div>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={resetDemo}
-                    className="flex-1 py-2 rounded border border-emerald-800 text-emerald-300 text-xs font-bold hover:bg-emerald-900/30 transition-colors uppercase"
-                  >
-                    Close Incident
-                  </button>
-                  <button
-                    onClick={() => navigate('/intelligence')}
-                    className="flex-1 py-2 rounded bg-[#E11D48] hover:bg-rose-700 text-white text-xs font-bold transition-colors uppercase flex items-center justify-center gap-1.5"
-                  >
-                    Network Intelligence Updated <ArrowRight size={13} />
-                  </button>
+                <div>
+                  <h4 className="text-xs font-bold text-[#111827]">Wave 3 — Partner Network</h4>
+                  <p className="text-[11px] text-[#6B7280]">Activates partner hospitals, NGOs and regional network.</p>
                 </div>
               </div>
-            )}
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
+                Pending
+              </span>
+            </div>
+
+            {/* On Route */}
+            <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 flex items-center justify-between opacity-85">
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-full bg-gray-100 text-gray-600 font-bold flex items-center justify-center text-xs">
+                  4
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-[#111827]">On Route</h4>
+                  <p className="text-[11px] text-[#6B7280]">Confirmed units in transit to hospital.</p>
+                </div>
+              </div>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
+                Pending
+              </span>
+            </div>
           </div>
 
-          <div className="pt-2">
-            {state.phase === 'idle' ? (
+          {/* Primary Action Button Bar */}
+          <div className="pt-2 flex gap-3">
+            {phase === 'idle' ? (
               <button
-                onClick={startDemo}
-                className="w-full py-3 rounded bg-[#E11D48] hover:bg-rose-700 text-white font-mono text-xs font-bold tracking-widest uppercase transition-colors shadow-sm flex items-center justify-center gap-2"
+                onClick={startSimulation}
+                className="w-full py-3.5 rounded-xl bg-[#E11D48] hover:bg-[#BE123C] text-white text-xs font-bold shadow-md transition-all flex items-center justify-center gap-2"
               >
-                <Zap size={16} /> START RESPONSE CASCADE SIMULATION
+                <Zap size={16} />
+                <span>START RESPONSE CASCADE SIMULATION →</span>
               </button>
             ) : (
               <button
-                onClick={resetDemo}
-                className="px-4 py-2 rounded bg-[#161E2E] border border-[#1F2937] text-slate-400 hover:text-white font-mono text-xs"
+                onClick={resetSimulation}
+                className="px-4 py-2.5 rounded-xl border border-[#E5E7EB] hover:bg-white text-xs font-bold text-[#4B5563] transition-colors flex items-center gap-1.5"
               >
-                Reset Cascade Demo
+                <RefreshCw size={14} />
+                <span>Reset Simulation</span>
               </button>
             )}
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="rounded bg-[#111827] border border-[#1F2937] p-4 text-center space-y-3 font-mono">
-            <h3 className="text-xs font-bold tracking-wider uppercase text-slate-400">
-              UNITS SECURED METRIC
+        {/* RIGHT COLUMN: Units Secured, Incident Details, Principles & Privacy (Col 4 / ~35%) */}
+        <div className="lg:col-span-4 space-y-5">
+          {/* Units Secured Metric Card */}
+          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs text-center space-y-3">
+            <h3 className="text-xs font-bold font-display text-[#6B7280] uppercase tracking-wider">
+              Units Secured
             </h3>
-            <div className={cn(
-              'text-5xl font-bold font-mono transition-colors',
-              state.unitsSec >= state.unitsNeeded ? 'text-emerald-400' : 'text-amber-400'
-            )}>
-              {state.unitsSec} / {state.unitsNeeded}
+            <div className="text-5xl font-bold font-display text-[#111827]">
+              {unitsSecured} / {totalRequired}
             </div>
-            <p className="text-xs text-slate-400">Verified Units Confirmed</p>
-            <div className="h-2 rounded bg-[#0B0F14] overflow-hidden border border-[#1F2937]">
-              <div
-                className={cn(
-                  'h-full transition-all duration-500',
-                  state.unitsSec >= state.unitsNeeded ? 'bg-emerald-500' : 'bg-amber-500'
-                )}
-                style={{ width: `${(state.unitsSec / state.unitsNeeded) * 100}%` }}
-              />
+            <div className="space-y-1">
+              <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden border border-[#E5E7EB]">
+                <div
+                  className="h-full bg-[#E11D48] transition-all duration-500"
+                  style={{ width: `${(unitsSecured / totalRequired) * 100}%` }}
+                />
+              </div>
+              <span className="text-[11px] text-[#6B7280] font-semibold block">
+                {Math.round((unitsSecured / totalRequired) * 100)}% Fulfilled
+              </span>
             </div>
           </div>
 
-          <div className="rounded bg-[#111827] border border-[#1F2937] p-4 space-y-3">
-            <h3 className="text-xs font-mono font-bold tracking-wider uppercase text-slate-300 border-b border-[#1F2937] pb-2">
-              CASCADE PRINCIPLES
-            </h3>
-            <div className="space-y-2.5 text-xs text-slate-300">
-              <div className="flex gap-2">
-                <span className="text-rose-400 font-bold">•</span>
-                <span><strong className="text-white">Verified Need:</strong> Requirement confirmed before outreach</span>
+          {/* Incident Details Card */}
+          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-3">
+            <h3 className="text-xs font-bold font-display text-[#111827]">Incident Details</h3>
+
+            <div className="space-y-2.5 text-xs text-[#4B5563]">
+              <div className="flex justify-between pb-2 border-b border-[#F3F4F6]">
+                <span className="text-[#6B7280]">Blood Group</span>
+                <span className="font-bold text-[#111827] font-mono">{incident.requirement.blood_group}</span>
               </div>
-              <div className="flex gap-2">
-                <span className="text-rose-400 font-bold">•</span>
-                <span><strong className="text-white">Explainable Matching:</strong> Donor readiness score</span>
+              <div className="flex justify-between pb-2 border-b border-[#F3F4F6]">
+                <span className="text-[#6B7280]">Units Required</span>
+                <span className="font-bold text-[#111827]">{totalRequired} Units</span>
               </div>
-              <div className="flex gap-2">
-                <span className="text-rose-400 font-bold">•</span>
-                <span><strong className="text-white">Progressive Waves:</strong> Tiered cohort outreach</span>
+              <div className="flex justify-between pb-2 border-b border-[#F3F4F6]">
+                <span className="text-[#6B7280]">Priority</span>
+                <span className="font-bold text-[#E11D48] uppercase">{incident.requirement.urgency}</span>
               </div>
-              <div className="flex gap-2">
-                <span className="text-rose-400 font-bold">•</span>
-                <span><strong className="text-white">Deduplication:</strong> Prevents donor alert fatigue</span>
+              <div className="flex justify-between pb-2 border-b border-[#F3F4F6]">
+                <span className="text-[#6B7280]">Elapsed Time</span>
+                <span className="font-bold text-[#111827]">08m 42s</span>
               </div>
+              <div className="flex justify-between pb-2 border-b border-[#F3F4F6]">
+                <span className="text-[#6B7280]">Location</span>
+                <span className="font-bold text-[#111827]">{incident.requirement.location.zone}, Pune</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#6B7280]">Hospital</span>
+                <span className="font-bold text-[#111827]">{incident.requirement.requesting_facility}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Cascade Principles Card */}
+          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-3">
+            <h3 className="text-xs font-bold font-display text-[#111827]">Cascade Principles</h3>
+
+            <div className="space-y-3 text-xs">
+              <div className="flex items-start gap-2.5">
+                <ShieldCheck size={18} className="text-[#10B981] shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-[#111827] block font-bold">Verified Requirement</strong>
+                  <span className="text-[#6B7280]">Requirement confirmed before outreach.</span>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5">
+                <Users size={18} className="text-[#2563EB] shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-[#111827] block font-bold">Explainable Matching</strong>
+                  <span className="text-[#6B7280]">Donors ranked by compatibility, proximity and reliability.</span>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5">
+                <Zap size={18} className="text-[#E11D48] shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-[#111827] block font-bold">Progressive Waves</strong>
+                  <span className="text-[#6B7280]">Tiered outreach to maximise response rate.</span>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5">
+                <Activity size={18} className="text-[#8B5CF6] shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-[#111827] block font-bold">Deduplication</strong>
+                  <span className="text-[#6B7280]">Prevents donor alert fatigue and ensures fair distribution.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Privacy Protected Card */}
+          <div className="bg-[#FFF1F2] border border-[#FECDD3] rounded-2xl p-4 shadow-2xs flex items-center gap-3 text-xs text-[#4B5563]">
+            <ShieldCheck size={20} className="text-[#E11D48] shrink-0" />
+            <div className="space-y-0.5">
+              <strong className="text-[#E11D48] font-bold block">Privacy Protected</strong>
+              <p className="text-[11px] text-[#6B7280]">
+                Contact information is revealed only after the donor responds. All access is audit-logged.
+              </p>
             </div>
           </div>
         </div>
