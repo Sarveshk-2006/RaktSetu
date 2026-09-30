@@ -1,301 +1,688 @@
-// RAKTSETU — Premium Light Overview Page
+// RAKTSETU — Complete Overview Page UI/UX Redesign (Reference-Driven)
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   AlertTriangle, Users, Network, Clock,
-  ChevronRight, ArrowRight, MapPin
+  ChevronRight, ArrowUpRight, MapPin, Sun,
+  Info, CheckCircle2, UserCheck, Zap, PackageCheck,
+  Plus
 } from 'lucide-react'
-import { KpiCard } from '@/components/ui/KpiCard'
-import { BloodGroupBadge } from '@/components/ui/BloodGroupBadge'
-import { IncidentCard } from '@/components/incidents/IncidentCard'
+
+import {
+  BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid
+} from 'recharts'
 import { cn } from '@/lib/utils'
-import { ALL_INCIDENTS, NETWORK_METRICS } from '@/data/demoData'
+
+// Synthetic supply vs demand trend data for Pune Network
+const SUPPLY_DEMAND_DATA = [
+  { day: '24 Sep', supplied: 42, requested: 58 },
+  { day: '25 Sep', supplied: 35, requested: 62 },
+  { day: '26 Sep', supplied: 65, requested: 70 },
+  { day: '27 Sep', supplied: 48, requested: 52 },
+  { day: '28 Sep', supplied: 55, requested: 45 },
+  { day: '29 Sep', supplied: 72, requested: 60 },
+  { day: '30 Sep', supplied: 58, requested: 68 },
+]
+
+// Blood group resilience data matching reference image
+const BLOOD_GROUPS = [
+  { group: 'O+', percent: 94, status: 'STRONG', color: 'green' },
+  { group: 'A+', percent: 91, status: 'STRONG', color: 'green' },
+  { group: 'B+', percent: 89, status: 'STRONG', color: 'green' },
+  { group: 'AB+', percent: 78, status: 'STABLE', color: 'yellow' },
+  { group: 'O-', percent: 41, status: 'CRITICAL', color: 'red' },
+  { group: 'A-', percent: 54, status: 'HIGH RISK', color: 'orange' },
+  { group: 'B-', percent: 48, status: 'HIGH RISK', color: 'orange' },
+  { group: 'AB-', percent: 29, status: 'CRITICAL', color: 'red' },
+]
+
+// Active requirements list
+const ACTIVE_REQUIREMENTS = [
+  {
+    id: 'INC-PN-48291',
+    group: 'O-',
+    groupColor: 'bg-[#FFE4E6] text-[#E11D48] border-[#FECDD3]',
+    units: '2 units required',
+    urgency: 'Critical',
+    urgencyClass: 'bg-[#FFE4E6] text-[#E11D48]',
+    location: 'Wagholi, Pune · Sahyadri Hospital',
+    time: '12m 40s ago',
+    featured: true,
+  },
+  {
+    id: 'INC-PN-48287',
+    group: 'B+',
+    groupColor: 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]',
+    units: '3 units required',
+    urgency: 'High',
+    urgencyClass: 'bg-[#FEF3C7] text-[#D97706]',
+    location: 'Kothrud, Pune · Ruby Hall Clinic',
+    time: '24m 12s ago',
+    featured: false,
+  },
+  {
+    id: 'INC-PN-48279',
+    group: 'A+',
+    groupColor: 'bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]',
+    units: '1 unit required',
+    urgency: 'Moderate',
+    urgencyClass: 'bg-[#EFF6FF] text-[#2563EB]',
+    location: 'Baner, Pune · Deenanath Mangeshkar Hospital',
+    time: '04m 15s ago',
+    featured: false,
+  },
+]
+
+// Recent operational activity timeline
+const RECENT_ACTIVITIES = [
+  {
+    time: '22:18',
+    icon: CheckCircle2,
+    iconBg: 'text-[#10B981] bg-[#ECFDF5]',
+    title: 'INC-PN-48291 verified by Dr. A. Sharma',
+    subtitle: 'Sahyadri Hospital',
+  },
+  {
+    time: '22:17',
+    icon: UserCheck,
+    iconBg: 'text-[#2563EB] bg-[#EFF6FF]',
+    title: 'Donor D8821 accepted request',
+    subtitle: 'ETA: 14 mins',
+  },
+  {
+    time: '22:15',
+    icon: Zap,
+    iconBg: 'text-[#E11D48] bg-[#FFE4E6]',
+    title: 'Wave 2 activation started',
+    subtitle: '4 additional donors notified',
+  },
+  {
+    time: '22:11',
+    icon: MapPin,
+    iconBg: 'text-[#10B981] bg-[#ECFDF5]',
+    title: 'Donor D1042 responded',
+    subtitle: 'O- matched · 3.2 km distance',
+  },
+  {
+    time: '22:08',
+    icon: PackageCheck,
+    iconBg: 'text-[#D97706] bg-[#FEF3C7]',
+    title: '1 unit delivered',
+    subtitle: 'Ruby Hall Clinic',
+  },
+]
 
 export function OverviewPage() {
   const navigate = useNavigate()
-  const metrics = NETWORK_METRICS
-  const activeIncidents = ALL_INCIDENTS.filter(i => !['Fulfilled', 'Closed'].includes(i.status))
+  const [timeRange, setTimeRange] = useState('Last 7 days')
+  const [healthRange, setHealthRange] = useState('Last 24 hours')
 
   return (
-    <div className="space-y-6 animate-fade-in font-body text-[#17202A]">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E4E7EC]">
+    <div className="space-y-5 animate-fade-in font-body text-[#111827] max-w-[1600px] mx-auto pb-8">
+      {/* Overview Header Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
         <div>
-          <span className="text-xs font-semibold text-[#667085] uppercase tracking-wider block mb-0.5">
-            Good evening
-          </span>
-          <h1 className="text-2xl font-bold font-display text-[#17202A] tracking-tight">
+          <div className="flex items-center gap-2 text-[#D97706] font-semibold text-xs mb-1">
+            <Sun size={18} className="text-amber-500 fill-amber-100" />
+            <span>Good Evening, Operator</span>
+          </div>
+          <h1 className="text-2xl font-bold font-display text-[#111827] tracking-tight">
             RAKTSETU Overview
           </h1>
-          <p className="text-xs text-[#667085] mt-0.5">
-            Monitor active requirements, donor availability and network readiness.
+          <p className="text-xs text-[#6B7280] mt-0.5">
+            Here's the current status of the RAKTSETU network in Pune.
           </p>
         </div>
-        <button
-          onClick={() => navigate('/incidents/create')}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#DC2626] hover:bg-[#B91C1C] text-white text-xs font-semibold transition-colors shadow-sm self-start sm:self-auto"
-        >
-          + Create Blood Requirement
-        </button>
+
+        <div className="flex items-center gap-4 self-start sm:self-auto">
+          <div className="hidden md:flex flex-col text-right text-xs">
+            <span className="font-semibold text-[#111827]">Tue, 30 Sep 2026</span>
+            <span className="text-[#6B7280]">11:08 PM IST</span>
+          </div>
+          <button
+            onClick={() => navigate('/incidents/create')}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#E11D48] hover:bg-[#BE123C] text-white text-xs font-semibold shadow-xs transition-colors"
+          >
+            <Plus size={16} />
+            <span>Create Blood Requirement</span>
+          </button>
+        </div>
       </div>
 
-      {/* Balanced Metric Cards Row */}
+      {/* SECTION 1 — 4 KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard
-          label="Active Incidents"
-          value="4"
-          icon={AlertTriangle}
-          accent="red"
-          trend="2 critical requires action"
-        />
-        <KpiCard
-          label="Ready Donors"
-          value="4,218"
-          icon={Users}
-          accent="green"
-          trend="↑ 143 verified donors"
-          trendUp
-        />
-        <KpiCard
-          label="Network Coverage"
-          value="87%"
-          icon={Network}
-          accent="blue"
-          trend="3 critical geographic gaps"
-        />
-        <KpiCard
-          label="Median Response"
-          value="8m 42s"
-          icon={Clock}
-          accent="amber"
-          trend="↓ 1m 18s response time"
-          trendUp
-        />
+        {/* Card 1: Active Incidents */}
+        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-3 relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-[#FFE4E6] flex items-center justify-center text-[#E11D48]">
+                <AlertTriangle size={18} />
+              </div>
+              <span className="text-xs font-semibold text-[#4B5563]">Active Incidents</span>
+            </div>
+            <div className="w-7 h-7 rounded-md bg-rose-50 border border-rose-100 flex items-center justify-center text-[#E11D48]">
+              <AlertTriangle size={14} />
+            </div>
+          </div>
+          <div className="flex items-baseline justify-between">
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold text-[#111827] font-display">4</span>
+              <span className="text-xs font-semibold text-[#E11D48] bg-[#FFE4E6] px-1.5 py-0.5 rounded">
+                ↑ 2
+              </span>
+            </div>
+            {/* Sparkline SVG */}
+            <svg className="w-16 h-6 stroke-[#E11D48] fill-none stroke-[2]" viewBox="0 0 60 20">
+              <path d="M0 15 Q 15 5, 30 14 T 60 4" />
+            </svg>
+          </div>
+          <p className="text-[11px] text-[#6B7280]">2 critical require action</p>
+        </div>
+
+        {/* Card 2: Ready Donors */}
+        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-3 relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-[#D1FAE5] flex items-center justify-center text-[#10B981]">
+                <Users size={18} />
+              </div>
+              <span className="text-xs font-semibold text-[#4B5563]">Ready Donors</span>
+            </div>
+            <div className="w-7 h-7 rounded-md bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#10B981]">
+              <Users size={14} />
+            </div>
+          </div>
+          <div className="flex items-baseline justify-between">
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold text-[#111827] font-display">4,218</span>
+              <span className="text-xs font-semibold text-[#059669] bg-[#D1FAE5] px-1.5 py-0.5 rounded">
+                ↑ 143
+              </span>
+            </div>
+            {/* Sparkline SVG */}
+            <svg className="w-16 h-6 stroke-[#10B981] fill-none stroke-[2]" viewBox="0 0 60 20">
+              <path d="M0 18 Q 15 12, 30 10 T 60 3" />
+            </svg>
+          </div>
+          <p className="text-[11px] text-[#6B7280]">Verified & available</p>
+        </div>
+
+        {/* Card 3: Network Coverage */}
+        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-3 relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-[#DBEAFE] flex items-center justify-center text-[#2563EB]">
+                <Network size={18} />
+              </div>
+              <span className="text-xs font-semibold text-[#4B5563]">Network Coverage</span>
+            </div>
+            <div className="w-7 h-7 rounded-md bg-blue-50 border border-blue-100 flex items-center justify-center text-[#2563EB]">
+              <Network size={14} />
+            </div>
+          </div>
+          <div className="flex items-baseline justify-between">
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold text-[#111827] font-display">87%</span>
+              <span className="text-xs font-semibold text-[#2563EB] bg-[#DBEAFE] px-1.5 py-0.5 rounded">
+                ↑ 5%
+              </span>
+            </div>
+            {/* Sparkline SVG */}
+            <svg className="w-16 h-6 stroke-[#2563EB] fill-none stroke-[2]" viewBox="0 0 60 20">
+              <path d="M0 16 Q 15 8, 30 12 T 60 5" />
+            </svg>
+          </div>
+          <p className="text-[11px] text-[#6B7280]">Operational coverage</p>
+        </div>
+
+        {/* Card 4: Median Response */}
+        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-3 relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-[#FEF3C7] flex items-center justify-center text-[#D97706]">
+                <Clock size={18} />
+              </div>
+              <span className="text-xs font-semibold text-[#4B5563]">Median Response</span>
+            </div>
+            <div className="w-7 h-7 rounded-md bg-amber-50 border border-amber-100 flex items-center justify-center text-[#D97706]">
+              <Clock size={14} />
+            </div>
+          </div>
+          <div className="flex items-baseline justify-between">
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold text-[#111827] font-display">8m 42s</span>
+              <span className="text-xs font-semibold text-[#059669] bg-[#D1FAE5] px-1.5 py-0.5 rounded">
+                ↓ 1m 18s
+              </span>
+            </div>
+            {/* Sparkline SVG */}
+            <svg className="w-16 h-6 stroke-[#D97706] fill-none stroke-[2]" viewBox="0 0 60 20">
+              <path d="M0 6 Q 15 14, 30 8 T 60 16" />
+            </svg>
+          </div>
+          <p className="text-[11px] text-[#6B7280]">From request to first response</p>
+        </div>
       </div>
 
-      {/* Main 2-Column Overview Composition */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* LEFT COLUMN — Active Response (Col 7) */}
-        <div className="lg:col-span-7 space-y-4">
+      {/* SECTION 2, 3, 4 — Middle 3-Column Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Card 1: Network Health Index (Col 4) */}
+        <div className="lg:col-span-4 bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-2xs flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-[#17202A] font-display">
-              Active blood requirements
-            </h2>
-            <button
-              onClick={() => navigate('/incidents')}
-              className="text-xs font-medium text-[#DC2626] hover:text-[#B91C1C] flex items-center gap-1"
+            <div className="flex items-center gap-1.5">
+              <h3 className="text-sm font-bold text-[#111827] font-display">Network Health Index</h3>
+              <Info size={14} className="text-[#9CA3AF]" />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-semibold text-[#059669] bg-[#D1FAE5] px-1.5 py-0.5 rounded">
+                ↑ +5%
+              </span>
+              <select
+                value={healthRange}
+                onChange={(e) => setHealthRange(e.target.value)}
+                className="text-[11px] font-medium text-[#4B5563] bg-[#F9FAFB] border border-[#E5E7EB] rounded-md px-2 py-0.5 outline-none"
+              >
+                <option>Last 24 hours</option>
+                <option>Last 7 days</option>
+              </select>
+            </div>
+          </div>
+
+          <p className="text-xs text-[#6B7280]">
+            Real-time operational health of Pune blood supply network
+          </p>
+
+          {/* Semi-circular Radial Donut Gauge */}
+          <div className="relative flex flex-col items-center justify-center my-2">
+            <svg className="w-48 h-28" viewBox="0 0 100 55">
+              {/* Background arc */}
+              <path
+                d="M 10 50 A 40 40 0 0 1 90 50"
+                fill="none"
+                stroke="#F3F4F6"
+                strokeWidth="10"
+                strokeLinecap="round"
+              />
+              {/* Foreground green arc (87%) */}
+              <path
+                d="M 10 50 A 40 40 0 0 1 90 50"
+                fill="none"
+                stroke="#10B981"
+                strokeWidth="10"
+                strokeDasharray="125.6"
+                strokeDashoffset="16.3"
+                strokeLinecap="round"
+              />
+            </svg>
+            <div className="absolute bottom-2 text-center">
+              <span className="text-3xl font-bold font-display text-[#111827] leading-none block">
+                87
+              </span>
+              <span className="text-xs font-semibold text-[#10B981] mt-0.5 block">
+                Excellent
+              </span>
+            </div>
+          </div>
+
+          {/* 3 Progress Indicators */}
+          <div className="space-y-3 pt-2">
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-[#4B5563] font-medium">Supply Stability</span>
+                <span className="font-bold text-[#111827]">92%</span>
+              </div>
+              <div className="h-2 rounded-full bg-[#F3F4F6] overflow-hidden">
+                <div className="h-full bg-[#10B981] rounded-full" style={{ width: '92%' }} />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-[#4B5563] font-medium">Response Efficiency</span>
+                <span className="font-bold text-[#111827]">84%</span>
+              </div>
+              <div className="h-2 rounded-full bg-[#F3F4F6] overflow-hidden">
+                <div className="h-full bg-[#2563EB] rounded-full" style={{ width: '84%' }} />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-[#4B5563] font-medium">Transit Fluidity</span>
+                <span className="font-bold text-[#111827]">78%</span>
+              </div>
+              <div className="h-2 rounded-full bg-[#F3F4F6] overflow-hidden">
+                <div className="h-full bg-[#F59E0B] rounded-full" style={{ width: '78%' }} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2: Supply vs Demand Trend (Col 4) */}
+        <div className="lg:col-span-4 bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-2xs flex flex-col justify-between space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[#111827] font-display">Supply vs Demand Trend</h3>
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className="text-[11px] font-medium text-[#4B5563] bg-[#F9FAFB] border border-[#E5E7EB] rounded-md px-2 py-0.5 outline-none"
             >
-              View all ({activeIncidents.length}) <ChevronRight size={13} />
+              <option>Last 7 days</option>
+              <option>Last 30 days</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-4 text-xs">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#E11D48]" />
+              <span className="text-[#4B5563] font-medium">Units Supplied</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#FDA4AF]" />
+              <span className="text-[#4B5563] font-medium">Units Requested</span>
+            </div>
+          </div>
+
+          <div className="h-[210px] w-full pt-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={SUPPLY_DEMAND_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
+                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 10 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 10 }} domain={[0, 80]} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#111827', color: '#FFF', borderRadius: '8px', fontSize: '11px' }}
+                />
+                <Bar dataKey="supplied" fill="#E11D48" radius={[3, 3, 0, 0]} barSize={10} />
+                <Bar dataKey="requested" fill="#FDA4AF" radius={[3, 3, 0, 0]} barSize={10} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Card 3: Blood Group Resilience (Col 4) */}
+        <div className="lg:col-span-4 bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-2xs flex flex-col justify-between space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[#111827] font-display">Blood Group Resilience</h3>
+            <button
+              onClick={() => navigate('/intelligence')}
+              className="text-xs font-semibold text-[#E11D48] hover:underline flex items-center gap-0.5"
+            >
+              <span>View Details</span>
+              <ChevronRight size={13} />
             </button>
           </div>
 
-          {/* PRIMARY FEATURED INCIDENT */}
-          <div className="rounded-xl bg-white border border-red-200 p-5 space-y-4 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 left-0 bottom-0 w-1.5 bg-[#DC2626]" />
-
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E4E7EC]">
-              <div className="flex items-center gap-3">
-                <BloodGroupBadge group="O-" size="lg" />
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-base font-bold text-[#17202A] font-display">
-                      O− · 2 units required
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full bg-red-50 text-[#DC2626] border border-red-200 text-xs font-semibold">
-                      Critical
-                    </span>
-                  </div>
-                  <span className="text-xs text-[#667085] flex items-center gap-1 mt-0.5">
-                    <MapPin size={12} /> Wagholi, Pune · Sahyadri Hospital
-                  </span>
-                </div>
-              </div>
-              <span className="text-xs font-mono font-medium text-[#667085] bg-slate-50 px-2.5 py-1 rounded border border-[#E4E7EC]">
-                INC-PN-48291
-              </span>
-            </div>
-
-            {/* Units secured & Response wave */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#F7F8FA] p-3.5 rounded-lg border border-[#E4E7EC]">
-              <div>
-                <span className="text-xs text-[#667085] block">Secured Status</span>
-                <span className="text-sm font-bold text-[#10B981]">1 / 2 units secured</span>
-                <div className="h-2 rounded-full bg-[#E4E7EC] overflow-hidden mt-1.5">
-                  <div className="h-full bg-[#10B981] rounded-full" style={{ width: '50%' }} />
-                </div>
-              </div>
-              <div>
-                <span className="text-xs text-[#667085] block">Current Stage</span>
-                <span className="text-sm font-bold text-amber-700">Wave 2 Active</span>
-                <p className="text-[11px] text-[#667085] mt-1">Contacted 9 donors · 2 responses</p>
-              </div>
-            </div>
-
-            {/* Action Bar */}
-            <div className="flex items-center justify-between pt-1">
-              <span className="text-xs text-[#667085] font-mono">Elapsed time: 12m 40s</span>
-              <button
-                onClick={() => navigate('/incidents/INC-PN-48291')}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#DC2626] hover:bg-[#B91C1C] text-white text-xs font-semibold transition-colors"
+          <div className="grid grid-cols-4 gap-2 text-center">
+            {BLOOD_GROUPS.map((bg) => (
+              <div
+                key={bg.group}
+                className={cn(
+                  'p-2 rounded-lg border text-center space-y-1 transition-all',
+                  bg.color === 'red'
+                    ? 'bg-[#FFF1F2] border-[#FECDD3]'
+                    : bg.color === 'orange'
+                    ? 'bg-[#FFFBEB] border-[#FDE68A]'
+                    : 'bg-[#F9FAFB] border-[#E5E7EB]'
+                )}
               >
-                Open Incident <ArrowRight size={14} />
-              </button>
+                <div className="font-bold text-sm text-[#111827]">{bg.group}</div>
+                <div className="text-[11px] font-semibold text-[#6B7280]">{bg.percent}%</div>
+                <div className="h-1 rounded-full bg-[#E5E7EB] overflow-hidden">
+                  <div
+                    className={cn(
+                      'h-full rounded-full',
+                      bg.color === 'red' ? 'bg-[#E11D48]' : bg.color === 'orange' ? 'bg-[#D97706]' : 'bg-[#10B981]'
+                    )}
+                    style={{ width: `${bg.percent}%` }}
+                  />
+                </div>
+                <span
+                  className={cn(
+                    'inline-block px-1 py-0.2 text-[9px] font-bold rounded uppercase',
+                    bg.color === 'red'
+                      ? 'bg-[#FFE4E6] text-[#E11D48]'
+                      : bg.color === 'orange'
+                      ? 'bg-[#FEF3C7] text-[#D97706]'
+                      : 'bg-[#D1FAE5] text-[#059669]'
+                  )}
+                >
+                  {bg.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION 5 & 6 — Lower 2-Column Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Card 1: Active Blood Requirements (Col 6) */}
+        <div className="lg:col-span-6 bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-[#111827] font-display">Active Blood Requirements</h3>
+              <p className="text-xs text-[#6B7280]">Live and recent incident requests across Pune network</p>
             </div>
+            <button
+              onClick={() => navigate('/incidents')}
+              className="text-xs font-semibold text-[#E11D48] hover:underline flex items-center gap-0.5"
+            >
+              <span>View all (3)</span>
+              <ChevronRight size={13} />
+            </button>
           </div>
 
-          {/* Secondary Active Incidents */}
           <div className="space-y-3">
-            {ALL_INCIDENTS.slice(1, 4).map(inc => (
-              <IncidentCard key={inc.incident_id} incident={inc} compact />
+            {ACTIVE_REQUIREMENTS.map((req) => (
+              <div
+                key={req.id}
+                onClick={() => navigate(`/incidents/${req.id}`)}
+                className={cn(
+                  'p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 hover:shadow-xs',
+                  req.featured
+                    ? 'bg-[#FFF1F2]/60 border-[#FECDD3] border-l-4 border-l-[#E11D48]'
+                    : 'bg-[#F9FAFB] border-[#E5E7EB] hover:bg-white'
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={cn(
+                      'w-9 h-9 rounded-full font-bold text-sm flex items-center justify-center border shadow-2xs shrink-0',
+                      req.groupColor
+                    )}
+                  >
+                    {req.group}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-[#111827] font-mono">{req.id}</span>
+                      <span className="text-xs font-semibold text-[#374151]">{req.units}</span>
+                      <span className={cn('px-2 py-0.5 rounded-full text-[10px] font-bold', req.urgencyClass)}>
+                        {req.urgency}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#6B7280] flex items-center gap-1 mt-0.5">
+                      <MapPin size={12} className="text-[#9CA3AF]" />
+                      {req.location}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-[11px] font-mono text-[#6B7280]">{req.time}</span>
+                  <ChevronRight size={16} className="text-[#9CA3AF]" />
+                </div>
+              </div>
             ))}
           </div>
         </div>
 
-        {/* RIGHT COLUMN — Network Health & Readiness (Col 5) */}
-        <div className="lg:col-span-5 space-y-5">
-          {/* Donor Readiness Card */}
-          <div className="rounded-xl bg-white border border-[#E4E7EC] p-5 space-y-4 shadow-2xs">
-            <div className="flex items-center justify-between border-b border-[#E4E7EC] pb-3">
-              <div>
-                <h3 className="text-sm font-bold text-[#17202A] font-display">
-                  Donor readiness
-                </h3>
-                <span className="text-xs text-[#667085]">20,000 registered capacity</span>
+        {/* Card 2: Pune Network Overview Map (Col 6) */}
+        <div className="lg:col-span-6 bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-2xs flex flex-col justify-between space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[#111827] font-display">Pune Network Overview</h3>
+            <div className="flex items-center gap-3 text-[11px]">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#E11D48]" /> Blood Bank</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#2563EB]" /> Hospital</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#10B981]" /> Mobile Unit</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#F59E0B]" /> High Demand</span>
+            </div>
+          </div>
+
+          {/* Styled Canvas Map Container matching reference */}
+          <div className="relative w-full h-[220px] rounded-xl bg-[#F0F4F8] overflow-hidden border border-[#E5E7EB] flex items-center justify-center">
+            {/* Vector Map Simulation Grid */}
+            <div className="absolute inset-0 opacity-40 bg-[radial-gradient(#CBD5E1_1px,transparent_1px)] [background-size:16px_16px]" />
+
+            {/* Map Roads & Geographic Lines */}
+            <svg className="absolute inset-0 w-full h-full stroke-slate-300 stroke-[1.5] fill-none">
+              <path d="M 20 80 Q 150 120, 280 60 T 500 150" />
+              <path d="M 80 200 Q 220 100, 360 180 T 550 40" />
+              <path d="M 250 20 L 250 200" strokeDasharray="4 4" />
+            </svg>
+
+            {/* Region Labels */}
+            <span className="absolute top-4 left-24 text-[10px] font-semibold text-slate-400">Pimpri-Chinchwad</span>
+            <span className="absolute top-20 left-48 text-[10px] font-semibold text-slate-500">Baner</span>
+            <span className="absolute bottom-10 left-36 text-[10px] font-semibold text-slate-500">Kothrud</span>
+            <span className="absolute top-28 right-16 text-[10px] font-bold text-[#E11D48]">Wagholi</span>
+            <span className="absolute bottom-8 right-24 text-[10px] font-semibold text-slate-500">Hadapsar</span>
+            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-sm font-bold text-slate-700 font-display">Pune</span>
+
+            {/* Node Markers */}
+            {/* Wagholi High Demand Pulsing Zone */}
+            <div className="absolute top-24 right-20 flex items-center justify-center">
+              <span className="w-12 h-12 rounded-full bg-rose-500/20 animate-ping absolute" />
+              <div className="w-6 h-6 rounded-full bg-[#E11D48] text-white flex items-center justify-center shadow-md z-10">
+                <MapPin size={12} />
               </div>
-              <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                87% Coverage
-              </span>
             </div>
 
-            {/* Horizontal Bar Breakdown */}
-            <div className="space-y-3">
-              <div className="h-3.5 w-full rounded-full overflow-hidden flex bg-slate-100">
-                <div className="h-full bg-[#10B981]" style={{ width: '45.6%' }} title="Ready now" />
-                <div className="h-full bg-amber-400" style={{ width: '19.9%' }} title="May be available" />
-                <div className="h-full bg-red-400" style={{ width: '22.7%' }} title="Temporarily unavailable" />
-                <div className="h-full bg-slate-300" style={{ width: '11.8%' }} title="Status unknown" />
-              </div>
+            {/* Other Hospital & Bank Nodes */}
+            <div className="absolute top-16 left-44 w-5 h-5 rounded-full bg-[#2563EB] text-white text-[10px] font-bold flex items-center justify-center shadow-xs">H</div>
+            <div className="absolute bottom-12 left-40 w-5 h-5 rounded-full bg-[#10B981] text-white text-[10px] font-bold flex items-center justify-center shadow-xs">M</div>
+            <div className="absolute bottom-12 right-32 w-5 h-5 rounded-full bg-[#F59E0B] text-white text-[10px] font-bold flex items-center justify-center shadow-xs">!</div>
+            <div className="absolute top-10 left-32 w-5 h-5 rounded-full bg-[#10B981] text-white text-[10px] font-bold flex items-center justify-center shadow-xs">M</div>
 
-              <div className="grid grid-cols-2 gap-3 text-xs pt-1">
-                <div className="flex items-center justify-between p-2 rounded bg-slate-50 border border-[#E4E7EC]">
-                  <span className="text-[#667085] flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]" /> Ready now
-                  </span>
-                  <span className="font-bold text-[#17202A]">4,218</span>
-                </div>
-                <div className="flex items-center justify-between p-2 rounded bg-slate-50 border border-[#E4E7EC]">
-                  <span className="text-[#667085] flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400" /> May be available
-                  </span>
-                  <span className="font-bold text-[#17202A]">1,842</span>
-                </div>
-                <div className="flex items-center justify-between p-2 rounded bg-slate-50 border border-[#E4E7EC]">
-                  <span className="text-[#667085] flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-red-400" /> Temp. unavailable
-                  </span>
-                  <span className="font-bold text-[#17202A]">2,104</span>
-                </div>
-                <div className="flex items-center justify-between p-2 rounded bg-slate-50 border border-[#E4E7EC]">
-                  <span className="text-[#667085] flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-slate-300" /> Status unknown
-                  </span>
-                  <span className="font-bold text-[#17202A]">1,086</span>
-                </div>
+            {/* Map Zoom Controls */}
+            <div className="absolute top-3 left-3 flex flex-col rounded-lg bg-white border border-[#E5E7EB] shadow-2xs text-xs">
+              <button className="px-2 py-1 hover:bg-slate-50 font-bold border-b border-[#E5E7EB]">+</button>
+              <button className="px-2 py-1 hover:bg-slate-50 font-bold">−</button>
+            </div>
+
+            {/* Floating Active Nodes Card */}
+            <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-xs p-2.5 rounded-lg border border-[#E5E7EB] shadow-2xs text-[11px] space-y-1">
+              <span className="font-bold text-[#111827] block">Active Nodes</span>
+              <div className="flex items-center gap-2 text-[#4B5563]">
+                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#E11D48]" /> 5 Blood Banks</span>
+                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#2563EB]" /> 8 Hospitals</span>
+                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" /> 3 Mobile Units</span>
               </div>
             </div>
           </div>
 
-          {/* Network Attention Item Cards */}
-          <div className="rounded-xl bg-white border border-[#E4E7EC] p-5 space-y-3 shadow-2xs">
-            <div className="flex items-center justify-between border-b border-[#E4E7EC] pb-2">
-              <h3 className="text-sm font-bold text-[#17202A] font-display">
-                Network attention
-              </h3>
-              <button
-                onClick={() => navigate('/intelligence')}
-                className="text-xs text-[#DC2626] hover:underline font-medium"
-              >
-                View gap analysis
-              </button>
-            </div>
-
-            <div className="space-y-2 text-xs">
-              <div className="p-3 rounded-lg bg-red-50 border border-red-200 flex items-center justify-between">
-                <div>
-                  <div className="font-bold text-[#DC2626]">O− · Wagholi</div>
-                  <div className="text-[#667085] text-[11px]">Critical capacity gap · 11 ready now</div>
-                </div>
-                <span className="px-2 py-0.5 rounded bg-red-100 text-[#DC2626] font-bold text-[10px] uppercase">
-                  Critical
-                </span>
-              </div>
-
-              <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-between">
-                <div>
-                  <div className="font-bold text-amber-800">AB− · Hadapsar</div>
-                  <div className="text-[#667085] text-[11px]">Low active coverage · 4 ready now</div>
-                </div>
-                <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold text-[10px] uppercase">
-                  Attention
-                </span>
-              </div>
-
-              <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-between">
-                <div>
-                  <div className="font-bold text-blue-800">A− · Baner</div>
-                  <div className="text-[#667085] text-[11px]">Re-engagement opportunity · 15 donors</div>
-                </div>
-                <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold text-[10px] uppercase">
-                  Re-engage
-                </span>
-              </div>
-            </div>
+          <div className="flex justify-end">
+            <button
+              onClick={() => navigate('/intelligence')}
+              className="text-xs font-semibold text-[#111827] hover:text-[#E11D48] flex items-center gap-1 border border-[#E5E7EB] px-3 py-1.5 rounded-lg hover:border-[#E11D48] transition-colors"
+            >
+              <span>View Full Map</span>
+              <ArrowUpRight size={14} />
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Blood Group Network Resilience Grid */}
-      <div className="rounded-xl bg-white border border-[#E4E7EC] p-5 shadow-2xs space-y-3">
-        <div className="flex items-center justify-between border-b border-[#E4E7EC] pb-2">
-          <h3 className="text-sm font-bold text-[#17202A] font-display">
-            Blood group network resilience
-          </h3>
-          <button
-            onClick={() => navigate('/intelligence')}
-            className="text-xs text-[#DC2626] hover:underline font-medium"
-          >
-            Full resilience report
-          </button>
+      {/* SECTION 7 & 8 — Bottom 2-Column Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Card 1: Recent Activity (Col 6) */}
+        <div className="lg:col-span-6 bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-[#111827] font-display">Recent Activity</h3>
+              <p className="text-xs text-[#6B7280]">Live operational updates</p>
+            </div>
+            <button
+              onClick={() => navigate('/audit')}
+              className="text-xs font-semibold text-[#E11D48] hover:underline flex items-center gap-0.5"
+            >
+              <span>View all</span>
+              <ChevronRight size={13} />
+            </button>
+          </div>
+
+          <div className="space-y-3 pt-1">
+            {RECENT_ACTIVITIES.map((act, i) => {
+              const IconComponent = act.icon
+              return (
+                <div key={i} className="flex items-center justify-between text-xs py-1.5 border-b border-[#F3F4F6] last:border-none">
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-[#9CA3AF] text-[11px] w-10">{act.time}</span>
+                    <div className={cn('w-6 h-6 rounded-full flex items-center justify-center shrink-0', act.iconBg)}>
+                      <IconComponent size={13} />
+                    </div>
+                    <span className="font-medium text-[#111827]">{act.title}</span>
+                  </div>
+                  <span className="text-[#6B7280] text-[11px] text-right font-medium">{act.subtitle}</span>
+                </div>
+              )
+            })}
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 text-xs">
-          {metrics.blood_group_resilience.map(r => (
-            <div
-              key={r.blood_group}
-              className="p-3 rounded-lg border border-[#E4E7EC] bg-slate-50 text-center space-y-1"
-            >
-              <div className="font-mono font-bold text-sm text-[#17202A]">{r.blood_group}</div>
-              <div className={cn(
-                'text-[10px] font-semibold uppercase',
-                r.status === 'Critical' ? 'text-[#DC2626]' :
-                r.status === 'High Risk' ? 'text-amber-700' : 'text-emerald-700'
-              )}>
-                {r.status}
-              </div>
-              <div className="h-1.5 rounded-full bg-[#E4E7EC] overflow-hidden">
-                <div
-                  className={cn(
-                    'h-full rounded-full',
-                    r.coverage_percent < 50 ? 'bg-[#DC2626]' :
-                    r.coverage_percent < 75 ? 'bg-amber-500' : 'bg-[#10B981]'
-                  )}
-                  style={{ width: `${r.coverage_percent}%` }}
-                />
-              </div>
-              <div className="text-[11px] text-[#667085]">{r.coverage_percent}% coverage</div>
+        {/* Card 2: System Alerts & Insights (Col 6) */}
+        <div className="lg:col-span-6 bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-[#111827] font-display">System Alerts & Insights</h3>
+              <p className="text-xs text-[#6B7280]">Key network observability and recommendations</p>
             </div>
-          ))}
+            <button
+              onClick={() => navigate('/intelligence')}
+              className="text-xs font-semibold text-[#E11D48] hover:underline flex items-center gap-0.5"
+            >
+              <span>View all</span>
+              <ChevronRight size={13} />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* Card 1: Critical Capacity Gap */}
+            <div className="p-3.5 rounded-xl bg-[#FFF1F2] border border-[#FECDD3] space-y-2">
+              <div className="flex items-center gap-2 text-[#E11D48]">
+                <AlertTriangle size={15} />
+                <span className="font-bold text-xs">Critical Capacity Gap</span>
+              </div>
+              <p className="text-[11px] text-[#4B5563] leading-snug">
+                O- supply low in Wagholi region. 11 ready donors within 5km.
+              </p>
+            </div>
+
+            {/* Card 2: Rising Demand Trend */}
+            <div className="p-3.5 rounded-xl bg-[#FEF3C7]/60 border border-[#FDE68A] space-y-2">
+              <div className="flex items-center gap-2 text-[#D97706]">
+                <AlertTriangle size={15} />
+                <span className="font-bold text-xs">Rising Demand Trend</span>
+              </div>
+              <p className="text-[11px] text-[#4B5563] leading-snug">
+                2x increase in requests in last 24 hours.
+              </p>
+            </div>
+
+            {/* Card 3: Re-engagement Opportunity */}
+            <div className="p-3.5 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE] space-y-2">
+              <div className="flex items-center gap-2 text-[#2563EB]">
+                <Info size={15} />
+                <span className="font-bold text-xs">Re-engagement Opportunity</span>
+              </div>
+              <p className="text-[11px] text-[#4B5563] leading-snug">
+                15 inactive donors in Baner can be re-engaged.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   )
 }
+
