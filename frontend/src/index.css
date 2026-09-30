@@ -1,0 +1,121 @@
+@import 'leaflet/dist/leaflet.css';
+@import "tailwindcss";
+
+/* ─── RAKTSETU — Premium Light Design System ──────────────────────────────── */
+
+@layer base {
+  :root {
+    /* Background & Surfaces */
+    --bg-base:                  #F7F8FA;
+    --bg-surface:               #FFFFFF;
+    --bg-surface-elevated:      #F1F3F9;
+    --bg-surface-subtle:        #FAFAFB;
+
+    /* Text */
+    --text-primary:             #17202A;
+    --text-secondary:           #667085;
+    --text-muted:               #98A2B3;
+
+    /* Borders */
+    --border-subtle:            #F2F4F7;
+    --border-default:           #E4E7EC;
+    --border-strong:            #D0D5DD;
+
+    /* Brand Crimson */
+    --brand-red:                #DC2626;
+    --brand-red-hover:          #B91C1C;
+    --brand-red-light:          #FEF2F2;
+    --brand-red-border:         #FECACA;
+
+    /* Status Colors */
+    --status-green:             #10B981;
+    --status-green-bg:          #ECFDF5;
+    --status-green-text:        #047857;
+
+    --status-amber:             #F59E0B;
+    --status-amber-bg:          #FFFBEB;
+    --status-amber-text:        #B45309;
+
+    --status-blue:              #2563EB;
+    --status-blue-bg:           #EFF6FF;
+    --status-blue-text:         #1D4ED8;
+
+    /* Layout Spacing */
+    --sidebar-width:            260px;
+    --topbar-height:            60px;
+
+    /* Radius & Elevation */
+    --radius-sm:                6px;
+    --radius-md:                10px;
+    --radius-lg:                14px;
+    --shadow-subtle:            0 1px 3px rgba(16, 24, 40, 0.05), 0 1px 2px rgba(16, 24, 40, 0.03);
+    --shadow-card:              0 2px 6px rgba(16, 24, 40, 0.04), 0 1px 2px rgba(16, 24, 40, 0.02);
+    --shadow-elevated:          0 10px 20px -3px rgba(16, 24, 40, 0.08), 0 4px 6px -2px rgba(16, 24, 40, 0.03);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #D0D5DD; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #98A2B3; }
+
+  /* Font Utilities */
+  .font-display {
+    font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  }
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  .font-body {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+/* ─── Leaflet Overrides (Light Mode Map) ─────────────────────────────────── */
+.leaflet-container {
+  background: #F2F4F7 !important;
+  font-family: 'Inter', sans-serif !important;
+  border-radius: 10px;
+}
+.leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #667085 !important;
+  font-size: 10px !important;
+}
+.leaflet-tile-pane { filter: none !important; }
+
+/* ─── Animations ─────────────────────────────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in { animation: fade-in 0.25s ease-out forwards; }
+.animate-scale-in { animation: scale-in 0.2s ease-out forwards; }
