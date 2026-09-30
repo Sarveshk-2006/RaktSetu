@@ -10,6 +10,7 @@ import { ResponseCascadePage } from '@/pages/ResponseCascadePage'
 import { NetworkIntelligencePage } from '@/pages/NetworkIntelligencePage'
 import { StressLabPage } from '@/pages/StressLabPage'
 import { PartnerNetworkPage } from '@/pages/PartnerNetworkPage'
+import { PartnerDetailPage } from '@/pages/PartnerDetailPage'
 import { AuditLogPage } from '@/pages/AuditLogPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 
@@ -27,6 +28,9 @@ function App() {
           <Route path="/intelligence" element={<NetworkIntelligencePage />} />
           <Route path="/stress" element={<StressLabPage />} />
           <Route path="/partners" element={<PartnerNetworkPage />} />
+          <Route path="/partners/:id" element={<PartnerDetailPage />} />
+          <Route path="/partner-network" element={<PartnerNetworkPage />} />
+          <Route path="/partner-network/:id" element={<PartnerDetailPage />} />
           <Route path="/audit" element={<AuditLogPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
