@@ -3,15 +3,18 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   AlertTriangle, Users, Network, Clock,
-  ChevronRight, ArrowUpRight, MapPin, Sun,
+  ChevronRight, MapPin, Sun,
   Info, CheckCircle2, UserCheck, Zap, PackageCheck,
   Plus
 } from 'lucide-react'
 
+
 import {
   BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid
 } from 'recharts'
+import { PuneNetworkMap } from '@/components/overview/PuneNetworkMap'
 import { cn } from '@/lib/utils'
+
 
 // Synthetic supply vs demand trend data for Pune Network
 const SUPPLY_DEMAND_DATA = [
@@ -518,79 +521,10 @@ export function OverviewPage() {
         </div>
 
         {/* Card 2: Pune Network Overview Map (Col 6) */}
-        <div className="lg:col-span-6 bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-2xs flex flex-col justify-between space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-[#111827] font-display">Pune Network Overview</h3>
-            <div className="flex items-center gap-3 text-[11px]">
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#E11D48]" /> Blood Bank</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#2563EB]" /> Hospital</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#10B981]" /> Mobile Unit</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#F59E0B]" /> High Demand</span>
-            </div>
-          </div>
-
-          {/* Styled Canvas Map Container matching reference */}
-          <div className="relative w-full h-[220px] rounded-xl bg-[#F0F4F8] overflow-hidden border border-[#E5E7EB] flex items-center justify-center">
-            {/* Vector Map Simulation Grid */}
-            <div className="absolute inset-0 opacity-40 bg-[radial-gradient(#CBD5E1_1px,transparent_1px)] [background-size:16px_16px]" />
-
-            {/* Map Roads & Geographic Lines */}
-            <svg className="absolute inset-0 w-full h-full stroke-slate-300 stroke-[1.5] fill-none">
-              <path d="M 20 80 Q 150 120, 280 60 T 500 150" />
-              <path d="M 80 200 Q 220 100, 360 180 T 550 40" />
-              <path d="M 250 20 L 250 200" strokeDasharray="4 4" />
-            </svg>
-
-            {/* Region Labels */}
-            <span className="absolute top-4 left-24 text-[10px] font-semibold text-slate-400">Pimpri-Chinchwad</span>
-            <span className="absolute top-20 left-48 text-[10px] font-semibold text-slate-500">Baner</span>
-            <span className="absolute bottom-10 left-36 text-[10px] font-semibold text-slate-500">Kothrud</span>
-            <span className="absolute top-28 right-16 text-[10px] font-bold text-[#E11D48]">Wagholi</span>
-            <span className="absolute bottom-8 right-24 text-[10px] font-semibold text-slate-500">Hadapsar</span>
-            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-sm font-bold text-slate-700 font-display">Pune</span>
-
-            {/* Node Markers */}
-            {/* Wagholi High Demand Pulsing Zone */}
-            <div className="absolute top-24 right-20 flex items-center justify-center">
-              <span className="w-12 h-12 rounded-full bg-rose-500/20 animate-ping absolute" />
-              <div className="w-6 h-6 rounded-full bg-[#E11D48] text-white flex items-center justify-center shadow-md z-10">
-                <MapPin size={12} />
-              </div>
-            </div>
-
-            {/* Other Hospital & Bank Nodes */}
-            <div className="absolute top-16 left-44 w-5 h-5 rounded-full bg-[#2563EB] text-white text-[10px] font-bold flex items-center justify-center shadow-xs">H</div>
-            <div className="absolute bottom-12 left-40 w-5 h-5 rounded-full bg-[#10B981] text-white text-[10px] font-bold flex items-center justify-center shadow-xs">M</div>
-            <div className="absolute bottom-12 right-32 w-5 h-5 rounded-full bg-[#F59E0B] text-white text-[10px] font-bold flex items-center justify-center shadow-xs">!</div>
-            <div className="absolute top-10 left-32 w-5 h-5 rounded-full bg-[#10B981] text-white text-[10px] font-bold flex items-center justify-center shadow-xs">M</div>
-
-            {/* Map Zoom Controls */}
-            <div className="absolute top-3 left-3 flex flex-col rounded-lg bg-white border border-[#E5E7EB] shadow-2xs text-xs">
-              <button className="px-2 py-1 hover:bg-slate-50 font-bold border-b border-[#E5E7EB]">+</button>
-              <button className="px-2 py-1 hover:bg-slate-50 font-bold">−</button>
-            </div>
-
-            {/* Floating Active Nodes Card */}
-            <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-xs p-2.5 rounded-lg border border-[#E5E7EB] shadow-2xs text-[11px] space-y-1">
-              <span className="font-bold text-[#111827] block">Active Nodes</span>
-              <div className="flex items-center gap-2 text-[#4B5563]">
-                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#E11D48]" /> 5 Blood Banks</span>
-                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#2563EB]" /> 8 Hospitals</span>
-                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" /> 3 Mobile Units</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end">
-            <button
-              onClick={() => navigate('/intelligence')}
-              className="text-xs font-semibold text-[#111827] hover:text-[#E11D48] flex items-center gap-1 border border-[#E5E7EB] px-3 py-1.5 rounded-lg hover:border-[#E11D48] transition-colors"
-            >
-              <span>View Full Map</span>
-              <ArrowUpRight size={14} />
-            </button>
-          </div>
+        <div className="lg:col-span-6">
+          <PuneNetworkMap />
         </div>
+
       </div>
 
       {/* SECTION 7 & 8 — Bottom 2-Column Grid */}
