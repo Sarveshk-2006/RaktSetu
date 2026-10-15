@@ -4,7 +4,7 @@ These represent the core domain entities for the system.
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Any
 from enum import Enum
 from datetime import datetime
 
@@ -28,10 +28,14 @@ class IncidentUrgency(str, Enum):
 
 
 class IncidentStatus(str, Enum):
+    PENDING_VERIFICATION = "PendingVerification"
     VERIFIED = "Verified"
     MATCHING = "Matching"
     MOBILISING = "Mobilising"
+    PARTIALLY_FULFILLED = "Partially Fulfilled"
     FULFILLED = "Fulfilled"
+    ESCALATED = "Escalated"
+    CANCELLED = "Cancelled"
     CLOSED = "Closed"
 
 
@@ -45,7 +49,9 @@ class DonorReadiness(str, Enum):
 class DonorResponse(str, Enum):
     ACCEPTED = "Accepted"
     DECLINED = "Declined"
+    UNABLE_TO_HELP = "UnableToHelp"
     NO_RESPONSE = "NoResponse"
+    EXPIRED = "Expired"
     PENDING = "Pending"
 
 
@@ -54,6 +60,8 @@ class WaveStatus(str, Enum):
     ACTIVE = "Active"
     COMPLETE = "Complete"
     INSUFFICIENT = "Insufficient"
+    EXPIRED = "Expired"
+    CANCELLED = "Cancelled"
 
 
 class Location(BaseModel):
@@ -186,3 +194,80 @@ class StressResult(BaseModel):
     weakest_zone: str
     expected_delay_increase_percent: float
     interventions: List[Dict]
+
+
+# ─── Milestone 3: Lifecycle & Cascade Request/Response Schemas ────────────────
+
+class IncidentCreateRequest(BaseModel):
+    blood_group: BloodGroup
+    component: str = "Packed RBC"
+    units_requested: int = Field(gt=0, description="Quantity of blood units requested")
+    urgency: IncidentUrgency = IncidentUrgency.HIGH
+    requesting_facility: str
+    zone: str
+    district: str = "Pune"
+    lat: float
+    lng: float
+    source: str = "Hospital"
+    auto_verify: bool = False
+    actor: str = "Hospital Medical Officer"
+
+
+class IncidentVerificationRequest(BaseModel):
+    verified_by: str
+    notes: Optional[str] = None
+    facility_confirmed: bool = True
+
+
+class WaveLaunchRequest(BaseModel):
+    wave_number: Optional[int] = None
+    wave_size: int = Field(default=5, gt=0, le=20)
+    operator_id: Optional[str] = None
+
+
+class WaveAdvanceRequest(BaseModel):
+    action: str = "advance"  # advance / timeout / insufficient / complete
+    actor: str = "System"
+
+
+class DonorResponseRecordRequest(BaseModel):
+    contact_attempt_id: int
+    response: DonorResponse
+    actor: str = "Donor Portal"
+    distance_km: Optional[float] = None
+    eta_minutes: Optional[int] = None
+    notes: Optional[str] = None
+
+
+class FulfilmentConfirmRequest(BaseModel):
+    units_confirmed: int = Field(gt=0)
+    confirmation_source: str
+    confirmed_by: str
+    component: Optional[str] = None
+    notes: Optional[str] = None
+
+
+class IncidentCloseRequest(BaseModel):
+    closed_by: str
+    notes: Optional[str] = None
+
+
+class IncidentCancelRequest(BaseModel):
+    cancelled_by: str
+    reason: str
+
+
+class AuditEventResponse(BaseModel):
+    event_id: str
+    timestamp: datetime
+    incident_id: Optional[str]
+    actor: str
+    actor_type: str
+    category: str
+    action: str
+    entity_type: str
+    entity_id: Optional[str]
+    outcome: str
+    safe_metadata: Dict[str, Any]
+    sha256_hash: Optional[str]
+

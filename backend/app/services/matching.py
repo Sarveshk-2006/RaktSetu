@@ -211,9 +211,7 @@ class MatchingResponse(BaseModel):
     exclusions: List[MatchExclusionResult] = []
 
 
-class DuplicateOutreachError(Exception):
-    """Raised when an outreach attempt is dispatched to an already-contacted donor for the same incident."""
-    pass
+from app.core.exceptions import DuplicateOutreachError
 
 
 # ─── 5. SCORING & EXPLAINABILITY ENGINE ───────────────────────────────────────
