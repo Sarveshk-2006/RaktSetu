@@ -6,7 +6,7 @@ FastAPI Backend - Main Application Entry Point
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import incidents, donors, network, stress, partners
+from app.api import incidents, donors, network, stress, partners, audit
 from app.core.config import settings
 
 app = FastAPI(
@@ -43,3 +43,4 @@ app.include_router(donors.router, prefix="/api/donors", tags=["Donors"])
 app.include_router(network.router, prefix="/api/network", tags=["Network"])
 app.include_router(stress.router, prefix="/api/stress", tags=["Stress Lab"])
 app.include_router(partners.router, prefix="/api/partners", tags=["Partners"])
+app.include_router(audit.router, prefix="/api/audit", tags=["Audit Trail"])

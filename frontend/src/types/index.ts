@@ -10,15 +10,29 @@ export type BloodGroup =
 export type IncidentUrgency = 'Critical' | 'High' | 'Moderate' | 'Routine'
 
 export type IncidentStatus =
+  | 'PendingVerification'
   | 'Verified'
   | 'Matching'
   | 'Mobilising'
+  | 'Partially Fulfilled'
   | 'Fulfilled'
+  | 'Escalated'
+  | 'Cancelled'
   | 'Closed'
 
 export type DonorReadiness = 'Ready' | 'Maybe' | 'Unavailable' | 'Unknown'
-export type DonorResponse = 'Accepted' | 'Declined' | 'NoResponse' | 'Pending'
-export type WaveStatus = 'Pending' | 'Active' | 'Complete' | 'Insufficient'
+export type DonorResponse = 'Accepted' | 'Declined' | 'UnableToHelp' | 'NoResponse' | 'Expired' | 'Pending'
+export type WaveStatus =
+  | 'Pending'
+  | 'Active'
+  | 'Dispatched'
+  | 'Evaluating'
+  | 'Complete'
+  | 'Completed'
+  | 'Insufficient'
+  | 'Exhausted'
+  | 'Expired'
+  | 'Cancelled'
 export type SeverityLevel = 'Critical' | 'High Risk' | 'Stable' | 'Strong'
 
 export interface Location {
@@ -56,16 +70,22 @@ export interface ResponseEvent {
 
 export interface Incident {
   incident_id: string
-  requirement: IncidentRequirement
-  status: IncidentStatus
+  requirement?: IncidentRequirement
+  blood_group?: string
+  units_requested?: number
+  urgency?: string
+  requesting_facility?: string
+  zone?: string
+  district?: string
+  status: IncidentStatus | string
   units_secured: number
   created_at: string
-  updated_at: string
-  elapsed_seconds: number
-  donors_contacted: number
-  duplicate_outreach_avoided: number
-  waves: ResponseWave[]
-  response_events: ResponseEvent[]
+  updated_at?: string
+  elapsed_seconds?: number
+  donors_contacted?: number
+  duplicate_outreach_avoided?: number
+  waves?: ResponseWave[]
+  response_events?: ResponseEvent[]
   fulfilled_at?: string
   response_time_seconds?: number
 }
@@ -99,15 +119,48 @@ export interface NetworkGap {
   re_engageable: number
 }
 
+export interface RegionalCoverageItem {
+  name: string
+  capacity_state: string
+  donor_count: number
+  status_color: string
+  text_color: string
+  lat: number
+  lng: number
+  o_neg_status: string
+  partner_coverage: string
+  median_response: string
+}
+
+export interface ZoneMetricsItem {
+  zone: string
+  lat: number
+  lng: number
+  donor_count: number
+  ready_now: number
+  severity: string
+  active_incidents: number
+}
+
 export interface NetworkMetrics {
+  total_registered_donors?: number
   ready_donors: number
+  maybe_available_donors?: number
+  temporarily_unavailable_donors?: number
+  status_unknown_donors?: number
+  operational_coverage_pct?: number
+  usable_donors?: number
+  coverage_areas_count?: number
+  blood_group_resilience: BloodGroupResilience[]
+  regional_coverage?: RegionalCoverageItem[]
+  timestamp?: string
+  // Legacy compatibility fields
   maybe_available: number
   temporarily_unavailable: number
   status_unknown: number
   network_coverage_percent: number
   median_response_minutes: number
   active_incidents: number
-  blood_group_resilience: BloodGroupResilience[]
   gaps: NetworkGap[]
 }
 
@@ -126,7 +179,15 @@ export interface StressScenario {
   scenario_id: string
   name: string
   description: string
-  capacity_reduction: number
+  type?: string
+  parameters?: Record<string, any>
+  capacity_reduction?: number
+}
+
+export interface StressRunRequest {
+  scenario_id: string
+  scenario_type?: string
+  parameters?: Record<string, any>
 }
 
 export interface StressIntervention {

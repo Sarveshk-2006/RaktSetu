@@ -46,11 +46,16 @@ export function urgencyColor(urgency: IncidentUrgency): string {
 
 export function statusColor(status: IncidentStatus): string {
   switch (status) {
-    case 'Verified':   return 'text-blue-700 bg-blue-50 border-blue-200'
-    case 'Matching':   return 'text-amber-700 bg-amber-50 border-amber-200'
-    case 'Mobilising': return 'text-orange-700 bg-orange-50 border-orange-200'
-    case 'Fulfilled':  return 'text-emerald-700 bg-emerald-50 border-emerald-200'
-    case 'Closed':     return 'text-slate-600 bg-slate-100 border-slate-200'
+    case 'PendingVerification': return 'text-purple-700 bg-purple-50 border-purple-200'
+    case 'Verified':            return 'text-blue-700 bg-blue-50 border-blue-200'
+    case 'Matching':            return 'text-amber-700 bg-amber-50 border-amber-200'
+    case 'Mobilising':          return 'text-orange-700 bg-orange-50 border-orange-200'
+    case 'Partially Fulfilled': return 'text-teal-700 bg-teal-50 border-teal-200'
+    case 'Fulfilled':           return 'text-emerald-700 bg-emerald-50 border-emerald-200'
+    case 'Escalated':           return 'text-rose-700 bg-rose-50 border-rose-200'
+    case 'Cancelled':           return 'text-stone-600 bg-stone-100 border-stone-200'
+    case 'Closed':              return 'text-slate-600 bg-slate-100 border-slate-200'
+    default:                    return 'text-slate-700 bg-slate-50 border-slate-200'
   }
 }
 
@@ -83,6 +88,7 @@ export function readinessColor(r: DonorReadiness): string {
     case 'Maybe':       return 'text-amber-600 font-semibold'
     case 'Unavailable': return 'text-red-600 font-semibold'
     case 'Unknown':     return 'text-slate-500'
+    default:            return 'text-slate-500'
   }
 }
 
@@ -90,8 +96,14 @@ export function waveStatusColor(s: WaveStatus): string {
   switch (s) {
     case 'Active':       return 'text-amber-700'
     case 'Complete':     return 'text-emerald-700'
+    case 'Completed':    return 'text-emerald-700'
     case 'Insufficient': return 'text-[#DC2626]'
+    case 'Exhausted':    return 'text-[#DC2626]'
+    case 'Cancelled':    return 'text-slate-400'
+    case 'Dispatched':   return 'text-blue-700'
+    case 'Evaluating':   return 'text-purple-700'
     case 'Pending':      return 'text-slate-500'
+    default:             return 'text-slate-500'
   }
 }
 

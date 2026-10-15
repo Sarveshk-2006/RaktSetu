@@ -74,3 +74,31 @@ async def test_partners_endpoint_compatibility():
         assert res.status_code == 200
         partners = res.json()
         assert len(partners) >= 5
+
+
+@pytest.mark.asyncio
+async def test_donors_list_endpoint_compatibility():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        res = await client.get("/api/donors/?limit=10")
+        assert res.status_code == 200
+        donors = res.json()
+        assert isinstance(donors, list)
+        if donors:
+            assert "donor_id" in donors[0]
+            assert "blood_group" in donors[0]
+            assert "phone" not in donors[0]  # Privacy check
+
+
+@pytest.mark.asyncio
+async def test_audit_list_endpoint_compatibility():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        res = await client.get("/api/audit/?limit=10")
+        assert res.status_code == 200
+        events = res.json()
+        assert isinstance(events, list)
+        if events:
+            assert "event_id" in events[0]
+            assert "sha256_hash" in events[0]
+

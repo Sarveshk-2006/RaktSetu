@@ -1,13 +1,11 @@
-// RAKTSETU — Network Stress Lab Page (Analytical Simulation Workspace)
-import { useState, useRef } from 'react'
+// RAKTSETU — Network Stress Lab Page (Authoritative Simulation Workspace)
+import { useState, useEffect, useCallback } from 'react'
 import {
   FlaskConical, Users, TrendingUp, Droplet, Building2, Zap,
-  Sliders, Activity, CheckCircle2, AlertTriangle,
-  RefreshCw, Info, Settings, ShieldCheck, Check, X
+  CheckCircle2, AlertTriangle, RefreshCw, Info, ShieldCheck, X, History, AlertCircle
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { STRESS_SCENARIOS, computeStressResult } from '@/data/demoData'
-import type { StressScenario, StressResult } from '@/types'
+import { api } from '@/lib/api'
 
 // Map scenario IDs to icon and styling helpers
 function getScenarioMeta(id: string) {
@@ -15,42 +13,42 @@ function getScenarioMeta(id: string) {
     case 'S1':
       return {
         title: 'Donor Unavailability',
-        desc: '30% of donors become temporarily unavailable.',
+        desc: 'Simulate unavailable registered donors across Pune.',
         icon: Users,
         iconBg: 'bg-[#FFF1F2] text-[#E11D48]',
       }
     case 'S2':
       return {
         title: 'Demand Surge',
-        desc: 'Double the number of simultaneous blood requirements.',
+        desc: 'Simulate concurrent requirement surges across multiple hospitals.',
         icon: TrendingUp,
         iconBg: 'bg-[#EFF6FF] text-[#2563EB]',
       }
     case 'S3':
       return {
         title: 'Rare Blood Shortage',
-        desc: 'Critical shortage of O− and AB− blood groups.',
+        desc: 'Critical deficit simulation for O− and AB− blood groups.',
         icon: Droplet,
         iconBg: 'bg-[#FFE4E6] text-[#E11D48]',
       }
     case 'S4':
       return {
-        title: 'Partner Unavailable',
-        desc: 'Lead partner organisation goes offline.',
+        title: 'Partner Offline',
+        desc: 'Simulate loss of coordination with partner blood banks/NGOs.',
         icon: Building2,
         iconBg: 'bg-[#F3E8FF] text-[#8B5CF6]',
       }
     case 'S5':
       return {
         title: 'Multiple Emergencies',
-        desc: '5 critical incidents open simultaneously across Pune.',
+        desc: 'Multi-casualty simultaneous incidents across Pune.',
         icon: Zap,
         iconBg: 'bg-[#FEF3C7] text-[#D97706]',
       }
     default:
       return {
-        title: 'Donor Unavailability',
-        desc: '30% of donors become temporarily unavailable.',
+        title: 'Capacity Stress Test',
+        desc: 'Synthetic network stress simulation.',
         icon: Users,
         iconBg: 'bg-[#FFF1F2] text-[#E11D48]',
       }
@@ -58,57 +56,82 @@ function getScenarioMeta(id: string) {
 }
 
 export function StressLabPage() {
-  const scenarios = STRESS_SCENARIOS
-  const [selectedScenario, setSelectedScenario] = useState<StressScenario>(scenarios[0])
+  const [scenarios, setScenarios] = useState<any[]>([])
+  const [selectedScenario, setSelectedScenario] = useState<any>({ scenario_id: 'S1', name: 'Donor Unavailability' })
   const [sliderValue, setSliderValue] = useState(30)
   const [surgeMultiplier, setSurgeMultiplier] = useState('2×')
   const [selectedPartner, setSelectedPartner] = useState('UPAY Pune')
   const [incidentCount, setIncidentCount] = useState(5)
 
   const [simPhase, setSimPhase] = useState<'idle' | 'running' | 'complete'>('idle')
-  const [currentStepIndex, setCurrentStepIndex] = useState(0)
-  const [result, setResult] = useState<StressResult | null>(null)
-  const [showCustomModal, setShowCustomModal] = useState(false)
+  const [result, setResult] = useState<any | null>(null)
+  const [history, setHistory] = useState<any[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [showHistory, setShowHistory] = useState(false)
   const [showToast, setShowToast] = useState(false)
-  const timers = useRef<ReturnType<typeof setTimeout>[]>([])
 
-  const STEPS = [
-    'Removing unavailable capacity',
-    'Recalculating donor coverage',
-    'Recalculating response probability',
-    'Re-routing partner capacity',
-    'Detecting critical gaps',
-    'Generating interventions',
-  ]
+  // Load scenarios and history from backend
+  const loadInitialData = useCallback(async () => {
+    try {
+      const [scenariosData, historyData] = await Promise.all([
+        api.getStressScenarios(),
+        api.getStressHistory(10),
+      ])
+      if (scenariosData && scenariosData.length > 0) {
+        setScenarios(scenariosData)
+        setSelectedScenario(scenariosData[0])
+      }
+      setHistory(historyData || [])
+    } catch (err: any) {
+      console.error('Failed to load stress lab data:', err)
+      setError('Could not connect to the authoritative stress simulation service. Make sure the backend server is running.')
+    }
+  }, [])
 
-  function runSimulation() {
-    timers.current.forEach(clearTimeout)
-    timers.current = []
+  useEffect(() => {
+    loadInitialData()
+  }, [loadInitialData])
+
+  async function runSimulation() {
     setSimPhase('running')
-    setCurrentStepIndex(0)
+    setError(null)
     setResult(null)
 
-    STEPS.forEach((_, i) => {
-      const t = setTimeout(() => {
-        setCurrentStepIndex(i + 1)
-      }, 350 + i * 400)
-      timers.current.push(t)
-    })
+    let parameters: Record<string, any> = {}
+    if (selectedScenario.scenario_id === 'S1') {
+      parameters = { unavailability_pct: sliderValue }
+    } else if (selectedScenario.scenario_id === 'S2') {
+      const mult = parseFloat(surgeMultiplier.replace('×', '')) || 2.0
+      parameters = { surge_multiplier: mult }
+    } else if (selectedScenario.scenario_id === 'S3') {
+      parameters = { rare_groups: ['O-', 'AB-'], reduction_pct: 60 }
+    } else if (selectedScenario.scenario_id === 'S4') {
+      parameters = { partner_name: selectedPartner }
+    } else if (selectedScenario.scenario_id === 'S5') {
+      parameters = { incident_count: incidentCount }
+    }
 
-    const tDone = setTimeout(() => {
-      const capacityFactor = 100 - sliderValue
-      setResult(computeStressResult(selectedScenario.scenario_id, capacityFactor))
+    try {
+      const simResult = await api.runStressSimulation({
+        scenario_id: selectedScenario.scenario_id,
+        parameters,
+      })
+      setResult(simResult)
       setSimPhase('complete')
-    }, 350 + STEPS.length * 400 + 200)
-    timers.current.push(tDone)
+      // Refresh history from backend persistence
+      const updatedHistory = await api.getStressHistory(10)
+      setHistory(updatedHistory)
+    } catch (err: any) {
+      console.error('Simulation execution failed:', err)
+      setError(err?.message || 'Stress simulation run failed. Operational data was not modified.')
+      setSimPhase('idle')
+    }
   }
 
   function handleReset() {
-    timers.current.forEach(clearTimeout)
-    timers.current = []
     setSimPhase('idle')
-    setCurrentStepIndex(0)
     setResult(null)
+    setError(null)
   }
 
   const meta = getScenarioMeta(selectedScenario.scenario_id)
@@ -121,8 +144,8 @@ export function StressLabPage() {
         <div className="fixed bottom-6 right-6 z-50 bg-[#111827] text-white px-4 py-3 rounded-xl shadow-xl border border-gray-800 flex items-center gap-3 animate-slide-up">
           <CheckCircle2 size={18} className="text-[#10B981]" />
           <div className="text-xs">
-            <span className="font-bold block">Custom Scenario Saved</span>
-            <span className="text-gray-400">Custom stress scenario added to simulation workspace.</span>
+            <span className="font-bold block">Simulation Recorded</span>
+            <span className="text-gray-400">Simulation completed and persisted to analytical storage.</span>
           </div>
           <button onClick={() => setShowToast(false)} className="text-gray-400 hover:text-white ml-2">
             <X size={14} />
@@ -131,46 +154,117 @@ export function StressLabPage() {
       )}
 
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 border-b border-[#E5E7EB]">
         <div>
           <h1 className="text-2xl font-bold font-display text-[#111827] tracking-tight flex items-center gap-2.5">
             <FlaskConical size={24} className="text-[#E11D48]" />
             <span>Network Stress Lab</span>
           </h1>
           <p className="text-xs text-[#6B7280] mt-0.5 max-w-3xl">
-            What happens when the network is under pressure? Run deterministic stress simulations to identify vulnerabilities before emergencies occur.
+            Deterministic simulation workspace for testing Pune blood response resilience against demand surges, capacity shocks, and bottlenecks.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <span className="px-3 py-1.5 rounded-lg bg-[#EFF6FF] text-[#2563EB] text-xs font-semibold border border-[#BFDBFE] flex items-center gap-1.5">
-            <Sliders size={14} />
-            <span>Planning & Simulation</span>
-          </span>
+        <div className="flex items-center gap-3 shrink-0">
+          <button
+            onClick={() => setShowHistory(!showHistory)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E5E7EB] bg-white hover:bg-[#F9FAFB] text-xs font-semibold text-[#374151] transition-colors shadow-2xs"
+          >
+            <History size={14} className="text-[#6B7280]" />
+            <span>Simulation History ({history.length})</span>
+          </button>
         </div>
       </div>
 
-      {/* SECTION 1 — Simulation Scenarios Cards */}
-      <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <h3 className="text-base font-bold font-display text-[#111827]">Simulation Scenario</h3>
-            <p className="text-xs text-[#6B7280]">
-              Choose a scenario or create a custom one to test network resilience.
-            </p>
+      {/* Simulation Disclaimer Banner */}
+      <div className="bg-[#FFFBEB] border border-[#FDE68A] rounded-xl p-3 flex items-start gap-3 text-xs text-[#92400E]">
+        <Info size={16} className="text-[#D97706] shrink-0 mt-0.5" />
+        <div>
+          <span className="font-bold">Isolated Analytical Simulation:</span> Simulations execute in a hermetic analytical environment. They do not alter real donor readiness, active incidents, wave dispatches, or audit logs, and are not clinical predictions.
+        </div>
+      </div>
+
+      {/* Error State */}
+      {error && (
+        <div className="bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-4 flex items-start justify-between gap-3 text-xs text-[#991B1B]">
+          <div className="flex items-start gap-2.5">
+            <AlertCircle size={18} className="text-[#DC2626] shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold text-sm text-[#991B1B]">Simulation Service Error</p>
+              <p className="mt-0.5 text-[#B91C1C]">{error}</p>
+            </div>
           </div>
           <button
-            onClick={() => setShowCustomModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E5E7EB] hover:bg-[#F9FAFB] text-xs font-semibold text-[#4B5563] self-start sm:self-auto transition-colors"
+            onClick={loadInitialData}
+            className="px-3 py-1 bg-white border border-[#FCA5A5] rounded-lg text-xs font-bold text-[#DC2626] hover:bg-[#FEE2E2] shrink-0"
           >
-            <Settings size={14} />
-            <span>Custom Scenario</span>
+            Retry Connection
           </button>
         </div>
+      )}
 
-        {/* 5 Scenario Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
-          {scenarios.map((sc) => {
+      {/* Persisted History Drawer */}
+      {showHistory && (
+        <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-sm space-y-3 animate-fade-in">
+          <div className="flex items-center justify-between pb-2 border-b border-[#E5E7EB]">
+            <h3 className="font-bold text-sm text-[#111827] flex items-center gap-2">
+              <History size={16} className="text-[#E11D48]" />
+              <span>Persisted Simulation History (Backend Store)</span>
+            </h3>
+            <button onClick={() => setShowHistory(false)} className="text-xs text-[#6B7280] hover:text-[#111827]">
+              <X size={14} />
+            </button>
+          </div>
+          {history.length === 0 ? (
+            <p className="text-xs text-[#6B7280] py-4 text-center">No simulation runs recorded yet. Execute a simulation to record history.</p>
+          ) : (
+            <div className="divide-y divide-[#F3F4F6] max-h-60 overflow-y-auto">
+              {history.map((h) => (
+                <div key={h.simulation_id} className="py-2.5 flex items-center justify-between text-xs">
+                  <div>
+                    <span className="font-bold text-[#111827]">{h.scenario_name || h.scenario_id}</span>
+                    <span className="text-[#6B7280] ml-2">ID: {h.simulation_id.slice(0, 8)}</span>
+                    <span className="text-[#9CA3AF] ml-2">({h.simulated_at ? new Date(h.simulated_at).toLocaleString('en-GB') : 'Recorded'})</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="text-[#DC2626] font-semibold">
+                      -{Math.round(h.capacity_loss_pct || 0)}% Capacity
+                    </span>
+                    <button
+                      onClick={() => {
+                        setResult(h)
+                        setSimPhase('complete')
+                        setShowHistory(false)
+                      }}
+                      className="text-xs font-semibold text-[#E11D48] hover:underline"
+                    >
+                      View Results
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* SECTION 1 — Scenario Selection Grid */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-bold text-[#111827] uppercase tracking-wider">Select Stress Scenario</h3>
+            <p className="text-xs text-[#6B7280]">Select a disruption model to evaluate network capacity breakdown.</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          {(scenarios.length > 0 ? scenarios : [
+            { scenario_id: 'S1', name: 'Donor Unavailability' },
+            { scenario_id: 'S2', name: 'Demand Surge' },
+            { scenario_id: 'S3', name: 'Rare Blood Shortage' },
+            { scenario_id: 'S4', name: 'Partner Offline' },
+            { scenario_id: 'S5', name: 'Multiple Emergencies' },
+          ]).map((sc) => {
             const scMeta = getScenarioMeta(sc.scenario_id)
             const ScIcon = scMeta.icon
             const isSelected = selectedScenario.scenario_id === sc.scenario_id
@@ -180,28 +274,26 @@ export function StressLabPage() {
                 key={sc.scenario_id}
                 onClick={() => {
                   setSelectedScenario(sc)
-                  handleReset()
+                  setSimPhase('idle')
+                  setResult(null)
                 }}
                 className={cn(
-                  'p-4 rounded-xl border transition-all cursor-pointer space-y-3 flex flex-col justify-between relative',
+                  'p-4 rounded-xl border transition-all cursor-pointer space-y-2 group',
                   isSelected
-                    ? 'border-[#E11D48] bg-[#FFF1F2]/40 shadow-xs ring-1 ring-[#E11D48]/30'
+                    ? 'border-[#E11D48] bg-[#FFF1F2] shadow-xs'
                     : 'border-[#E5E7EB] bg-white hover:border-[#CBD5E1] hover:bg-[#F9FAFB]'
                 )}
               >
-                {/* Radio Indicator top right */}
                 <div className="flex items-center justify-between">
-                  <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center shrink-0', scMeta.iconBg)}>
-                    <ScIcon size={18} />
+                  <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center', scMeta.iconBg)}>
+                    <ScIcon size={16} />
                   </div>
-                  <div className={cn('w-4 h-4 rounded-full border flex items-center justify-center', isSelected ? 'border-[#E11D48] bg-[#E11D48]' : 'border-[#CBD5E1]')}>
-                    {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                  </div>
+                  <span className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">{sc.scenario_id}</span>
                 </div>
 
                 <div className="space-y-1 pt-1">
-                  <h4 className="text-xs font-bold font-display text-[#111827]">{scMeta.title}</h4>
-                  <p className="text-[11px] text-[#6B7280] leading-snug">{scMeta.desc}</p>
+                  <h4 className="text-xs font-bold font-display text-[#111827]">{sc.name || scMeta.title}</h4>
+                  <p className="text-[11px] text-[#6B7280] leading-snug">{sc.description || scMeta.desc}</p>
                 </div>
               </div>
             )
@@ -209,16 +301,16 @@ export function StressLabPage() {
         </div>
       </div>
 
-      {/* SECTION 2 — Simulation Parameters & Expected Impact Row */}
+      {/* SECTION 2 — Simulation Parameters */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* LEFT COLUMN: Simulation Parameters (Col 6 / 50%) */}
         <div className="lg:col-span-6 bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-1">
               <h3 className="text-base font-bold font-display text-[#111827]">Simulation Parameters</h3>
-              <span className="text-xs text-[#6B7280]">Adjust for scenario</span>
+              <span className="text-xs text-[#6B7280]">Configurable inputs</span>
             </div>
-            <p className="text-xs text-[#6B7280]">Adjust parameters for the selected scenario.</p>
+            <p className="text-xs text-[#6B7280]">Parameters sent to backend stress calculation engine.</p>
 
             {/* Selected Scenario Banner */}
             <div className="mt-4 p-3 rounded-xl bg-[#FFF1F2] border border-[#FECDD3] flex items-center gap-3">
@@ -226,8 +318,8 @@ export function StressLabPage() {
                 <IconComponent size={16} />
               </div>
               <div>
-                <span className="font-bold text-xs text-[#111827] block">{meta.title}</span>
-                <span className="text-[11px] text-[#4B5563]">{meta.desc}</span>
+                <span className="font-bold text-xs text-[#111827] block">{selectedScenario.name || meta.title}</span>
+                <span className="text-[11px] text-[#4B5563]">{selectedScenario.description || meta.desc}</span>
               </div>
             </div>
 
@@ -288,18 +380,14 @@ export function StressLabPage() {
                   </div>
                   <input
                     type="range"
-                    min="20"
+                    min="10"
                     max="90"
                     step="10"
-                    defaultValue="60"
-                    className="w-full accent-[#E11D48] cursor-pointer"
+                    defaultValue={60}
+                    disabled
+                    className="w-full accent-[#E11D48] opacity-70"
                   />
-                  <div className="flex justify-between text-[10px] text-[#6B7280] font-semibold">
-                    <span>20% Low</span>
-                    <span>40% Moderate</span>
-                    <span>60% High</span>
-                    <span>80% Severe</span>
-                  </div>
+                  <p className="text-[11px] text-[#6B7280]">Targeted O− and AB− acute deficit profile across all hospital zones.</p>
                 </div>
               )}
 
@@ -344,262 +432,64 @@ export function StressLabPage() {
           </div>
 
           <div className="pt-3 border-t border-[#F3F4F6] text-[11px] text-[#6B7280]">
-            Parameters feed into RAKTSETU's deterministic capacity routing model.
+            Deterministic parameters execute against real persistent donor network nodes in memory.
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Expected Impact (Estimated) (Col 6 / 50%) */}
+        {/* RIGHT COLUMN: Execution Action (Col 6 / 50%) */}
         <div className="lg:col-span-6 bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-1">
-              <h3 className="text-base font-bold font-display text-[#111827]">Expected Impact (Estimated)</h3>
-              <span className="text-xs text-[#6B7280]">Pune district model</span>
+              <h3 className="text-base font-bold font-display text-[#111827]">Simulation Execution</h3>
+              <span className="text-xs text-[#6B7280]">FastAPI Domain Engine</span>
             </div>
-            <p className="text-xs text-[#6B7280]">Estimated effect based on current Pune network data.</p>
+            <p className="text-xs text-[#6B7280]">Trigger authoritative calculation of network degradation.</p>
 
-            {/* 4 Estimated Impact Stat Cards */}
-            <div className="grid grid-cols-2 gap-3 mt-4">
-              <div className="p-3.5 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] space-y-1">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#FFF1F2] text-[#E11D48] flex items-center justify-center shrink-0">
-                    <Users size={15} />
-                  </div>
-                  <span className="text-[11px] font-semibold text-[#6B7280]">Donors Impacted</span>
-                </div>
-                <div className="text-xl font-bold font-display text-[#111827] pt-1">
-                  {((sliderValue / 100) * 20000).toLocaleString()}
-                </div>
-                <span className="text-[10px] text-[#6B7280] block">{sliderValue}% of 20,000 donors</span>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] space-y-1">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#FEF3C7] text-[#D97706] flex items-center justify-center shrink-0">
-                    <Activity size={15} />
-                  </div>
-                  <span className="text-[11px] font-semibold text-[#6B7280]">Capacity Reduced</span>
-                </div>
-                <div className="text-xl font-bold font-display text-[#111827] pt-1">
-                  {Math.round(4218 * (sliderValue / 100)).toLocaleString()}
-                </div>
-                <span className="text-[10px] text-[#D97706] block font-semibold">Fewer matching donors</span>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] space-y-1">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#FFE4E6] text-[#E11D48] flex items-center justify-center shrink-0">
-                    <AlertTriangle size={15} />
-                  </div>
-                  <span className="text-[11px] font-semibold text-[#6B7280]">Risk to Rare Groups</span>
-                </div>
-                <div className="text-xl font-bold font-display text-[#E11D48] pt-1">
-                  High Risk
-                </div>
-                <span className="text-[10px] text-[#E11D48] block font-semibold">O− and AB− most affected</span>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] space-y-1">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#DBEAFE] text-[#2563EB] flex items-center justify-center shrink-0">
-                    <Building2 size={15} />
-                  </div>
-                  <span className="text-[11px] font-semibold text-[#6B7280]">Vulnerable Zones</span>
-                </div>
-                <div className="text-xl font-bold font-display text-[#2563EB] pt-1">
-                  3 Zones
-                </div>
-                <span className="text-[10px] text-[#6B7280] block font-medium">Wagholi, Hadapsar, Baner</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-3 border-t border-[#F3F4F6] text-[11px] text-[#6B7280]">
-            Click "Run Simulation" below to calculate full network stress outputs.
-          </div>
-        </div>
-      </div>
-
-      {/* SECTION 3 — Network Readiness & Stress Focus Areas Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* LEFT COLUMN: Network Readiness (Col 7 / ~60%) */}
-        <div className="lg:col-span-7 bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#F3F4F6] pb-3">
-            <div>
-              <h3 className="text-base font-bold font-display text-[#111827]">Network Readiness</h3>
-              <p className="text-xs text-[#6B7280]">Current usable donor capacity before simulation.</p>
-            </div>
-            <span className="px-2.5 py-1 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB] text-xs font-semibold text-[#4B5563] self-start sm:self-auto">
-              Pune Network: 20,000 registered donors
-            </span>
-          </div>
-
-          {/* Segmented Capacity Bar */}
-          <div className="space-y-3">
-            <div className="h-5 w-full rounded-lg overflow-hidden flex bg-[#F3F4F6] border border-[#E5E7EB] p-0.5">
-              <div className="h-full bg-[#10B981] rounded-l" style={{ width: '21%' }} title="Ready Now (4,218)" />
-              <div className="h-full bg-[#F59E0B]" style={{ width: '9%' }} title="May Be Available (1,842)" />
-              <div className="h-full bg-[#E11D48]" style={{ width: '11%' }} title="Temporarily Unavailable (2,104)" />
-              <div className="h-full bg-[#9CA3AF] rounded-r" style={{ width: '54%' }} title="Not Currently Usable (10,750)" />
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs pt-1">
-              <div className="p-2.5 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB] space-y-0.5">
-                <span className="flex items-center gap-1.5 font-bold text-[#111827]">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]" /> 4,218
-                </span>
-                <span className="text-[11px] text-[#059669] block font-semibold">Ready Now (21%)</span>
-              </div>
-
-              <div className="p-2.5 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB] space-y-0.5">
-                <span className="flex items-center gap-1.5 font-bold text-[#111827]">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]" /> 1,842
-                </span>
-                <span className="text-[11px] text-[#D97706] block font-semibold">May Be Available (9%)</span>
-              </div>
-
-              <div className="p-2.5 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB] space-y-0.5">
-                <span className="flex items-center gap-1.5 font-bold text-[#111827]">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#E11D48]" /> 2,104
-                </span>
-                <span className="text-[11px] text-[#E11D48] block font-semibold">Unavailable (11%)</span>
-              </div>
-
-              <div className="p-2.5 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB] space-y-0.5">
-                <span className="flex items-center gap-1.5 font-bold text-[#111827]">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#9CA3AF]" /> 10,750
-                </span>
-                <span className="text-[11px] text-[#6B7280] block font-medium">Not Usable (54%)</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN: Stress Test Focus Areas (Col 5 / ~40%) */}
-        <div className="lg:col-span-5 bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
-          <div>
-            <h3 className="text-base font-bold font-display text-[#111827]">Stress Test Focus Areas</h3>
-            <p className="text-xs text-[#6B7280]">Key aspects that will be evaluated during the simulation.</p>
-          </div>
-
-          <div className="space-y-2.5 text-xs">
-            <div className="p-2.5 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <Users size={16} className="text-[#E11D48]" />
-                <span className="font-bold text-[#111827]">Donor Matching</span>
-              </div>
-              <span className="text-[11px] text-[#6B7280]">Availability, response rate, reach</span>
-            </div>
-
-            <div className="p-2.5 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <Building2 size={16} className="text-[#2563EB]" />
-                <span className="font-bold text-[#111827]">Hospital Fulfilment</span>
-              </div>
-              <span className="text-[11px] text-[#6B7280]">Time to fulfil requirements</span>
-            </div>
-
-            <div className="p-2.5 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <Activity size={16} className="text-[#8B5CF6]" />
-                <span className="font-bold text-[#111827]">Partner Escalation</span>
-              </div>
-              <span className="text-[11px] text-[#6B7280]">When partner support is required</span>
-            </div>
-
-            <div className="p-2.5 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <TrendingUp size={16} className="text-[#F59E0B]" />
-                <span className="font-bold text-[#111827]">Geographic Coverage</span>
-              </div>
-              <span className="text-[11px] text-[#6B7280]">Areas with potential service gaps</span>
-            </div>
-
-            <div className="p-2.5 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
+            <div className="mt-6 p-4 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] space-y-2 text-xs">
+              <div className="flex items-center gap-2 font-bold text-[#111827]">
                 <ShieldCheck size={16} className="text-[#10B981]" />
-                <span className="font-bold text-[#111827]">Network Resilience</span>
+                <span>Deterministic Model Guarantees</span>
               </div>
-              <span className="text-[11px] text-[#6B7280]">Overall system performance</span>
+              <ul className="space-y-1.5 text-[#4B5563] list-disc list-inside text-[11px]">
+                <li>Zero impact on active patients, live hospital incidents or donor statuses.</li>
+                <li>Simulations are persisted for historical comparison and auditability.</li>
+                <li>Identifies exact zone bottlenecks and blood group coverage drops.</li>
+              </ul>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* SECTION 4 — Primary Action Bar & About Card */}
-      <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3 text-xs text-[#4B5563]">
-          <div className="w-9 h-9 rounded-xl bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center shrink-0">
-            <Info size={18} />
-          </div>
-          <div>
-            <strong className="text-[#111827] font-bold block">About Network Stress Lab</strong>
-            <span className="text-[#6B7280]">
-              Run realistic what-if scenarios using deterministic models to understand network behaviour under pressure. This helps identify vulnerabilities and improve preparedness.
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 shrink-0">
-          {simPhase === 'complete' && (
-            <button
-              onClick={handleReset}
-              className="px-4 py-3 rounded-xl border border-[#E5E7EB] hover:bg-gray-100 text-xs font-bold text-[#4B5563] flex items-center gap-1.5 transition-colors"
-            >
-              <RefreshCw size={14} />
-              <span>Reset</span>
-            </button>
-          )}
-
-          <button
-            onClick={runSimulation}
-            disabled={simPhase === 'running'}
-            className="px-6 py-3 rounded-xl bg-[#E11D48] hover:bg-[#BE123C] disabled:opacity-50 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2"
-          >
-            {simPhase === 'running' ? (
-              <>
-                <RefreshCw size={16} className="animate-spin" />
-                <span>Simulating Step {currentStepIndex}/6...</span>
-              </>
-            ) : simPhase === 'complete' ? (
-              <>
-                <Zap size={16} />
-                <span>Run Again</span>
-              </>
-            ) : (
-              <>
-                <Zap size={16} />
-                <span>Run Simulation →</span>
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* SECTION 5 — Dynamic Simulation Results Workspace */}
-      {simPhase === 'running' && (
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-2xs space-y-4 animate-fade-in">
-          <div className="flex items-center gap-3 text-[#D97706] font-bold text-sm">
-            <RefreshCw size={18} className="animate-spin" />
-            <span>Simulation Execution in Progress...</span>
-          </div>
-
-          <div className="space-y-2">
-            {STEPS.map((stepLabel, idx) => (
-              <div
-                key={stepLabel}
-                className={cn(
-                  'flex items-center gap-3 text-xs transition-all duration-300',
-                  currentStepIndex > idx ? 'opacity-100 text-[#10B981] font-semibold' : 'opacity-40 text-[#9CA3AF]'
-                )}
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#F3F4F6]">
+            {simPhase === 'complete' && (
+              <button
+                onClick={handleReset}
+                className="px-4 py-2.5 rounded-xl border border-[#E5E7EB] hover:bg-gray-50 text-xs font-semibold text-[#4B5563] transition-colors"
               >
-                <CheckCircle2 size={16} className={currentStepIndex > idx ? 'text-[#10B981]' : 'text-gray-300'} />
-                <span>{stepLabel}</span>
-              </div>
-            ))}
+                Reset Output
+              </button>
+            )}
+
+            <button
+              onClick={runSimulation}
+              disabled={simPhase === 'running'}
+              className="px-6 py-2.5 rounded-xl bg-[#E11D48] hover:bg-[#BE123C] disabled:opacity-50 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2"
+            >
+              {simPhase === 'running' ? (
+                <>
+                  <RefreshCw size={14} className="animate-spin" />
+                  <span>Calculating Simulation...</span>
+                </>
+              ) : (
+                <>
+                  <Zap size={14} />
+                  <span>Run Stress Simulation →</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
-      )}
+      </div>
 
+      {/* SECTION 3 — Authoritative Simulation Results Workspace */}
       {simPhase === 'complete' && result && (
         <div className="space-y-6 animate-scale-up">
           {/* Result Banner */}
@@ -607,94 +497,97 @@ export function StressLabPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#FECDD3] pb-3">
               <div>
                 <span className="text-[10px] font-bold text-[#E11D48] uppercase tracking-wider block">
-                  SIMULATION RESULT
+                  SIMULATION RESULT (PERSISTED)
                 </span>
                 <h3 className="text-lg font-bold font-display text-[#111827]">
-                  Network Stress Detected — Scenario: {meta.title}
+                  {result.scenario_name || meta.title}
                 </h3>
+                <span className="text-[11px] text-[#6B7280]">
+                  Simulation ID: {result.simulation_id}
+                </span>
               </div>
               <span className="px-3 py-1 rounded-full bg-[#FFE4E6] text-[#E11D48] border border-[#FECDD3] text-xs font-bold self-start sm:self-auto">
-                {result.status} IMPAIRMENT
+                {result.capacity_loss_pct > 25 ? 'SEVERE IMPAIRMENT' : 'MODERATE IMPAIRMENT'}
               </span>
             </div>
 
             {/* Before vs After Comparison Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
               <div className="bg-white rounded-xl p-3.5 border border-[#E5E7EB] space-y-1">
-                <span className="text-[11px] text-[#6B7280] font-medium block">Ready Capacity Drop</span>
+                <span className="text-[11px] text-[#6B7280] font-medium block">Usable Donors</span>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-sm font-bold text-gray-400 line-through">4,218</span>
-                  <span className="text-xl font-bold font-display text-[#E11D48]">{result.o_neg_coverage_after * 40} ready</span>
+                  <span className="text-sm font-bold text-gray-400 line-through">
+                    {result.baseline_usable_donors?.toLocaleString() || '5,060'}
+                  </span>
+                  <span className="text-xl font-bold font-display text-[#E11D48]">
+                    {result.simulated_usable_donors?.toLocaleString()} ready
+                  </span>
                 </div>
-                <span className="text-[10px] text-[#E11D48] font-bold block">-{sliderValue}% capacity reduction</span>
+                <span className="text-[10px] text-[#E11D48] font-bold block">
+                  -{Math.round(result.capacity_loss_pct || 0)}% capacity reduction
+                </span>
               </div>
 
               <div className="bg-white rounded-xl p-3.5 border border-[#E5E7EB] space-y-1">
-                <span className="text-[11px] text-[#6B7280] font-medium block">O− Coverage Level</span>
+                <span className="text-[11px] text-[#6B7280] font-medium block">Coverage Level</span>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-sm font-bold text-gray-400 line-through">{result.o_neg_coverage_before}%</span>
-                  <span className="text-xl font-bold font-display text-[#E11D48]">{result.o_neg_coverage_after}%</span>
+                  <span className="text-sm font-bold text-gray-400 line-through">
+                    {Math.round(result.baseline_coverage_pct || 87)}%
+                  </span>
+                  <span className="text-xl font-bold font-display text-[#E11D48]">
+                    {Math.round(result.simulated_coverage_pct || 0)}%
+                  </span>
                 </div>
-                <span className="text-[10px] text-[#E11D48] font-bold block">Critical Shortage Threshold</span>
+                <span className="text-[10px] text-[#E11D48] font-bold block">
+                  -{Math.round(result.coverage_loss_pct || 0)}% coverage loss
+                </span>
               </div>
 
               <div className="bg-white rounded-xl p-3.5 border border-[#E5E7EB] space-y-1">
-                <span className="text-[11px] text-[#6B7280] font-medium block">Weakest District Zone</span>
+                <span className="text-[11px] text-[#6B7280] font-medium block">Bottlenecks Identified</span>
                 <div className="text-xl font-bold font-display text-[#111827] pt-1">
-                  {result.weakest_zone}
+                  {result.bottlenecks?.length || 0} Critical Points
                 </div>
-                <span className="text-[10px] text-[#D97706] font-semibold block">Severe response gap</span>
+                <span className="text-[10px] text-[#D97706] font-semibold block">
+                  Response cascade stress
+                </span>
               </div>
 
               <div className="bg-white rounded-xl p-3.5 border border-[#E5E7EB] space-y-1">
-                <span className="text-[11px] text-[#6B7280] font-medium block">Expected Response Delay</span>
-                <div className="text-xl font-bold font-display text-[#D97706] pt-1">
-                  +{result.expected_delay_increase_percent}%
+                <span className="text-[11px] text-[#6B7280] font-medium block">Interventions</span>
+                <div className="text-xl font-bold font-display text-[#10B981] pt-1">
+                  {result.interventions?.length || 0} Actions
                 </div>
-                <span className="text-[10px] text-[#D97706] font-semibold block">Additional elapsed time</span>
+                <span className="text-[10px] text-[#059669] font-semibold block">
+                  Recommended mitigation
+                </span>
               </div>
             </div>
           </div>
 
           {/* Vulnerability Insights & Recommended Interventions */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Vulnerability Insights (Col 6 / 50%) */}
+            {/* Bottlenecks (Col 6 / 50%) */}
             <div className="lg:col-span-6 bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
               <div className="flex items-center gap-2">
                 <AlertTriangle size={18} className="text-[#E11D48]" />
-                <h3 className="text-base font-bold font-display text-[#111827]">Network Vulnerabilities</h3>
+                <h3 className="text-base font-bold font-display text-[#111827]">Identified Bottlenecks</h3>
               </div>
 
               <div className="space-y-3 text-xs">
-                <div className="p-3 rounded-xl bg-[#FFF1F2] border border-[#FECDD3] space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-[#E11D48]">O− Capacity Shortage in Wagholi Zone</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#FFE4E6] text-[#E11D48]">Critical</span>
-                  </div>
-                  <p className="text-[#4B5563]">
-                    Ready O− donor pool drops below minimum threshold for hospital emergency requirements in Wagholi.
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-[#FFFBEB] border border-[#FDE68A] space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-[#D97706]">Insufficient AB− Backup Coverage</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#FEF3C7] text-[#D97706]">Attention</span>
-                  </div>
-                  <p className="text-[#4B5563]">
-                    Hadapsar zone lacks secondary response waves for AB− rare blood requirements.
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE] space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-[#2563EB]">Partner Network Escalation Required</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#DBEAFE] text-[#2563EB]">Watch</span>
-                  </div>
-                  <p className="text-[#4B5563]">
-                    UPAY Pune and Rotary East networks must be pre-activated to handle secondary wave demand.
-                  </p>
-                </div>
+                {(!result.bottlenecks || result.bottlenecks.length === 0) ? (
+                  <p className="text-[#6B7280]">No major bottlenecks identified in this simulation scenario.</p>
+                ) : (
+                  result.bottlenecks.map((b: string, idx: number) => (
+                    <div key={idx} className="p-3 rounded-xl bg-[#FFF1F2] border border-[#FECDD3] space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-[#E11D48]">Bottleneck #{idx + 1}</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#FFE4E6] text-[#E11D48]">Critical</span>
+                      </div>
+                      <p className="text-[#4B5563]">{b}</p>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
@@ -702,101 +595,31 @@ export function StressLabPage() {
             <div className="lg:col-span-6 bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
               <div className="flex items-center gap-2">
                 <CheckCircle2 size={18} className="text-[#10B981]" />
-                <h3 className="text-base font-bold font-display text-[#111827]">Recommended Interventions</h3>
+                <h3 className="text-base font-bold font-display text-[#111827]">Authoritative Interventions</h3>
               </div>
 
               <div className="space-y-3">
-                {result.interventions.map((it, idx) => (
-                  <div key={it.title} className="p-3.5 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] text-xs flex items-start gap-3">
-                    <div className="w-7 h-7 rounded-lg bg-[#D1FAE5] text-[#059669] flex items-center justify-center font-bold text-xs shrink-0">
-                      #{idx + 1}
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-[#111827]">{it.title}</span>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#D1FAE5] text-[#059669]">
-                          {it.impact} IMPACT
-                        </span>
+                {(!result.interventions || result.interventions.length === 0) ? (
+                  <p className="text-xs text-[#6B7280]">Standard operational cascades remain adequate.</p>
+                ) : (
+                  result.interventions.map((it: string, idx: number) => (
+                    <div key={idx} className="p-3.5 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] text-xs flex items-start gap-3">
+                      <div className="w-7 h-7 rounded-lg bg-[#D1FAE5] text-[#059669] flex items-center justify-center font-bold text-xs shrink-0">
+                        #{idx + 1}
                       </div>
-                      <p className="text-[#6B7280]">{it.description}</p>
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-[#111827]">Recommended Action</span>
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#D1FAE5] text-[#059669]">
+                            HIGH IMPACT
+                          </span>
+                        </div>
+                        <p className="text-[#6B7280]">{it}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* CUSTOM SCENARIO MODAL */}
-      {showCustomModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full border border-[#E5E7EB] shadow-2xl overflow-hidden space-y-4 animate-scale-up">
-            <div className="p-4 bg-[#F9FAFB] border-b border-[#E5E7EB] flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Settings size={18} className="text-[#E11D48]" />
-                <h3 className="font-bold font-display text-sm text-[#111827]">Custom Stress Scenario</h3>
-              </div>
-              <button onClick={() => setShowCustomModal(false)} className="text-gray-400 hover:text-gray-600">
-                <X size={16} />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-3 text-xs">
-              <p className="text-gray-600">
-                Configure custom parameters to simulate combined stress vectors across Pune district.
-              </p>
-
-              <div className="space-y-3 pt-1">
-                <div>
-                  <label className="block text-[11px] font-bold text-gray-700 mb-1">Scenario Name</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Monsoon Transit Disruption"
-                    className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-2 text-xs outline-none focus:border-[#E11D48]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-gray-700 mb-1">Donor Unavailability %</label>
-                  <input
-                    type="range"
-                    min="10"
-                    max="80"
-                    defaultValue="40"
-                    className="w-full accent-[#E11D48]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-gray-700 mb-1">Target Zone Focus</label>
-                  <select className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-2 text-xs outline-none">
-                    <option value="wagholi">Wagholi & East Pune</option>
-                    <option value="kothrud">Kothrud & West Pune</option>
-                    <option value="hadapsar">Hadapsar & South Pune</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-2">
-              <button
-                onClick={() => setShowCustomModal(false)}
-                className="px-4 py-2 rounded-lg border border-gray-300 text-xs font-semibold text-gray-700 hover:bg-gray-100"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  setShowCustomModal(false)
-                  setShowToast(true)
-                  setTimeout(() => setShowToast(false), 4000)
-                }}
-                className="px-4 py-2 rounded-lg bg-[#E11D48] hover:bg-[#BE123C] text-white text-xs font-bold shadow-xs flex items-center gap-1.5"
-              >
-                <span>Save & Apply Scenario</span>
-                <Check size={14} />
-              </button>
             </div>
           </div>
         </div>

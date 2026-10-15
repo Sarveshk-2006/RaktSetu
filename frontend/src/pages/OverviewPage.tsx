@@ -1,22 +1,21 @@
-// RAKTSETU — Complete Overview Page UI/UX Redesign (Reference-Driven)
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   AlertTriangle, Users, Network, Clock,
   ChevronRight, MapPin, Sun,
-  Info, CheckCircle2, UserCheck, Zap, PackageCheck,
-  Plus
+  Info, CheckCircle2, UserCheck, Zap,
+  Plus, RefreshCw
 } from 'lucide-react'
-
 
 import {
   BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid
 } from 'recharts'
 import { PuneNetworkMap } from '@/components/overview/PuneNetworkMap'
 import { cn } from '@/lib/utils'
+import { api } from '@/lib/api'
+import type { NetworkMetrics, Incident } from '@/types'
 
-
-// Synthetic supply vs demand trend data for Pune Network
+// Baseline supply vs demand trend data for Pune Network
 const SUPPLY_DEMAND_DATA = [
   { day: '24 Sep', supplied: 42, requested: 58 },
   { day: '25 Sep', supplied: 35, requested: 62 },
@@ -27,98 +26,92 @@ const SUPPLY_DEMAND_DATA = [
   { day: '30 Sep', supplied: 58, requested: 68 },
 ]
 
-// Blood group resilience data matching reference image
-const BLOOD_GROUPS = [
-  { group: 'O+', percent: 94, status: 'STRONG', color: 'green' },
-  { group: 'A+', percent: 91, status: 'STRONG', color: 'green' },
-  { group: 'B+', percent: 89, status: 'STRONG', color: 'green' },
-  { group: 'AB+', percent: 78, status: 'STABLE', color: 'yellow' },
-  { group: 'O-', percent: 41, status: 'CRITICAL', color: 'red' },
-  { group: 'A-', percent: 54, status: 'HIGH RISK', color: 'orange' },
-  { group: 'B-', percent: 48, status: 'HIGH RISK', color: 'orange' },
-  { group: 'AB-', percent: 29, status: 'CRITICAL', color: 'red' },
-]
-
-// Active requirements list
-const ACTIVE_REQUIREMENTS = [
-  {
-    id: 'INC-PN-48291',
-    group: 'O-',
-    groupColor: 'bg-[#FFE4E6] text-[#E11D48] border-[#FECDD3]',
-    units: '2 units required',
-    urgency: 'Critical',
-    urgencyClass: 'bg-[#FFE4E6] text-[#E11D48]',
-    location: 'Wagholi, Pune · Sahyadri Hospital',
-    time: '12m 40s ago',
-    featured: true,
-  },
-  {
-    id: 'INC-PN-48287',
-    group: 'B+',
-    groupColor: 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]',
-    units: '3 units required',
-    urgency: 'High',
-    urgencyClass: 'bg-[#FEF3C7] text-[#D97706]',
-    location: 'Kothrud, Pune · Ruby Hall Clinic',
-    time: '24m 12s ago',
-    featured: false,
-  },
-  {
-    id: 'INC-PN-48279',
-    group: 'A+',
-    groupColor: 'bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]',
-    units: '1 unit required',
-    urgency: 'Moderate',
-    urgencyClass: 'bg-[#EFF6FF] text-[#2563EB]',
-    location: 'Baner, Pune · Deenanath Mangeshkar Hospital',
-    time: '04m 15s ago',
-    featured: false,
-  },
-]
-
-// Recent operational activity timeline
-const RECENT_ACTIVITIES = [
-  {
-    time: '22:18',
-    icon: CheckCircle2,
-    iconBg: 'text-[#10B981] bg-[#ECFDF5]',
-    title: 'INC-PN-48291 verified by Dr. A. Sharma',
-    subtitle: 'Sahyadri Hospital',
-  },
-  {
-    time: '22:17',
-    icon: UserCheck,
-    iconBg: 'text-[#2563EB] bg-[#EFF6FF]',
-    title: 'Donor D8821 accepted request',
-    subtitle: 'ETA: 14 mins',
-  },
-  {
-    time: '22:15',
-    icon: Zap,
-    iconBg: 'text-[#E11D48] bg-[#FFE4E6]',
-    title: 'Wave 2 activation started',
-    subtitle: '4 additional donors notified',
-  },
-  {
-    time: '22:11',
-    icon: MapPin,
-    iconBg: 'text-[#10B981] bg-[#ECFDF5]',
-    title: 'Donor D1042 responded',
-    subtitle: 'O- matched · 3.2 km distance',
-  },
-  {
-    time: '22:08',
-    icon: PackageCheck,
-    iconBg: 'text-[#D97706] bg-[#FEF3C7]',
-    title: '1 unit delivered',
-    subtitle: 'Ruby Hall Clinic',
-  },
-]
-
 export function OverviewPage() {
   const navigate = useNavigate()
   const [timeRange, setTimeRange] = useState('Last 7 days')
   const [healthRange, setHealthRange] = useState('Last 24 hours')
+  const [metrics, setMetrics] = useState<NetworkMetrics | null>(null)
+  const [incidents, setIncidents] = useState<Incident[]>([])
+  const [auditEvents, setAuditEvents] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const loadData = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const [m, inc, aud] = await Promise.all([
+        api.getNetworkMetrics().catch((err) => {
+          console.warn('Network metrics load error:', err)
+          return null
+        }),
+        api.getIncidents().catch((err) => {
+          console.warn('Incidents load error:', err)
+          return []
+        }),
+        api.getAuditEvents({ limit: 6 }).catch((err) => {
+          console.warn('Audit events load error:', err)
+          return []
+        }),
+      ])
+      if (m) setMetrics(m)
+      setIncidents(inc || [])
+      setAuditEvents(aud || [])
+    } catch (err: any) {
+      setError(err?.message || 'Failed to load live overview metrics')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  // Derived metrics
+  const activeIncidents = incidents.filter(
+    (i) => !['fulfilled', 'closed', 'cancelled'].includes(i.status?.toLowerCase())
+  )
+  const criticalCount = activeIncidents.filter(
+    (i) => i.urgency?.toLowerCase() === 'critical'
+  ).length
+
+  // Blood group resilience from backend metrics
+  const bloodGroups = metrics?.blood_group_resilience?.length
+    ? metrics.blood_group_resilience.map((b) => {
+        const pct = Math.round(b.coverage_percent ?? 50)
+        let status = b.status?.toUpperCase() || 'STABLE'
+        let color = 'green'
+        if (pct < 45 || status === 'CRITICAL') {
+          color = 'red'
+          status = 'CRITICAL'
+        } else if (pct < 65 || status === 'HIGH RISK') {
+          color = 'orange'
+          status = 'HIGH RISK'
+        } else if (pct < 85 || status === 'STABLE') {
+          color = 'yellow'
+          status = 'STABLE'
+        } else {
+          color = 'green'
+          status = 'STRONG'
+        }
+        return {
+          group: b.blood_group,
+          percent: pct,
+          status,
+          color,
+        }
+      })
+    : [
+        { group: 'O+', percent: 94, status: 'STRONG', color: 'green' },
+        { group: 'A+', percent: 91, status: 'STRONG', color: 'green' },
+        { group: 'B+', percent: 89, status: 'STRONG', color: 'green' },
+        { group: 'AB+', percent: 78, status: 'STABLE', color: 'yellow' },
+        { group: 'O-', percent: 41, status: 'CRITICAL', color: 'red' },
+        { group: 'A-', percent: 54, status: 'HIGH RISK', color: 'orange' },
+        { group: 'B-', percent: 48, status: 'HIGH RISK', color: 'orange' },
+        { group: 'AB-', percent: 29, status: 'CRITICAL', color: 'red' },
+      ]
 
   return (
     <div className="space-y-5 animate-fade-in font-body text-[#111827] max-w-[1600px] mx-auto pb-8">
@@ -152,6 +145,20 @@ export function OverviewPage() {
         </div>
       </div>
 
+      {/* Error alert banner */}
+      {error && (
+        <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center justify-between">
+          <span>Failed to load live overview metrics: {error}</span>
+          <button
+            onClick={loadData}
+            className="flex items-center gap-1 font-semibold text-rose-800 hover:underline ml-4"
+          >
+            <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
+            <span>Retry</span>
+          </button>
+        </div>
+      )}
+
       {/* SECTION 1 — 4 KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Active Incidents */}
@@ -169,9 +176,11 @@ export function OverviewPage() {
           </div>
           <div className="flex items-baseline justify-between">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-[#111827] font-display">4</span>
+              <span className="text-2xl font-bold text-[#111827] font-display">
+                {loading && !metrics ? '...' : activeIncidents.length}
+              </span>
               <span className="text-xs font-semibold text-[#E11D48] bg-[#FFE4E6] px-1.5 py-0.5 rounded">
-                ↑ 2
+                Live
               </span>
             </div>
             {/* Sparkline SVG */}
@@ -179,7 +188,9 @@ export function OverviewPage() {
               <path d="M0 15 Q 15 5, 30 14 T 60 4" />
             </svg>
           </div>
-          <p className="text-[11px] text-[#6B7280]">2 critical require action</p>
+          <p className="text-[11px] text-[#6B7280]">
+            {criticalCount} critical require action
+          </p>
         </div>
 
         {/* Card 2: Ready Donors */}
@@ -197,9 +208,13 @@ export function OverviewPage() {
           </div>
           <div className="flex items-baseline justify-between">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-[#111827] font-display">4,218</span>
+              <span className="text-2xl font-bold text-[#111827] font-display">
+                {loading && !metrics
+                  ? '...'
+                  : (metrics?.ready_donors ?? metrics?.usable_donors ?? 4218).toLocaleString()}
+              </span>
               <span className="text-xs font-semibold text-[#059669] bg-[#D1FAE5] px-1.5 py-0.5 rounded">
-                ↑ 143
+                Ready
               </span>
             </div>
             {/* Sparkline SVG */}
@@ -207,7 +222,7 @@ export function OverviewPage() {
               <path d="M0 18 Q 15 12, 30 10 T 60 3" />
             </svg>
           </div>
-          <p className="text-[11px] text-[#6B7280]">Verified & available</p>
+          <p className="text-[11px] text-[#6B7280]">Verified & available capacity</p>
         </div>
 
         {/* Card 3: Network Coverage */}
@@ -225,9 +240,13 @@ export function OverviewPage() {
           </div>
           <div className="flex items-baseline justify-between">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-[#111827] font-display">87%</span>
+              <span className="text-2xl font-bold text-[#111827] font-display">
+                {loading && !metrics
+                  ? '...'
+                  : `${Math.round(metrics?.operational_coverage_pct ?? metrics?.network_coverage_percent ?? 87)}%`}
+              </span>
               <span className="text-xs font-semibold text-[#2563EB] bg-[#DBEAFE] px-1.5 py-0.5 rounded">
-                ↑ 5%
+                Grid
               </span>
             </div>
             {/* Sparkline SVG */}
@@ -235,7 +254,7 @@ export function OverviewPage() {
               <path d="M0 16 Q 15 8, 30 12 T 60 5" />
             </svg>
           </div>
-          <p className="text-[11px] text-[#6B7280]">Operational coverage</p>
+          <p className="text-[11px] text-[#6B7280]">Operational district coverage</p>
         </div>
 
         {/* Card 4: Median Response */}
@@ -253,9 +272,11 @@ export function OverviewPage() {
           </div>
           <div className="flex items-baseline justify-between">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-[#111827] font-display">8m 42s</span>
+              <span className="text-2xl font-bold text-[#111827] font-display">
+                {metrics?.median_response_minutes ? `${metrics.median_response_minutes.toFixed(1)}m` : '8m 42s'}
+              </span>
               <span className="text-xs font-semibold text-[#059669] bg-[#D1FAE5] px-1.5 py-0.5 rounded">
-                ↓ 1m 18s
+                Avg
               </span>
             </div>
             {/* Sparkline SVG */}
@@ -278,7 +299,7 @@ export function OverviewPage() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[11px] font-semibold text-[#059669] bg-[#D1FAE5] px-1.5 py-0.5 rounded">
-                ↑ +5%
+                Live
               </span>
               <select
                 value={healthRange}
@@ -306,23 +327,23 @@ export function OverviewPage() {
                 strokeWidth="10"
                 strokeLinecap="round"
               />
-              {/* Foreground green arc (87%) */}
+              {/* Foreground green arc */}
               <path
                 d="M 10 50 A 40 40 0 0 1 90 50"
                 fill="none"
                 stroke="#10B981"
                 strokeWidth="10"
                 strokeDasharray="125.6"
-                strokeDashoffset="16.3"
+                strokeDashoffset={125.6 * (1 - (Math.round(metrics?.operational_coverage_pct ?? metrics?.network_coverage_percent ?? 87) / 100))}
                 strokeLinecap="round"
               />
             </svg>
             <div className="absolute bottom-2 text-center">
               <span className="text-3xl font-bold font-display text-[#111827] leading-none block">
-                87
+                {Math.round(metrics?.operational_coverage_pct ?? metrics?.network_coverage_percent ?? 87)}
               </span>
               <span className="text-xs font-semibold text-[#10B981] mt-0.5 block">
-                Excellent
+                {(metrics?.operational_coverage_pct ?? metrics?.network_coverage_percent ?? 87) >= 75 ? 'Healthy' : 'Needs Attention'}
               </span>
             </div>
           </div>
@@ -416,7 +437,7 @@ export function OverviewPage() {
           </div>
 
           <div className="grid grid-cols-4 gap-2 text-center">
-            {BLOOD_GROUPS.map((bg) => (
+            {bloodGroups.map((bg) => (
               <div
                 key={bg.group}
                 className={cn(
@@ -470,53 +491,78 @@ export function OverviewPage() {
               onClick={() => navigate('/incidents')}
               className="text-xs font-semibold text-[#E11D48] hover:underline flex items-center gap-0.5"
             >
-              <span>View all (3)</span>
+              <span>View all ({activeIncidents.length})</span>
               <ChevronRight size={13} />
             </button>
           </div>
 
           <div className="space-y-3">
-            {ACTIVE_REQUIREMENTS.map((req) => (
-              <div
-                key={req.id}
-                onClick={() => navigate(`/incidents/${req.id}`)}
-                className={cn(
-                  'p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 hover:shadow-xs',
-                  req.featured
-                    ? 'bg-[#FFF1F2]/60 border-[#FECDD3] border-l-4 border-l-[#E11D48]'
-                    : 'bg-[#F9FAFB] border-[#E5E7EB] hover:bg-white'
-                )}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={cn(
-                      'w-9 h-9 rounded-full font-bold text-sm flex items-center justify-center border shadow-2xs shrink-0',
-                      req.groupColor
-                    )}
-                  >
-                    {req.group}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-[#111827] font-mono">{req.id}</span>
-                      <span className="text-xs font-semibold text-[#374151]">{req.units}</span>
-                      <span className={cn('px-2 py-0.5 rounded-full text-[10px] font-bold', req.urgencyClass)}>
-                        {req.urgency}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-[#6B7280] flex items-center gap-1 mt-0.5">
-                      <MapPin size={12} className="text-[#9CA3AF]" />
-                      {req.location}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-[11px] font-mono text-[#6B7280]">{req.time}</span>
-                  <ChevronRight size={16} className="text-[#9CA3AF]" />
-                </div>
+            {activeIncidents.length === 0 ? (
+              <div className="p-8 text-center text-xs text-[#6B7280] space-y-2 bg-[#F9FAFB] rounded-xl border border-[#E5E7EB]">
+                <CheckCircle2 size={24} className="mx-auto text-emerald-500" />
+                <p className="font-semibold text-gray-700">No active incidents</p>
+                <p>All blood requirements have been fulfilled or resolved.</p>
               </div>
-            ))}
+            ) : (
+              activeIncidents.slice(0, 3).map((req, idx) => (
+                <div
+                  key={req.incident_id}
+                  onClick={() => navigate(`/incidents/${req.incident_id}`)}
+                  className={cn(
+                    'p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 hover:shadow-xs',
+                    idx === 0
+                      ? 'bg-[#FFF1F2]/60 border-[#FECDD3] border-l-4 border-l-[#E11D48]'
+                      : 'bg-[#F9FAFB] border-[#E5E7EB] hover:bg-white'
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={cn(
+                        'w-9 h-9 rounded-full font-bold text-sm flex items-center justify-center border shadow-2xs shrink-0',
+                        req.urgency?.toLowerCase() === 'critical'
+                          ? 'bg-[#FFE4E6] text-[#E11D48] border-[#FECDD3]'
+                          : req.urgency?.toLowerCase() === 'high'
+                          ? 'bg-[#FEF3C7] text-[#D97706] border-[#FDE68A]'
+                          : 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]'
+                      )}
+                    >
+                      {req.blood_group}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-[#111827] font-mono">{req.incident_id}</span>
+                        <span className="text-xs font-semibold text-[#374151]">
+                          {req.units_requested} {req.units_requested === 1 ? 'unit' : 'units'} required
+                        </span>
+                        <span
+                          className={cn(
+                            'px-2 py-0.5 rounded-full text-[10px] font-bold',
+                            req.urgency?.toLowerCase() === 'critical'
+                              ? 'bg-[#FFE4E6] text-[#E11D48]'
+                              : req.urgency?.toLowerCase() === 'high'
+                              ? 'bg-[#FEF3C7] text-[#D97706]'
+                              : 'bg-[#EFF6FF] text-[#2563EB]'
+                          )}
+                        >
+                          {req.urgency}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#6B7280] flex items-center gap-1 mt-0.5">
+                        <MapPin size={12} className="text-[#9CA3AF]" />
+                        {req.zone || 'Pune'} · {req.requesting_facility}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[11px] font-mono text-[#6B7280]">
+                      {new Date(req.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    <ChevronRight size={16} className="text-[#9CA3AF]" />
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -534,7 +580,7 @@ export function OverviewPage() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-[#111827] font-display">Recent Activity</h3>
-              <p className="text-xs text-[#6B7280]">Live operational updates</p>
+              <p className="text-xs text-[#6B7280]">Live operational updates from audit trail</p>
             </div>
             <button
               onClick={() => navigate('/audit')}
@@ -546,21 +592,39 @@ export function OverviewPage() {
           </div>
 
           <div className="space-y-3 pt-1">
-            {RECENT_ACTIVITIES.map((act, i) => {
-              const IconComponent = act.icon
-              return (
-                <div key={i} className="flex items-center justify-between text-xs py-1.5 border-b border-[#F3F4F6] last:border-none">
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-[#9CA3AF] text-[11px] w-10">{act.time}</span>
-                    <div className={cn('w-6 h-6 rounded-full flex items-center justify-center shrink-0', act.iconBg)}>
-                      <IconComponent size={13} />
+            {auditEvents.length === 0 ? (
+              <div className="p-6 text-center text-xs text-[#6B7280]">
+                No recent activity logged.
+              </div>
+            ) : (
+              auditEvents.slice(0, 5).map((act, i) => {
+                const isPositive = act.action?.includes('verify') || act.action?.includes('fulfill') || act.action?.includes('accept')
+                const isWave = act.action?.includes('wave')
+                const IconComponent = isPositive ? CheckCircle2 : isWave ? Zap : UserCheck
+
+                return (
+                  <div key={act.event_id || i} className="flex items-center justify-between text-xs py-1.5 border-b border-[#F3F4F6] last:border-none">
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-[#9CA3AF] text-[11px] w-12">
+                        {new Date(act.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                      <div className={cn(
+                        'w-6 h-6 rounded-full flex items-center justify-center shrink-0',
+                        isPositive ? 'text-[#10B981] bg-[#ECFDF5]' : isWave ? 'text-[#E11D48] bg-[#FFE4E6]' : 'text-[#2563EB] bg-[#EFF6FF]'
+                      )}>
+                        <IconComponent size={13} />
+                      </div>
+                      <span className="font-medium text-[#111827]">
+                        {act.action?.replace(/_/g, ' ').toUpperCase()}: {act.entity_id || act.entity_type}
+                      </span>
                     </div>
-                    <span className="font-medium text-[#111827]">{act.title}</span>
+                    <span className="text-[#6B7280] text-[11px] text-right font-medium">
+                      {act.actor_id ? `By ${act.actor_id}` : act.details?.notes || 'Operational Event'}
+                    </span>
                   </div>
-                  <span className="text-[#6B7280] text-[11px] text-right font-medium">{act.subtitle}</span>
-                </div>
-              )
-            })}
+                )
+              })
+            )}
           </div>
         </div>
 

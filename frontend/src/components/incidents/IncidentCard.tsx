@@ -14,16 +14,22 @@ interface IncidentCardProps {
 
 export function IncidentCard({ incident, className, compact = false }: IncidentCardProps) {
   const navigate = useNavigate()
-  const { requirement: req } = incident
+  const bloodGroup = incident.requirement?.blood_group || (incident.blood_group as any) || 'O+'
+  const unitsRequired = incident.requirement?.units_required || incident.units_requested || 1
+  const urgency = incident.requirement?.urgency || incident.urgency || 'Moderate'
+  const zone = incident.requirement?.location?.zone || incident.zone || 'Pune'
+  const district = incident.requirement?.location?.district || incident.district || 'Pune'
+  const facility = incident.requirement?.requesting_facility || incident.requesting_facility || 'Hospital'
+  const waves = incident.waves || []
 
-  const unitsBar = (incident.units_secured / req.units_required) * 100
+  const unitsBar = Math.min(100, (incident.units_secured / unitsRequired) * 100)
 
   return (
     <div
       onClick={() => navigate(`/incidents/${incident.incident_id}`)}
       className={cn(
         'group rounded-xl border p-4 cursor-pointer transition-all duration-200 shadow-2xs hover:shadow-md font-body',
-        req.urgency === 'Critical' ? 'bg-red-50/40 border-red-200 hover:border-red-300' : 'bg-white border-[#E4E7EC] hover:border-[#D0D5DD]',
+        urgency === 'Critical' ? 'bg-red-50/40 border-red-200 hover:border-red-300' : 'bg-white border-[#E4E7EC] hover:border-[#D0D5DD]',
         className,
       )}
     >
@@ -33,13 +39,13 @@ export function IncidentCard({ incident, className, compact = false }: IncidentC
           <span className="font-mono text-xs font-bold text-[#17202A] tracking-wider">
             {incident.incident_id}
           </span>
-          <BloodGroupBadge group={req.blood_group} size="sm" />
-          <StatusBadge type="urgency" value={req.urgency} />
+          <BloodGroupBadge group={bloodGroup} size="sm" />
+          <StatusBadge type="urgency" value={urgency} />
           <StatusBadge type="status" value={incident.status} />
         </div>
         {!compact && (
           <span className="text-xs text-[#667085] font-mono whitespace-nowrap">
-            {formatElapsed(incident.elapsed_seconds)}
+            {formatElapsed(incident.elapsed_seconds || 0)}
           </span>
         )}
       </div>
@@ -48,11 +54,11 @@ export function IncidentCard({ incident, className, compact = false }: IncidentC
       <div className="mt-2.5 flex items-center gap-4 text-xs text-[#667085]">
         <span className="flex items-center gap-1 font-medium text-[#17202A]">
           <MapPin size={13} className="text-[#667085]" />
-          {req.location.zone} · {req.location.district}
+          {zone} · {district}
         </span>
         <span className="flex items-center gap-1">
           <Building2 size={13} className="text-[#667085]" />
-          {req.requesting_facility}
+          {facility}
         </span>
       </div>
 
@@ -64,7 +70,7 @@ export function IncidentCard({ incident, className, compact = false }: IncidentC
             'font-semibold font-mono',
             incident.status === 'Fulfilled' ? 'text-emerald-700' : 'text-[#17202A]',
           )}>
-            {incident.units_secured} / {req.units_required}
+            {incident.units_secured} / {unitsRequired}
           </span>
         </div>
         <div className="h-1.5 rounded-full bg-[#F1F3F9] overflow-hidden">
@@ -80,15 +86,15 @@ export function IncidentCard({ incident, className, compact = false }: IncidentC
       </div>
 
       {/* Wave info */}
-      {!compact && incident.waves.length > 0 && (
+      {!compact && waves.length > 0 && (
         <div className="mt-2.5 flex items-center justify-between pt-2 border-t border-[#E4E7EC]/60">
           <div className="flex items-center gap-1.5 text-xs text-[#667085]">
             <Clock size={12} />
-            {incident.waves.map((w, i) => (
+            {waves.map((w, i) => (
               <span key={i} className={cn(
                 'px-2 py-0.5 rounded text-[10px] font-medium border',
                 w.status === 'Active' ? 'bg-amber-50 text-amber-800 border-amber-200' :
-                w.status === 'Complete' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
+                w.status === 'Complete' || w.status === 'Completed' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
                 w.status === 'Insufficient' ? 'bg-red-50 text-red-800 border-red-200' :
                 'bg-slate-100 text-slate-600 border-slate-200'
               )}>

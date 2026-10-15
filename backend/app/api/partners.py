@@ -32,9 +32,19 @@ async def get_partner(org_id: str, db: Session = Depends(get_db)):
     if detail:
         return detail
 
+    # Also search by slug or name in canonical DB
+    norm_id = org_id.lower().replace("-", "").replace("_", "")
+    for org in db.query(DBOrganisation).all():
+        db_norm = org.org_id.lower().replace("-", "").replace("_", "")
+        name_slug = org.name.lower().replace(" ", "-")
+        if norm_id in db_norm or db_norm in norm_id or org_id.lower() == name_slug:
+            det = calculate_partner_detail(db, org.org_id)
+            if det:
+                return det
+
     # Fallback to demo orgs
     for org in ORGANISATIONS:
-        if org.org_id == org_id:
+        if org.org_id == org_id or org.org_id.lower() == org_id.lower():
             return org
 
     raise HTTPException(status_code=404, detail=f"Partner organisation '{org_id}' not found.")

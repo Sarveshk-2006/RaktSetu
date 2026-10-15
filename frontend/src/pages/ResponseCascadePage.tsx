@@ -1,88 +1,127 @@
-// RAKTSETU — Response Cascade Workspace Page
-import { useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+// RAKTSETU — Response Cascade Workspace Page (Authoritative Backend Integration)
+import { useState, useEffect, useCallback } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Zap, CheckCircle2, ShieldCheck, Phone,
-  Clock, MapPin, Building2, ArrowRight,
-  RefreshCw, Users, Activity
+  MapPin, Building2, ArrowRight,
+  RefreshCw, Users, AlertCircle, ArrowLeft,
+  AlertTriangle
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { DEMO_INCIDENT } from '@/data/demoData'
+import { api } from '@/lib/api'
 
 export function ResponseCascadePage() {
   const navigate = useNavigate()
-  const incident = DEMO_INCIDENT
+  const [searchParams] = useSearchParams()
+  const incidentIdParam = searchParams.get('incident') || 'INC-PUNE-001'
 
-  // Cascade Simulation State
-  const [phase, setPhase] = useState<'idle' | 'wave1' | 'wave1_insufficient' | 'wave2' | 'fulfilled'>('idle')
-  const [contactedDonors, setContactedDonors] = useState<string[]>([])
-  const [confirmedDonors, setConfirmedDonors] = useState<string[]>([])
-  const [unitsSecured, setUnitsSecured] = useState(1) // Starts with 1 from DEMO_INCIDENT
+  const [incident, setIncident] = useState<any | null>(null)
+  const [candidates, setCandidates] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [isActionPending, setIsActionPending] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [showToast, setShowToast] = useState(false)
   const [toastMsg, setToastMsg] = useState('')
-  const timerRef = useRef<ReturnType<typeof setTimeout>[]>([])
 
-  const totalRequired = incident.requirement.units_required // 2
+  const loadData = useCallback(async (isManual = false) => {
+    if (isManual) setIsRefreshing(true)
+    setError(null)
+    try {
+      const [incData, candData] = await Promise.all([
+        api.getIncident(incidentIdParam),
+        api.getIncidentCandidates(incidentIdParam).catch(() => ({ candidates: [] })),
+      ])
+      setIncident(incData)
+      setCandidates(candData?.candidates || candData || [])
+    } catch (err: any) {
+      console.error('Failed to load cascade incident:', err)
+      setError(err?.message || `Failed to load incident '${incidentIdParam}' for response cascade.`)
+    } finally {
+      setIsLoading(false)
+      setIsRefreshing(false)
+    }
+  }, [incidentIdParam])
 
-  function clearTimers() {
-    timerRef.current.forEach(t => clearTimeout(t))
-    timerRef.current = []
-  }
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
-  // Handle individual donor outreach
-  const handleContactDonor = (donorId: string) => {
-    if (!contactedDonors.includes(donorId)) {
-      setContactedDonors(prev => [...prev, donorId])
-      setToastMsg(`Outreach request dispatched to ${donorId}. Audit logged.`)
+  // Launch Next Wave
+  async function handleLaunchNextWave() {
+    setIsActionPending(true)
+    setError(null)
+    try {
+      const nextWaveNum = (incident?.waves?.length || 0) + 1
+      await api.launchWave(incidentIdParam, {
+        wave_number: nextWaveNum,
+        wave_size: 5,
+        operator_id: 'Response Coordinator',
+      })
+      setToastMsg(`Wave ${nextWaveNum} mobilized successfully.`)
       setShowToast(true)
-      setTimeout(() => setShowToast(false), 3500)
+      await loadData()
+    } catch (err: any) {
+      setError(err?.message || 'Failed to activate next wave.')
+    } finally {
+      setIsActionPending(false)
     }
   }
 
-  // Full Response Cascade Simulation Workflow
-  function startSimulation() {
-    clearTimers()
-    setPhase('wave1')
-    setContactedDonors(['D1042'])
-    setConfirmedDonors(['D1042'])
-    setUnitsSecured(1)
-
-    // Step 1: D3819 declined
-    const t1 = setTimeout(() => {
-      setContactedDonors(prev => [...prev, 'D3819'])
-    }, 1200)
-    timerRef.current.push(t1)
-
-    // Step 2: D5127 NoResponse -> Wave 1 Insufficient
-    const t2 = setTimeout(() => {
-      setContactedDonors(prev => [...prev, 'D5127'])
-      setPhase('wave1_insufficient')
-    }, 2400)
-    timerRef.current.push(t2)
-
-    // Step 3: Trigger Wave 2
-    const t3 = setTimeout(() => {
-      setPhase('wave2')
-      setContactedDonors(prev => [...prev, 'D8821'])
-    }, 3800)
-    timerRef.current.push(t3)
-
-    // Step 4: D8821 Accepts -> Requirement Fulfilled!
-    const t4 = setTimeout(() => {
-      setConfirmedDonors(prev => [...prev, 'D8821'])
-      setUnitsSecured(2)
-      setPhase('fulfilled')
-    }, 5200)
-    timerRef.current.push(t4)
+  // Advance Wave
+  async function handleAdvanceWave(waveNum: number) {
+    setIsActionPending(true)
+    setError(null)
+    try {
+      await api.advanceWave(incidentIdParam, waveNum, {
+        action: 'advance',
+        actor: 'Response Desk',
+      })
+      setToastMsg(`Wave ${waveNum} evaluated and advanced.`)
+      setShowToast(true)
+      await loadData()
+    } catch (err: any) {
+      setError(err?.message || 'Could not advance wave.')
+    } finally {
+      setIsActionPending(false)
+    }
   }
 
-  function resetSimulation() {
-    clearTimers()
-    setPhase('idle')
-    setContactedDonors([])
-    setConfirmedDonors([])
-    setUnitsSecured(1)
+  // Authorised Fulfilment
+  async function handleConfirmFulfilment() {
+    setIsActionPending(true)
+    setError(null)
+    try {
+      await api.confirmFulfilment(incidentIdParam, {
+        units_confirmed: 1,
+        confirmed_by: 'Transfusion Lead',
+        confirmation_source: 'Hospital Blood Bank',
+        notes: 'Clinical delivery verified.',
+      })
+      setToastMsg('Unit fulfilment confirmed in canonical ledger.')
+      setShowToast(true)
+      await loadData()
+    } catch (err: any) {
+      setError(err?.message || 'Failed to confirm fulfilment.')
+    } finally {
+      setIsActionPending(false)
+    }
   }
+
+  if (isLoading && !incident) {
+    return (
+      <div className="space-y-6 animate-fade-in max-w-[1600px] mx-auto pb-16">
+        <div className="h-6 w-32 bg-gray-200 rounded animate-pulse" />
+        <div className="h-40 bg-white rounded-2xl border border-[#E5E7EB] animate-pulse" />
+      </div>
+    )
+  }
+
+  const req = incident?.requirement || {}
+  const totalRequired = req.units_required || incident?.units_requested || 1
+  const unitsSecured = incident?.units_secured || 0
+  const waves = incident?.waves || []
+  const status = incident?.status || 'PendingVerification'
 
   return (
     <div className="space-y-6 animate-fade-in font-body text-[#111827] max-w-[1600px] mx-auto pb-16">
@@ -91,7 +130,7 @@ export function ResponseCascadePage() {
         <div className="fixed bottom-6 right-6 z-50 bg-[#111827] text-white px-4 py-3 rounded-xl shadow-xl border border-gray-800 flex items-center gap-3 animate-slide-up">
           <Phone size={18} className="text-[#10B981]" />
           <div className="text-xs">
-            <span className="font-bold block">Donor Dispatch Initiated</span>
+            <span className="font-bold block">Cascade Operation Confirmed</span>
             <span className="text-gray-400">{toastMsg}</span>
           </div>
           <button onClick={() => setShowToast(false)} className="text-gray-400 hover:text-white ml-2">
@@ -100,25 +139,58 @@ export function ResponseCascadePage() {
         </div>
       )}
 
+      {/* Error Alert */}
+      {error && (
+        <div className="p-4 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl flex items-start justify-between gap-3 text-xs text-[#991B1B]">
+          <div className="flex items-start gap-2.5">
+            <AlertCircle size={18} className="text-[#DC2626] shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold text-sm text-[#991B1B]">Cascade Operation Blocked</p>
+              <p className="mt-0.5 text-[#B91C1C]">{error}</p>
+            </div>
+          </div>
+          <button onClick={() => setError(null)} className="text-xs font-semibold text-[#DC2626] hover:underline">
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 border-b border-[#E5E7EB]">
         <div>
+          <button
+            onClick={() => navigate(`/incidents/${incidentIdParam}`)}
+            className="text-xs font-semibold text-[#6B7280] hover:text-[#111827] mb-1 flex items-center gap-1"
+          >
+            <ArrowLeft size={14} /> Back to Incident Command
+          </button>
           <h1 className="text-2xl font-bold font-display text-[#111827] tracking-tight flex items-center gap-2.5">
             <Zap size={24} className="text-[#E11D48]" />
             <span>Response Cascade</span>
           </h1>
           <p className="text-xs text-[#6B7280] mt-0.5">
-            Progressively mobilise capacity instead of broadcasting every request to everyone.
+            Progressive mobilisation of capacity across verified waves.
           </p>
         </div>
 
-        <button
-          onClick={() => navigate(`/incidents/${incident.incident_id}`)}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-[#E5E7EB] hover:bg-gray-50 text-xs font-semibold text-[#4B5563] transition-colors self-start sm:self-auto"
-        >
-          <span>View Incident Command</span>
-          <ArrowRight size={14} />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => loadData(true)}
+            disabled={isRefreshing}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#E5E7EB] bg-white hover:bg-[#F9FAFB] text-xs font-semibold text-[#374151] transition-colors shadow-2xs"
+          >
+            <RefreshCw size={14} className={cn(isRefreshing && 'animate-spin text-[#E11D48]')} />
+            <span>Refresh State</span>
+          </button>
+
+          <button
+            onClick={() => navigate(`/incidents/${incidentIdParam}`)}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-gray-900 text-white hover:bg-black text-xs font-semibold transition-colors"
+          >
+            <span>View Incident Command</span>
+            <ArrowRight size={14} />
+          </button>
+        </div>
       </div>
 
       {/* Incident Header Summary Banner */}
@@ -126,355 +198,196 @@ export function ResponseCascadePage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-wrap">
             <span className="w-3 h-3 rounded-full bg-[#E11D48] animate-ping" />
-            <span className="text-lg font-bold font-mono text-[#111827]">{incident.incident_id}</span>
+            <span className="text-lg font-bold font-mono text-[#111827]">{incident?.incident_id}</span>
             <span className="px-2.5 py-0.5 rounded bg-[#FFE4E6] text-[#E11D48] font-bold text-xs font-mono">
-              {incident.requirement.blood_group}
+              {req.blood_group}
             </span>
             <span className="px-3 py-1 rounded-full bg-[#FFE4E6] text-[#E11D48] border border-[#FECDD3] text-xs font-bold uppercase">
-              {incident.requirement.urgency} · {totalRequired} UNITS
+              {req.urgency || 'HIGH'} · {totalRequired} UNITS
+            </span>
+            <span className="px-2.5 py-0.5 rounded text-xs font-bold bg-gray-100 text-gray-700">
+              {status}
             </span>
           </div>
 
           <div className="flex items-center gap-4 text-xs text-[#6B7280]">
-            <span className="flex items-center gap-1">
-              <Clock size={14} /> Created 08m 42s ago
-            </span>
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#D1FAE5] text-[#059669]">
-              <CheckCircle2 size={13} /> Verified Incident
+              <CheckCircle2 size={13} /> {status === 'PendingVerification' ? 'Pending Verification' : 'Verified Incident'}
             </span>
           </div>
         </div>
 
         <div className="flex items-center gap-4 text-xs text-[#4B5563] pt-1 border-t border-[#F3F4F6]">
           <span className="flex items-center gap-1 font-medium">
-            <MapPin size={14} className="text-[#E11D48]" /> Location: {incident.requirement.location.zone}, Pune
+            <MapPin size={14} className="text-[#E11D48]" /> Location: {req.location?.zone || incident?.zone}, Pune
           </span>
           <span className="flex items-center gap-1 font-medium">
-            <Building2 size={14} className="text-[#2563EB]" /> Facility: {incident.requirement.requesting_facility}
+            <Building2 size={14} className="text-[#2563EB]" /> Facility: {req.requesting_facility}
           </span>
         </div>
 
-        {/* 5-Stage Horizontal Workflow Tracker */}
+        {/* Waves Status Stepper */}
         <div className="pt-2">
-          <div className="grid grid-cols-5 gap-2 text-center text-xs">
-            {/* Stage 1: Wave 1 */}
-            <div className="p-3 rounded-xl border border-[#E11D48] bg-[#FFF1F2] space-y-1 relative">
-              <div className="w-7 h-7 rounded-full bg-[#E11D48] text-white font-bold flex items-center justify-center mx-auto text-xs">
-                1
-              </div>
-              <div className="font-bold text-[#111827]">Wave 1</div>
-              <div className="text-[10px] text-[#6B7280]">Local Donors</div>
-              <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-bold bg-[#E11D48] text-white mt-1">
-                Current Stage
-              </span>
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+            {[1, 2, 3, 4].map((waveNum) => {
+              const matchingWave = waves.find((w: any) => w.wave_number === waveNum)
+              const isLaunched = !!matchingWave
+              const isCurrent = isLaunched && (matchingWave.status === 'active' || matchingWave.status === 'Active')
 
-            {/* Stage 2: Wave 2 */}
-            <div className={cn(
-              'p-3 rounded-xl border space-y-1 transition-all',
-              phase === 'wave2' || phase === 'fulfilled' ? 'border-[#2563EB] bg-[#EFF6FF]' : 'border-[#E5E7EB] bg-gray-50'
-            )}>
-              <div className={cn('w-7 h-7 rounded-full font-bold flex items-center justify-center mx-auto text-xs', phase === 'wave2' || phase === 'fulfilled' ? 'bg-[#2563EB] text-white' : 'bg-gray-200 text-gray-600')}>
-                2
-              </div>
-              <div className="font-bold text-[#111827]">Wave 2</div>
-              <div className="text-[10px] text-[#6B7280]">Extended Network</div>
-              <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-bold bg-gray-200 text-gray-600 mt-1">
-                {phase === 'wave2' ? 'Active' : phase === 'fulfilled' ? 'Complete' : 'Pending'}
-              </span>
-            </div>
-
-            {/* Stage 3: Wave 3 */}
-            <div className="p-3 rounded-xl border border-[#E5E7EB] bg-gray-50 space-y-1">
-              <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-600 font-bold flex items-center justify-center mx-auto text-xs">
-                3
-              </div>
-              <div className="font-bold text-[#111827]">Wave 3</div>
-              <div className="text-[10px] text-[#6B7280]">Partner Network</div>
-              <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-bold bg-gray-200 text-gray-600 mt-1">
-                Pending
-              </span>
-            </div>
-
-            {/* Stage 4: On Route */}
-            <div className="p-3 rounded-xl border border-[#E5E7EB] bg-gray-50 space-y-1">
-              <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-600 font-bold flex items-center justify-center mx-auto text-xs">
-                4
-              </div>
-              <div className="font-bold text-[#111827]">On Route</div>
-              <div className="text-[10px] text-[#6B7280]">Units in Transit</div>
-              <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-bold bg-gray-200 text-gray-600 mt-1">
-                Pending
-              </span>
-            </div>
-
-            {/* Stage 5: Fulfilled */}
-            <div className={cn(
-              'p-3 rounded-xl border space-y-1 transition-all',
-              phase === 'fulfilled' ? 'border-[#10B981] bg-[#D1FAE5]' : 'border-[#E5E7EB] bg-gray-50'
-            )}>
-              <div className={cn('w-7 h-7 rounded-full font-bold flex items-center justify-center mx-auto text-xs', phase === 'fulfilled' ? 'bg-[#10B981] text-white' : 'bg-gray-200 text-gray-600')}>
-                5
-              </div>
-              <div className="font-bold text-[#111827]">Fulfilled</div>
-              <div className="text-[10px] text-[#6B7280]">Requirement Met</div>
-              <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-bold bg-gray-200 text-gray-600 mt-1">
-                {phase === 'fulfilled' ? 'Complete' : 'Pending'}
-              </span>
-            </div>
+              return (
+                <div
+                  key={waveNum}
+                  className={cn(
+                    'p-3 rounded-xl border space-y-1 transition-all',
+                    isCurrent
+                      ? 'border-[#E11D48] bg-[#FFF1F2]'
+                      : isLaunched
+                      ? 'border-[#10B981] bg-[#ECFDF5]'
+                      : 'border-[#E5E7EB] bg-gray-50'
+                  )}
+                >
+                  <div
+                    className={cn(
+                      'w-7 h-7 rounded-full font-bold flex items-center justify-center mx-auto text-xs',
+                      isCurrent
+                        ? 'bg-[#E11D48] text-white'
+                        : isLaunched
+                        ? 'bg-[#10B981] text-white'
+                        : 'bg-gray-200 text-gray-600'
+                    )}
+                  >
+                    {waveNum}
+                  </div>
+                  <div className="font-bold text-[#111827]">Wave {waveNum}</div>
+                  <div className="text-[10px] text-[#6B7280]">
+                    {matchingWave ? `${matchingWave.donors_contacted} Contacted` : 'Cohort Pending'}
+                  </div>
+                  <span
+                    className={cn(
+                      'inline-block px-1.5 py-0.2 rounded text-[9px] font-bold mt-1',
+                      isCurrent
+                        ? 'bg-[#E11D48] text-white'
+                        : isLaunched
+                        ? 'bg-[#10B981] text-white'
+                        : 'bg-gray-200 text-gray-600'
+                    )}
+                  >
+                    {matchingWave?.status || 'Pending'}
+                  </span>
+                </div>
+              )
+            })}
           </div>
         </div>
       </div>
 
       {/* MAIN WORKSPACE GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* LEFT COLUMN: Active Wave & Candidate List (Col 8 / ~65%) */}
+        {/* LEFT COLUMN: Active Waves & Matched Candidates (Col 8 / ~65%) */}
         <div className="lg:col-span-8 space-y-5">
-          {/* Card 1: Wave 1 Active Card */}
-          <div className="bg-white rounded-2xl border border-[#E11D48] p-5 shadow-2xs space-y-4">
+          {/* Active Waves Cards */}
+          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#F3F4F6] pb-3">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#E11D48] text-white font-bold flex items-center justify-center shrink-0">
-                  1
-                </div>
-                <div>
-                  <h3 className="text-base font-bold font-display text-[#111827]">Wave 1 — Local Donor Activation</h3>
-                  <p className="text-xs text-[#6B7280]">Contacting best matched donors within 5km radius.</p>
-                </div>
+              <div>
+                <h3 className="text-base font-bold font-display text-[#111827]">Authoritative Mobilisation Waves</h3>
+                <p className="text-xs text-[#6B7280]">Active waves executing against canonical database contacts.</p>
               </div>
 
-              <div className="flex items-center gap-2 self-start sm:self-auto">
-                <span className="px-2.5 py-1 rounded-full bg-[#FEF3C7] text-[#D97706] text-xs font-bold border border-[#FDE68A]">
-                  In Progress
-                </span>
-                <span className="text-xs text-[#6B7280] font-mono">⏱ 08m 42s</span>
-              </div>
-            </div>
-
-            {/* 4 Compact Wave Metrics Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-3 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] space-y-0.5">
-                <div className="flex items-center gap-1.5 text-xs text-[#6B7280]">
-                  <Users size={14} className="text-[#E11D48]" />
-                  <span>Candidates</span>
-                </div>
-                <div className="text-xl font-bold font-display text-[#111827]">3</div>
-                <span className="text-[10px] text-[#059669] font-semibold">High match score</span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] space-y-0.5">
-                <div className="flex items-center gap-1.5 text-xs text-[#6B7280]">
-                  <Phone size={14} className="text-[#2563EB]" />
-                  <span>Contacted</span>
-                </div>
-                <div className="text-xl font-bold font-display text-[#111827]">
-                  {contactedDonors.length}
-                </div>
-                <span className="text-[10px] text-[#2563EB] font-semibold">
-                  {Math.round((contactedDonors.length / 3) * 100)}% completed
-                </span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] space-y-0.5">
-                <div className="flex items-center gap-1.5 text-xs text-[#6B7280]">
-                  <CheckCircle2 size={14} className="text-[#10B981]" />
-                  <span>Confirmed</span>
-                </div>
-                <div className="text-xl font-bold font-display text-[#111827]">
-                  {confirmedDonors.length}
-                </div>
-                <span className="text-[10px] text-[#10B981] font-semibold">
-                  {Math.round((confirmedDonors.length / totalRequired) * 100)}% secured
-                </span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] space-y-0.5">
-                <div className="flex items-center gap-1.5 text-xs text-[#6B7280]">
-                  <Zap size={14} className="text-[#E11D48]" />
-                  <span>Secured</span>
-                </div>
-                <div className="text-xl font-bold font-display text-[#E11D48]">
-                  {unitsSecured} / {totalRequired}
-                </div>
-                <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden mt-1">
-                  <div className="h-full bg-[#E11D48]" style={{ width: `${(unitsSecured / totalRequired) * 100}%` }} />
-                </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleLaunchNextWave}
+                  disabled={isActionPending || status === 'PendingVerification' || status === 'Fulfilled' || status === 'Closed'}
+                  className="px-4 py-2 rounded-xl bg-[#E11D48] hover:bg-[#BE123C] disabled:opacity-50 text-white font-bold text-xs shadow-xs transition-all flex items-center gap-1.5"
+                >
+                  <Zap size={14} />
+                  <span>Launch Next Wave</span>
+                </button>
               </div>
             </div>
 
-            {/* Candidate Donors List */}
-            <div className="space-y-3 pt-2">
-              <span className="text-xs font-bold text-[#111827] block">Selected Donors for Wave 1</span>
-
-              {/* Donor #1: D1042 */}
-              <div className="p-3.5 rounded-xl border border-[#E5E7EB] hover:border-[#E11D48] transition-all bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="font-bold text-xs text-[#6B7280]">#1</span>
-                  <span className="font-mono font-bold text-sm text-[#111827]">D1042</span>
-                  <span className="px-2 py-0.5 rounded bg-[#FFE4E6] text-[#E11D48] font-bold text-xs font-mono">
-                    O-
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#D1FAE5] text-[#059669]">
-                    Ready
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-4 text-xs text-[#6B7280]">
-                  <span>📍 3.2 km</span>
-                  <span className="text-[#10B981] font-semibold">⚡ 92% response likelihood</span>
-                  <button
-                    onClick={() => handleContactDonor('D1042')}
-                    className={cn(
-                      'px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5',
-                      contactedDonors.includes('D1042')
-                        ? 'bg-[#D1FAE5] text-[#059669] border border-[#A7F3D0]'
-                        : 'bg-white text-[#E11D48] border border-[#E11D48] hover:bg-[#FFF1F2]'
-                    )}
-                  >
-                    <Phone size={13} />
-                    <span>{contactedDonors.includes('D1042') ? 'Contacted ✓' : 'Contact Donor'}</span>
-                  </button>
-                </div>
+            {waves.length === 0 ? (
+              <div className="text-center py-10 text-xs text-[#6B7280] space-y-2">
+                <AlertTriangle size={24} className="text-[#D97706] mx-auto" />
+                <p className="font-bold text-[#111827]">No active waves running for this incident.</p>
+                <p>Click 'Launch Next Wave' above to trigger automated candidate outreach.</p>
               </div>
-
-              {/* Donor #2: D3819 */}
-              <div className="p-3.5 rounded-xl border border-[#E5E7EB] hover:border-[#E11D48] transition-all bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="font-bold text-xs text-[#6B7280]">#2</span>
-                  <span className="font-mono font-bold text-sm text-[#111827]">D3819</span>
-                  <span className="px-2 py-0.5 rounded bg-[#FFE4E6] text-[#E11D48] font-bold text-xs font-mono">
-                    O-
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#FEF3C7] text-[#D97706]">
-                    Available
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-4 text-xs text-[#6B7280]">
-                  <span>📍 5.7 km</span>
-                  <span className="text-[#10B981] font-semibold">⚡ 86% response likelihood</span>
-                  <button
-                    onClick={() => handleContactDonor('D3819')}
-                    className={cn(
-                      'px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5',
-                      contactedDonors.includes('D3819')
-                        ? 'bg-[#D1FAE5] text-[#059669] border border-[#A7F3D0]'
-                        : 'bg-white text-[#E11D48] border border-[#E11D48] hover:bg-[#FFF1F2]'
-                    )}
-                  >
-                    <Phone size={13} />
-                    <span>{contactedDonors.includes('D3819') ? 'Contacted ✓' : 'Contact Donor'}</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Donor #3: D5127 */}
-              <div className="p-3.5 rounded-xl border border-[#E5E7EB] hover:border-[#E11D48] transition-all bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="font-bold text-xs text-[#6B7280]">#3</span>
-                  <span className="font-mono font-bold text-sm text-[#111827]">D5127</span>
-                  <span className="px-2 py-0.5 rounded bg-[#FFE4E6] text-[#E11D48] font-bold text-xs font-mono">
-                    O-
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#FEF3C7] text-[#D97706]">
-                    Available
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-4 text-xs text-[#6B7280]">
-                  <span>📍 7.1 km</span>
-                  <span className="text-[#10B981] font-semibold">⚡ 81% response likelihood</span>
-                  <button
-                    onClick={() => handleContactDonor('D5127')}
-                    className={cn(
-                      'px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5',
-                      contactedDonors.includes('D5127')
-                        ? 'bg-[#D1FAE5] text-[#059669] border border-[#A7F3D0]'
-                        : 'bg-white text-[#E11D48] border border-[#E11D48] hover:bg-[#FFF1F2]'
-                    )}
-                  >
-                    <Phone size={13} />
-                    <span>{contactedDonors.includes('D5127') ? 'Contacted ✓' : 'Contact Donor'}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Future Cascade Waves Rows */}
-          <div className="space-y-3">
-            {/* Wave 2 */}
-            <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 flex items-center justify-between opacity-85">
-              <div className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-full bg-gray-100 text-gray-600 font-bold flex items-center justify-center text-xs">
-                  2
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-[#111827]">Wave 2 — Extended Network</h4>
-                  <p className="text-[11px] text-[#6B7280]">Expands to city-wide donor network if required.</p>
-                </div>
-              </div>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
-                Pending
-              </span>
-            </div>
-
-            {/* Wave 3 */}
-            <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 flex items-center justify-between opacity-85">
-              <div className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-full bg-gray-100 text-gray-600 font-bold flex items-center justify-center text-xs">
-                  3
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-[#111827]">Wave 3 — Partner Network</h4>
-                  <p className="text-[11px] text-[#6B7280]">Activates partner hospitals, NGOs and regional network.</p>
-                </div>
-              </div>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
-                Pending
-              </span>
-            </div>
-
-            {/* On Route */}
-            <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 flex items-center justify-between opacity-85">
-              <div className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-full bg-gray-100 text-gray-600 font-bold flex items-center justify-center text-xs">
-                  4
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-[#111827]">On Route</h4>
-                  <p className="text-[11px] text-[#6B7280]">Confirmed units in transit to hospital.</p>
-                </div>
-              </div>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
-                Pending
-              </span>
-            </div>
-          </div>
-
-          {/* Primary Action Button Bar */}
-          <div className="pt-2 flex gap-3">
-            {phase === 'idle' ? (
-              <button
-                onClick={startSimulation}
-                className="w-full py-3.5 rounded-xl bg-[#E11D48] hover:bg-[#BE123C] text-white text-xs font-bold shadow-md transition-all flex items-center justify-center gap-2"
-              >
-                <Zap size={16} />
-                <span>START RESPONSE CASCADE SIMULATION →</span>
-              </button>
             ) : (
-              <button
-                onClick={resetSimulation}
-                className="px-4 py-2.5 rounded-xl border border-[#E5E7EB] hover:bg-white text-xs font-bold text-[#4B5563] transition-colors flex items-center gap-1.5"
-              >
-                <RefreshCw size={14} />
-                <span>Reset Simulation</span>
-              </button>
+              <div className="space-y-3">
+                {waves.map((w: any) => (
+                  <div
+                    key={w.wave_number}
+                    className="p-4 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm text-[#111827]">Wave {w.wave_number}</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#EFF6FF] text-[#2563EB]">
+                          {w.status}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleAdvanceWave(w.wave_number)}
+                        disabled={isActionPending}
+                        className="text-xs font-semibold text-[#E11D48] hover:underline"
+                      >
+                        Advance Wave →
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-4 gap-2 text-xs pt-1">
+                      <div>
+                        <span className="text-[10px] text-[#6B7280] block">Contacted</span>
+                        <span className="font-bold text-[#111827]">{w.donors_contacted}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-[#6B7280] block">Responses</span>
+                        <span className="font-bold text-[#111827]">{w.responses_received || 0}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-[#6B7280] block">Confirmed</span>
+                        <span className="font-bold text-[#10B981]">{w.confirmed || 0}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-[#6B7280] block">Units Secured</span>
+                        <span className="font-bold text-[#111827]">{w.units_secured || 0}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Matched Donor Cohort */}
+          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
+            <h3 className="text-base font-bold font-display text-[#111827]">Eligible Matched Candidates</h3>
+            {candidates.length === 0 ? (
+              <p className="text-xs text-[#6B7280] py-4">No remaining candidates in this cohort.</p>
+            ) : (
+              <div className="space-y-2.5">
+                {candidates.slice(0, 5).map((c: any, idx: number) => (
+                  <div key={c.donor_id} className="p-3.5 rounded-xl border border-[#E5E7EB] bg-white flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-3">
+                      <span className="font-bold text-[#6B7280]">#{idx + 1}</span>
+                      <span className="font-mono font-bold text-[#111827]">{c.donor_id}</span>
+                      <span className="px-2 py-0.5 rounded bg-[#FFE4E6] text-[#E11D48] font-bold text-xs font-mono">
+                        {c.blood_group}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4 text-[#6B7280]">
+                      <span>📍 {c.distance_km?.toFixed(1) || 3.5} km</span>
+                      <span className="text-[#10B981] font-semibold">
+                        Score: {c.composite_score ? Math.round(c.composite_score * 100) : 85}%
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Units Secured, Incident Details, Principles & Privacy (Col 4 / ~35%) */}
+        {/* RIGHT COLUMN: Units Secured & Actions (Col 4 / ~35%) */}
         <div className="lg:col-span-4 space-y-5">
           {/* Units Secured Metric Card */}
           <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs text-center space-y-3">
@@ -488,94 +401,50 @@ export function ResponseCascadePage() {
               <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden border border-[#E5E7EB]">
                 <div
                   className="h-full bg-[#E11D48] transition-all duration-500"
-                  style={{ width: `${(unitsSecured / totalRequired) * 100}%` }}
+                  style={{ width: `${Math.min(100, Math.round((unitsSecured / totalRequired) * 100))}%` }}
                 />
               </div>
               <span className="text-[11px] text-[#6B7280] font-semibold block">
                 {Math.round((unitsSecured / totalRequired) * 100)}% Fulfilled
               </span>
             </div>
-          </div>
 
-          {/* Incident Details Card */}
-          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-3">
-            <h3 className="text-xs font-bold font-display text-[#111827]">Incident Details</h3>
-
-            <div className="space-y-2.5 text-xs text-[#4B5563]">
-              <div className="flex justify-between pb-2 border-b border-[#F3F4F6]">
-                <span className="text-[#6B7280]">Blood Group</span>
-                <span className="font-bold text-[#111827] font-mono">{incident.requirement.blood_group}</span>
-              </div>
-              <div className="flex justify-between pb-2 border-b border-[#F3F4F6]">
-                <span className="text-[#6B7280]">Units Required</span>
-                <span className="font-bold text-[#111827]">{totalRequired} Units</span>
-              </div>
-              <div className="flex justify-between pb-2 border-b border-[#F3F4F6]">
-                <span className="text-[#6B7280]">Priority</span>
-                <span className="font-bold text-[#E11D48] uppercase">{incident.requirement.urgency}</span>
-              </div>
-              <div className="flex justify-between pb-2 border-b border-[#F3F4F6]">
-                <span className="text-[#6B7280]">Elapsed Time</span>
-                <span className="font-bold text-[#111827]">08m 42s</span>
-              </div>
-              <div className="flex justify-between pb-2 border-b border-[#F3F4F6]">
-                <span className="text-[#6B7280]">Location</span>
-                <span className="font-bold text-[#111827]">{incident.requirement.location.zone}, Pune</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#6B7280]">Hospital</span>
-                <span className="font-bold text-[#111827]">{incident.requirement.requesting_facility}</span>
-              </div>
-            </div>
+            {unitsSecured < totalRequired && (
+              <button
+                onClick={handleConfirmFulfilment}
+                disabled={isActionPending}
+                className="w-full py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-xs font-bold shadow-xs transition-colors"
+              >
+                Confirm Unit Fulfilment
+              </button>
+            )}
           </div>
 
           {/* Cascade Principles Card */}
           <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-3">
-            <h3 className="text-xs font-bold font-display text-[#111827]">Cascade Principles</h3>
-
-            <div className="space-y-3 text-xs">
+            <h3 className="text-xs font-bold font-display text-[#111827]">Authoritative Constraints</h3>
+            <div className="space-y-3 text-xs text-[#4B5563]">
               <div className="flex items-start gap-2.5">
                 <ShieldCheck size={18} className="text-[#10B981] shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-[#111827] block font-bold">Verified Requirement</strong>
-                  <span className="text-[#6B7280]">Requirement confirmed before outreach.</span>
+                  <strong className="text-[#111827] block font-bold">Verified Outreach</strong>
+                  <span>Requirements must be clinically verified before wave activation.</span>
                 </div>
               </div>
-
               <div className="flex items-start gap-2.5">
                 <Users size={18} className="text-[#2563EB] shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-[#111827] block font-bold">Explainable Matching</strong>
-                  <span className="text-[#6B7280]">Donors ranked by compatibility, proximity and reliability.</span>
+                  <strong className="text-[#111827] block font-bold">Fulfilment Separation</strong>
+                  <span>Donor acceptance does not count as secured blood until delivered.</span>
                 </div>
               </div>
-
               <div className="flex items-start gap-2.5">
                 <Zap size={18} className="text-[#E11D48] shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-[#111827] block font-bold">Progressive Waves</strong>
-                  <span className="text-[#6B7280]">Tiered outreach to maximise response rate.</span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2.5">
-                <Activity size={18} className="text-[#8B5CF6] shrink-0 mt-0.5" />
-                <div>
                   <strong className="text-[#111827] block font-bold">Deduplication</strong>
-                  <span className="text-[#6B7280]">Prevents donor alert fatigue and ensures fair distribution.</span>
+                  <span>Prior wave contacts are never re-alerted in subsequent waves.</span>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Privacy Protected Card */}
-          <div className="bg-[#FFF1F2] border border-[#FECDD3] rounded-2xl p-4 shadow-2xs flex items-center gap-3 text-xs text-[#4B5563]">
-            <ShieldCheck size={20} className="text-[#E11D48] shrink-0" />
-            <div className="space-y-0.5">
-              <strong className="text-[#E11D48] font-bold block">Privacy Protected</strong>
-              <p className="text-[11px] text-[#6B7280]">
-                Contact information is revealed only after the donor responds. All access is audit-logged.
-              </p>
             </div>
           </div>
         </div>
