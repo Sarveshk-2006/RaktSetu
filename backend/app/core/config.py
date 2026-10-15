@@ -6,7 +6,6 @@ Never hardcode secrets here.
 
 from pydantic_settings import BaseSettings
 from typing import List
-import os
 
 
 class Settings(BaseSettings):
@@ -26,16 +25,20 @@ class Settings(BaseSettings):
         "http://127.0.0.1:5173",
     ]
 
-    # Database (future — not required for prototype)
-    DATABASE_URL: str = ""
+    # Database
+    # Default to local SQLite database for portable local development and testing.
+    # Set to PostgreSQL connection string in production (e.g. postgresql+psycopg://user:pass@host/dbname).
+    DATABASE_URL: str = "sqlite:///./raktsetu.db"
+    DATABASE_ECHO: bool = False
     REDIS_URL: str = ""
 
-    # Map provider (optional — falls back to OSM if not set)
+    # Map provider (optional — falls back to OpenStreetMap if not set)
     MAPTILER_API_KEY: str = ""
 
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+        extra = "ignore"
 
 
 settings = Settings()

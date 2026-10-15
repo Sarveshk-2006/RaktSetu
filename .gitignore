@@ -37,3 +37,9 @@ frontend/.vite/
 # Python
 *.pycache/
 .pytest_cache/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
