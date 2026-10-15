@@ -27,6 +27,13 @@ class IncidentUrgency(str, Enum):
     ROUTINE = "Routine"
 
 
+class SeverityLevel(str, Enum):
+    CRITICAL = "Critical"
+    HIGH_RISK = "High Risk"
+    STABLE = "Stable"
+    STRONG = "Strong"
+
+
 class IncidentStatus(str, Enum):
     PENDING_VERIFICATION = "PendingVerification"
     VERIFIED = "Verified"

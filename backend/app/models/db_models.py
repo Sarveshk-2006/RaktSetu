@@ -325,3 +325,34 @@ class AuditEvent(Base):
 
     def __repr__(self) -> str:
         return f"<AuditEvent event_id={self.event_id} action={self.action} actor={self.actor}>"
+
+
+# ─── 10. Simulation Run ────────────────────────────────────────────────────────
+
+class SimulationRun(Base):
+    """
+    Persisted record of an isolated stress simulation scenario.
+    Stores scenario ID, configuration parameters, baseline vs simulated metrics,
+    bottlenecks, and recommended interventions.
+    Strictly isolated from live operational records.
+    """
+    __tablename__ = "simulation_runs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    simulation_id = Column(String(32), unique=True, nullable=False, index=True)
+    scenario_id = Column(String(32), nullable=False, index=True)
+    scenario_name = Column(String(128), nullable=False)
+    parameters = Column(JSON, nullable=False, default=dict)
+    baseline_metrics = Column(JSON, nullable=False, default=dict)
+    simulated_metrics = Column(JSON, nullable=False, default=dict)
+    capacity_difference_percent = Column(Float, nullable=False, default=0.0)
+    affected_blood_groups = Column(JSON, nullable=False, default=list)
+    affected_zones = Column(JSON, nullable=False, default=list)
+    bottlenecks = Column(JSON, nullable=False, default=list)
+    interventions = Column(JSON, nullable=False, default=list)
+    executed_at = Column(DateTime, nullable=False, default=utc_now)
+    executed_by = Column(String(128), nullable=False, default="System Operator")
+
+    def __repr__(self) -> str:
+        return f"<SimulationRun id={self.simulation_id} scenario={self.scenario_id}>"
+
