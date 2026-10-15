@@ -20,6 +20,8 @@ from app.models.db_models import (
     DonorResponse,
     FulfilmentRecord,
     AuditEvent,
+    User,
+    UserRole,
 )
 
 

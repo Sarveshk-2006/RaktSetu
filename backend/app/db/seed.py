@@ -27,7 +27,10 @@ from app.models.db_models import (
     DonorResponse,
     FulfilmentRecord,
     AuditEvent,
+    User,
+    UserRole,
 )
+from app.core.security import hash_password
 
 # ─── Reference Geographic Zones in Pune ───────────────────────────────────────
 
@@ -683,6 +686,66 @@ def seed_database(db: Session, donor_count: int = 100) -> Dict[str, int]:
             audit = AuditEvent(**ae, sha256_hash=sha)
             db.add(audit)
             counts["audit_events"] += 1
+
+    # ─── 8. Operational Users (RBAC) ──────────────────────────────────────────
+    counts["users"] = 0
+    users_seed = [
+        {
+            "username": "admin",
+            "email": "admin@raktsetu.internal",
+            "full_name": "System Administrator",
+            "role": UserRole.ADMIN,
+            "password": "Admin@RaktSetu2026",
+            "organisation_id": None,
+        },
+        {
+            "username": "dr.sharma",
+            "email": "a.sharma@sahyadri.org",
+            "full_name": "Dr. A. Sharma",
+            "role": UserRole.HOSPITAL_OPERATOR,
+            "password": "Hospital@Pune2026",
+            "organisation_id": None,
+        },
+        {
+            "username": "coord.neha",
+            "email": "neha.s@raktsetu.internal",
+            "full_name": "Coord. Neha S.",
+            "role": UserRole.INCIDENT_OPERATOR,
+            "password": "Operator@Pune2026",
+            "organisation_id": None,
+        },
+        {
+            "username": "upay.lead",
+            "email": "lead@upaypune.org",
+            "full_name": "UPAY Coordinator",
+            "role": UserRole.ORG_COORDINATOR,
+            "password": "Partner@Upay2026",
+            "organisation_id": 1,
+        },
+        {
+            "username": "auditor.pune",
+            "email": "auditor@maharashtra.gov.in",
+            "full_name": "Healthcare Compliance Auditor",
+            "role": UserRole.AUDITOR,
+            "password": "Auditor@Gov2026",
+            "organisation_id": None,
+        },
+    ]
+
+    for u in users_seed:
+        existing = db.query(User).filter_by(username=u["username"]).first()
+        if not existing:
+            user = User(
+                username=u["username"],
+                email=u["email"],
+                full_name=u["full_name"],
+                role=u["role"],
+                hashed_password=hash_password(u["password"]),
+                organisation_id=u["organisation_id"],
+                is_active=True,
+            )
+            db.add(user)
+            counts["users"] += 1
 
     db.commit()
     return counts

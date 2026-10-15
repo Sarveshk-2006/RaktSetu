@@ -15,6 +15,7 @@ import type {
 } from '@/types'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
+const AUTH_TOKEN_KEY = 'raktsetu_auth_token'
 
 export class ApiError extends Error {
   status: number
@@ -30,9 +31,12 @@ export class ApiError extends Error {
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`
+  const token = typeof window !== 'undefined' ? localStorage.getItem(AUTH_TOKEN_KEY) : null
+  const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {}
   const headers = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
+    ...authHeaders,
     ...options.headers,
   }
 
@@ -317,4 +321,70 @@ export const api = {
   async getAuditEvent(eventId: string) {
     return request<any>(`/audit/${encodeURIComponent(eventId)}`)
   },
+
+  async verifyAuditChain() {
+    return request<{
+      valid: boolean
+      total_events: number
+      verified_events: number
+      broken_at_event_id?: string
+      error?: string
+      message: string
+    }>('/audit/verify-chain')
+  },
+
+  // ─── Authentication & RBAC ────────────────────────────────────────────────
+  async login(credentials: { username: string; password: string }) {
+    const data = await request<{
+      access_token: string
+      token_type: string
+      user: {
+        id: number
+        username: string
+        email: string
+        role: string
+        full_name: string
+        organisation_id?: string
+      }
+    }>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    })
+    if (typeof window !== 'undefined' && data.access_token) {
+      localStorage.setItem(AUTH_TOKEN_KEY, data.access_token)
+    }
+    return data
+  },
+
+  async logout() {
+    try {
+      await request<{ status: string }>('/auth/logout', { method: 'POST' })
+    } finally {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(AUTH_TOKEN_KEY)
+      }
+    }
+  },
+
+  async getCurrentUser() {
+    return request<{
+      id: number
+      username: string
+      email: string
+      role: string
+      full_name: string
+      organisation_id?: string
+    }>('/auth/me')
+  },
+
+  async getAuthRoles() {
+    return request<{ roles: Array<{ role: string; label: string; description: string; permissions: string[] }> }>(
+      '/auth/roles'
+    )
+  },
+
+  getStoredToken(): string | null {
+    return typeof window !== 'undefined' ? localStorage.getItem(AUTH_TOKEN_KEY) : null
+  },
 }
+

@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.auth import get_current_user, require_roles
 from app.models.db_models import (
     Incident as DBIncident,
     BloodRequirement as DBBloodRequirement,
@@ -19,6 +20,8 @@ from app.models.db_models import (
     DonorResponse as DBDonorResponse,
     FulfilmentRecord as DBFulfilmentRecord,
     AuditEvent as DBAuditEvent,
+    User,
+    UserRole,
 )
 from app.models.models import (
     IncidentRequirement,
@@ -177,14 +180,19 @@ async def get_incident(incident_id: str, db: Session = Depends(get_db)):
 async def create_incident(
     req: Union[IncidentCreateRequest, IncidentRequirement],
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.HOSPITAL_OPERATOR, UserRole.INCIDENT_OPERATOR)),
 ):
     """
     Creates a new blood requirement and associated incident in a single transaction.
+    Enforces RBAC and attributes the action to the server-authenticated identity.
     Accepts both canonical IncidentCreateRequest and legacy IncidentRequirement.
     """
     try:
+        actor_name = current_user.full_name or current_user.username
         if isinstance(req, IncidentCreateRequest):
             create_dto = req
+            if not create_dto.actor or create_dto.actor == "Requesting Facility Operator":
+                create_dto.actor = actor_name
         else:
             create_dto = IncidentCreateRequest(
                 blood_group=req.blood_group,
@@ -197,7 +205,7 @@ async def create_incident(
                 lng=req.location.lng,
                 source=req.source,
                 auto_verify=False,
-                actor="Requesting Facility Operator",
+                actor=actor_name,
             )
 
         new_inc = create_requirement_and_incident(db, create_dto)
@@ -229,13 +237,19 @@ async def verify_incident_endpoint(
     incident_id: str,
     payload: IncidentVerificationRequest,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.HOSPITAL_OPERATOR)),
 ):
-    """Authorised verification of a specific incident's requirement."""
+    """
+    Authorised verification of a specific incident's requirement.
+    Restricted strictly to Hospital/Blood-Bank Operators and System Administrators.
+    Derives verification identity from validated server identity.
+    """
     try:
+        actor_name = current_user.full_name or payload.verified_by
         verified_inc = verify_incident_requirement(
             db=db,
             incident_id=incident_id,
-            verified_by=payload.verified_by,
+            verified_by=actor_name,
             notes=payload.notes,
             facility_confirmed=payload.facility_confirmed,
         )
@@ -272,18 +286,21 @@ async def launch_wave(
     incident_id: str,
     payload: WaveLaunchRequest,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.INCIDENT_OPERATOR, UserRole.HOSPITAL_OPERATOR)),
 ):
     """
     Launches a progressive mobilisation wave for an incident.
     Enforces requirement verification, excludes prior contacts, and persists outreach atomically.
+    Attributes launch to the server-authenticated operator identity.
     """
     try:
+        operator_name = current_user.full_name or payload.operator_id
         return svc_launch_response_wave(
             db=db,
             incident_id=incident_id,
             wave_number=payload.wave_number,
             wave_size=payload.wave_size,
-            operator_id=payload.operator_id,
+            operator_id=operator_name,
         )
     except IncidentNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -300,6 +317,7 @@ async def activate_wave_compatibility(
     incident_id: str,
     wave_number: int = 1,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.INCIDENT_OPERATOR, UserRole.HOSPITAL_OPERATOR)),
 ):
     """Backward-compatible wave activation endpoint."""
     inc = db.query(DBIncident).filter_by(incident_id=incident_id).first()
@@ -309,6 +327,7 @@ async def activate_wave_compatibility(
                 db=db,
                 incident_id=incident_id,
                 wave_number=wave_number,
+                operator_id=current_user.full_name or "Operational Coordinator",
             )
             return {"status": "activated", "incident_id": incident_id, "wave": res.wave_number}
         except ActiveWaveExistsError:
@@ -325,15 +344,17 @@ async def advance_wave(
     wave_number: int,
     payload: WaveAdvanceRequest,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.INCIDENT_OPERATOR, UserRole.HOSPITAL_OPERATOR)),
 ):
     """Explicit operation to evaluate or advance a wave upon timeout or insufficient responses."""
     try:
+        actor_name = current_user.full_name or payload.actor
         wave = svc_advance_or_evaluate_wave(
             db=db,
             incident_id=incident_id,
             wave_number=wave_number,
             action=payload.action,
-            actor=payload.actor,
+            actor=actor_name,
         )
         return {
             "status": "success",
@@ -356,18 +377,20 @@ async def record_response(
     incident_id: str,
     payload: DonorResponseRecordRequest,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.INCIDENT_OPERATOR, UserRole.HOSPITAL_OPERATOR)),
 ):
     """
     Records a donor's response idempotently.
     Note: Donor acceptance does NOT increment incident.units_secured.
     """
     try:
+        actor_name = current_user.full_name or payload.actor
         resp = svc_record_donor_response(
             db=db,
             incident_id=incident_id,
             contact_attempt_id=payload.contact_attempt_id,
             response_status=payload.response.value if hasattr(payload.response, "value") else str(payload.response),
-            actor=payload.actor,
+            actor=actor_name,
             distance_km=payload.distance_km,
             eta_minutes=payload.eta_minutes,
             notes=payload.notes,
@@ -391,9 +414,11 @@ async def fulfill_incident_endpoint(
     incident_id: str,
     payload: Optional[FulfilmentConfirmRequest] = None,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.HOSPITAL_OPERATOR)),
 ):
     """
     Authorised clinical confirmation that blood units have been collected and delivered.
+    Restricted strictly to Hospital/Blood-Bank Operators and System Administrators.
     Validates positive quantity and rejects over-fulfilment.
     """
     inc = db.query(DBIncident).filter_by(incident_id=incident_id).first()
@@ -401,7 +426,7 @@ async def fulfill_incident_endpoint(
         # If payload is provided, use authoritative confirmation
         units = payload.units_confirmed if payload else 1
         source = payload.confirmation_source if payload else "Hospital Blood Bank"
-        actor = payload.confirmed_by if payload else "Medical Officer"
+        actor = current_user.full_name or (payload.confirmed_by if payload else "Hospital Medical Officer")
         notes = payload.notes if payload else "Authorised clinical confirmation"
         comp = payload.component if payload else None
 
@@ -435,11 +460,12 @@ async def close_incident_endpoint(
     incident_id: str,
     payload: Optional[IncidentCloseRequest] = None,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.HOSPITAL_OPERATOR, UserRole.INCIDENT_OPERATOR)),
 ):
     """Authorised closure of a fulfilled or cancelled incident."""
     inc = db.query(DBIncident).filter_by(incident_id=incident_id).first()
     if inc:
-        closed_by = payload.closed_by if payload else "Authorised Coordinator"
+        closed_by = current_user.full_name or (payload.closed_by if payload else "Authorised Coordinator")
         notes = payload.notes if payload else "Standard operational closure."
         try:
             closed_inc = svc_close_incident(
@@ -471,13 +497,15 @@ async def cancel_incident_endpoint(
     incident_id: str,
     payload: IncidentCancelRequest,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.HOSPITAL_OPERATOR, UserRole.INCIDENT_OPERATOR)),
 ):
     """Authorised cancellation of an incident."""
     try:
+        cancelled_by = current_user.full_name or payload.cancelled_by
         cancelled_inc = svc_cancel_incident(
             db=db,
             incident_id=incident_id,
-            cancelled_by=payload.cancelled_by,
+            cancelled_by=cancelled_by,
             reason=payload.reason,
         )
         return _serialize_db_incident(cancelled_inc)

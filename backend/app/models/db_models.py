@@ -321,6 +321,7 @@ class AuditEvent(Base):
     entity_id = Column(String(64), nullable=True)
     outcome = Column(String(32), nullable=False, default="Success")  # Success / Pending / Failure / Flagged
     safe_metadata = Column(JSON, nullable=False, default=dict)
+    prev_hash = Column(String(64), nullable=True)
     sha256_hash = Column(String(64), nullable=True)
 
     def __repr__(self) -> str:
@@ -355,4 +356,40 @@ class SimulationRun(Base):
 
     def __repr__(self) -> str:
         return f"<SimulationRun id={self.simulation_id} scenario={self.scenario_id}>"
+
+
+# ─── 11. Security & RBAC: User and Roles ──────────────────────────────────────
+
+class UserRole:
+    ADMIN = "admin"                          # Platform administrator
+    HOSPITAL_OPERATOR = "hospital_operator"  # Hospital / blood-bank clinical operator
+    INCIDENT_OPERATOR = "incident_operator"  # Authorised mobilization / cascade operator
+    ORG_COORDINATOR = "org_coordinator"      # Verified organisation coordinator
+    AUDITOR = "auditor"                      # Read-only compliance auditor
+
+    ALL_ROLES = [ADMIN, HOSPITAL_OPERATOR, INCIDENT_OPERATOR, ORG_COORDINATOR, AUDITOR]
+
+
+class User(Base):
+    """
+    Authenticated platform user with cryptographically hashed credentials and RBAC role.
+    """
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(64), unique=True, nullable=False, index=True)
+    email = Column(String(128), unique=True, nullable=False, index=True)
+    hashed_password = Column(String(256), nullable=False)
+    role = Column(String(32), nullable=False, default=UserRole.INCIDENT_OPERATOR, index=True)
+    full_name = Column(String(128), nullable=False)
+    organisation_id = Column(Integer, ForeignKey("organisations.id", ondelete="SET NULL"), nullable=True, index=True)
+    is_active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime, nullable=False, default=utc_now)
+    updated_at = Column(DateTime, nullable=False, default=utc_now, onupdate=utc_now)
+
+    organisation = relationship("Organisation")
+
+    def __repr__(self) -> str:
+        return f"<User username={self.username} role={self.role}>"
+
 

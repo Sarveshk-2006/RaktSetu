@@ -32,6 +32,12 @@ class Settings(BaseSettings):
     DATABASE_ECHO: bool = False
     REDIS_URL: str = ""
 
+    # Security & Authentication
+    SECRET_KEY: str = "raktsetu-super-secure-production-ready-secret-key-change-in-env-2026"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours
+    AUTH_STRICT: bool = False  # Set to True to require tokens on every protected endpoint; False allows dev/test fallback
+
     # Map provider (optional — falls back to OpenStreetMap if not set)
     MAPTILER_API_KEY: str = ""
 

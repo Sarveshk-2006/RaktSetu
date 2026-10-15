@@ -11,8 +11,24 @@ from sqlalchemy import desc
 
 from app.core.database import get_db
 from app.models.db_models import AuditEvent as DBAuditEvent
+from app.services.audit import verify_audit_hash_chain
 
 router = APIRouter()
+
+
+@router.get("/verify-chain")
+async def verify_chain_endpoint(db: Session = Depends(get_db)):
+    """
+    Cryptographically verifies the SHA-256 hash chain of the audit trail.
+    Ensures that no past record has been tampered with or modified.
+    """
+    res = verify_audit_hash_chain(db)
+    res["message"] = (
+        f"Cryptographic SHA-256 audit hash chain verified successfully ({res['verified_events']} events verified)."
+        if res["valid"]
+        else f"Audit chain verification failure: {res['error']}"
+    )
+    return res
 
 
 @router.get("/")
