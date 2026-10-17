@@ -13,11 +13,11 @@ interface KpiCardProps {
 }
 
 const accentMap = {
-  red:     { icon: 'text-[#DC2626]', bg: 'bg-red-50 text-[#DC2626]' },
-  green:   { icon: 'text-emerald-600', bg: 'bg-emerald-50 text-emerald-700' },
-  amber:   { icon: 'text-amber-600', bg: 'bg-amber-50 text-amber-700' },
-  blue:    { icon: 'text-blue-600', bg: 'bg-blue-50 text-blue-700' },
-  default: { icon: 'text-[#667085]', bg: 'bg-slate-100 text-slate-700' },
+  red:     { icon: 'text-[#B42336]', bg: 'bg-[#FDF2F4] text-[#861D2B]' },
+  green:   { icon: 'text-[#16805D]', bg: 'bg-[#EBFDF5] text-[#085D40]' },
+  amber:   { icon: 'text-[#B7791F]', bg: 'bg-[#FEF7EC] text-[#8D5A0F]' },
+  blue:    { icon: 'text-[#3567B7]', bg: 'bg-[#EFF4FB] text-[#234B8E]' },
+  default: { icon: 'text-[#667085]', bg: 'bg-[#F8F9FA] text-[#475467]' },
 }
 
 export function KpiCard({ label, value, icon: Icon, trend, trendUp, accent = 'default', className }: KpiCardProps) {
@@ -25,28 +25,28 @@ export function KpiCard({ label, value, icon: Icon, trend, trendUp, accent = 'de
 
   return (
     <div className={cn(
-      'rounded-xl bg-white border border-[#E4E7EC] p-5 flex flex-col justify-between transition-all duration-200 shadow-[0_2px_4px_rgba(16,24,40,0.04)] hover:shadow-[0_4px_8px_rgba(16,24,40,0.06)]',
+      'rounded-xl bg-white border border-[#E6E8EC] p-5 flex flex-col justify-between transition-all duration-200 shadow-[0_1px_3px_rgba(16,24,40,0.03)] hover:shadow-[0_4px_12px_rgba(16,24,40,0.06)] hover:border-[#D0D5DD]',
       className,
     )}>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-medium text-[#667085]">
+        <span className="text-xs font-semibold text-[#667085] tracking-wide">
           {label}
         </span>
         {Icon && (
-          <div className={cn('p-1.5 rounded-lg', colors.bg)}>
+          <div className={cn('p-1.5 rounded-lg border border-transparent', colors.bg)}>
             <Icon size={16} />
           </div>
         )}
       </div>
 
-      <div className="text-3xl font-bold font-display tracking-tight text-[#17202A] my-1">
+      <div className="text-3xl font-bold font-display tracking-tight text-[#17212B] my-1">
         {value}
       </div>
 
       {trend && (
         <div className={cn(
           'text-xs font-medium mt-1 flex items-center gap-1',
-          trendUp ? 'text-emerald-600' : 'text-[#667085]'
+          trendUp ? 'text-[#16805D]' : 'text-[#667085]'
         )}>
           {trend}
         </div>

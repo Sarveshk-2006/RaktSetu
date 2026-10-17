@@ -21,7 +21,7 @@ export function StatusBadge({ type, value, className }: StatusBadgeProps) {
 
   return (
     <span className={cn(
-      'inline-flex items-center px-2.5 py-0.5 rounded-full border text-xs font-semibold tracking-wide whitespace-nowrap',
+      'inline-flex items-center px-2.5 py-0.5 rounded-full border text-[11px] font-semibold tracking-wide whitespace-nowrap transition-colors',
       colorClass,
       className,
     )}>
@@ -32,14 +32,14 @@ export function StatusBadge({ type, value, className }: StatusBadgeProps) {
 
 export function StatusDot({ status }: { status: IncidentStatus | 'operational' }) {
   const colors: Record<string, string> = {
-    Verified:    'bg-blue-600',
-    Matching:    'bg-amber-500',
-    Mobilising:  'bg-orange-500 animate-pulse',
-    Fulfilled:   'bg-emerald-600',
-    Closed:      'bg-slate-400',
-    operational: 'bg-emerald-500 animate-pulse',
+    Verified:    'bg-[#3567B7]',
+    Matching:    'bg-[#B7791F]',
+    Mobilising:  'bg-[#B42336] animate-pulse',
+    Fulfilled:   'bg-[#16805D]',
+    Closed:      'bg-[#98A2B3]',
+    operational: 'bg-[#16805D] animate-pulse',
   }
   return (
-    <span className={cn('inline-block w-2 h-2 rounded-full', colors[status] ?? 'bg-slate-400')} />
+    <span className={cn('inline-block w-2 h-2 rounded-full', colors[status] ?? 'bg-[#98A2B3]')} />
   )
 }

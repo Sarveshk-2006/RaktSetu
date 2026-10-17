@@ -114,30 +114,30 @@ export function OverviewPage() {
       ]
 
   return (
-    <div className="space-y-5 animate-fade-in font-body text-[#111827] max-w-[1600px] mx-auto pb-8">
+    <div className="space-y-6 animate-fade-in font-body text-[#17212B] max-w-[1600px] mx-auto pb-10">
       {/* Overview Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E6E8EC]">
         <div>
-          <div className="flex items-center gap-2 text-[#D97706] font-semibold text-xs mb-1">
-            <Sun size={18} className="text-amber-500 fill-amber-100" />
-            <span>Good Evening, Operator</span>
+          <div className="flex items-center gap-2 text-[#B7791F] font-semibold text-xs mb-1">
+            <Sun size={16} className="text-[#B7791F] fill-[#FEF7EC]" />
+            <span>Operational Console · Live Dispatch Ready</span>
           </div>
-          <h1 className="text-2xl font-bold font-display text-[#111827] tracking-tight">
-            RAKTSETU Overview
+          <h1 className="text-2xl sm:text-3xl font-bold font-display text-[#17212B] tracking-tight">
+            Network Command Centre
           </h1>
-          <p className="text-xs text-[#6B7280] mt-0.5">
-            Here's the current status of the RAKTSETU network in Pune.
+          <p className="text-xs text-[#667085] mt-0.5">
+            Real-time blood requirement coordination, supply resilience & response telemetry for Pune District.
           </p>
         </div>
 
         <div className="flex items-center gap-4 self-start sm:self-auto">
           <div className="hidden md:flex flex-col text-right text-xs">
-            <span className="font-semibold text-[#111827]">Tue, 30 Sep 2026</span>
-            <span className="text-[#6B7280]">11:08 PM IST</span>
+            <span className="font-semibold text-[#17212B]">District Coordination Cell</span>
+            <span className="text-[#667085] font-mono text-[11px]">Authorised Active</span>
           </div>
           <button
             onClick={() => navigate('/incidents/create')}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#E11D48] hover:bg-[#BE123C] text-white text-xs font-semibold shadow-xs transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#B42336] hover:bg-[#861D2B] text-white text-xs font-semibold shadow-xs transition-all duration-150 active:scale-[0.98]"
           >
             <Plus size={16} />
             <span>Create Blood Requirement</span>
@@ -147,11 +147,11 @@ export function OverviewPage() {
 
       {/* Error alert banner */}
       {error && (
-        <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center justify-between">
+        <div className="p-3.5 bg-[#FEF3F2] border border-[#FECDCA] rounded-xl text-xs text-[#912020] flex items-center justify-between">
           <span>Failed to load live overview metrics: {error}</span>
           <button
             onClick={loadData}
-            className="flex items-center gap-1 font-semibold text-rose-800 hover:underline ml-4"
+            className="flex items-center gap-1 font-semibold text-[#861D2B] hover:underline ml-4"
           >
             <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
             <span>Retry</span>
@@ -162,149 +162,145 @@ export function OverviewPage() {
       {/* SECTION 1 — 4 KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Active Incidents */}
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-3 relative overflow-hidden">
+        <div className="card-command p-5 space-y-3 relative overflow-hidden">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-[#FFE4E6] flex items-center justify-center text-[#E11D48]">
-                <AlertTriangle size={18} />
+              <div className="w-8 h-8 rounded-lg bg-[#FEF3F2] flex items-center justify-center text-[#B42336]">
+                <AlertTriangle size={17} />
               </div>
-              <span className="text-xs font-semibold text-[#4B5563]">Active Incidents</span>
+              <span className="text-xs font-semibold text-[#667085]">Active Incidents</span>
             </div>
-            <div className="w-7 h-7 rounded-md bg-rose-50 border border-rose-100 flex items-center justify-center text-[#E11D48]">
-              <AlertTriangle size={14} />
-            </div>
+            <span className="text-[11px] font-bold text-[#912020] bg-[#FEF3F2] border border-[#FECDCA] px-2 py-0.5 rounded-full">
+              Live
+            </span>
           </div>
           <div className="flex items-baseline justify-between">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-[#111827] font-display">
+              <span className="text-3xl font-bold text-[#17212B] font-display">
                 {loading && !metrics ? '...' : activeIncidents.length}
               </span>
-              <span className="text-xs font-semibold text-[#E11D48] bg-[#FFE4E6] px-1.5 py-0.5 rounded">
-                Live
-              </span>
+              <span className="text-xs text-[#667085]">requiring action</span>
             </div>
             {/* Sparkline SVG */}
-            <svg className="w-16 h-6 stroke-[#E11D48] fill-none stroke-[2]" viewBox="0 0 60 20">
+            <svg className="w-16 h-6 stroke-[#B42336] fill-none stroke-[2]" viewBox="0 0 60 20">
               <path d="M0 15 Q 15 5, 30 14 T 60 4" />
             </svg>
           </div>
-          <p className="text-[11px] text-[#6B7280]">
-            {criticalCount} critical require action
+          <p className="text-[11px] text-[#912020] font-medium flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#B42336]" />
+            {criticalCount} critical requisitions active
           </p>
         </div>
 
         {/* Card 2: Ready Donors */}
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-3 relative overflow-hidden">
+        <div className="card-command p-5 space-y-3 relative overflow-hidden">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-[#D1FAE5] flex items-center justify-center text-[#10B981]">
-                <Users size={18} />
+              <div className="w-8 h-8 rounded-lg bg-[#EBFDF5] flex items-center justify-center text-[#16805D]">
+                <Users size={17} />
               </div>
-              <span className="text-xs font-semibold text-[#4B5563]">Ready Donors</span>
+              <span className="text-xs font-semibold text-[#667085]">Verified Ready Donors</span>
             </div>
-            <div className="w-7 h-7 rounded-md bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#10B981]">
-              <Users size={14} />
-            </div>
+            <span className="text-[11px] font-bold text-[#085D40] bg-[#EBFDF5] border border-[#A6F4C5] px-2 py-0.5 rounded-full">
+              Ready
+            </span>
           </div>
           <div className="flex items-baseline justify-between">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-[#111827] font-display">
+              <span className="text-3xl font-bold text-[#17212B] font-display">
                 {loading && !metrics
                   ? '...'
                   : (metrics?.ready_donors ?? metrics?.usable_donors ?? 4218).toLocaleString()}
               </span>
-              <span className="text-xs font-semibold text-[#059669] bg-[#D1FAE5] px-1.5 py-0.5 rounded">
-                Ready
-              </span>
+              <span className="text-xs text-[#667085]">in Pune</span>
             </div>
             {/* Sparkline SVG */}
-            <svg className="w-16 h-6 stroke-[#10B981] fill-none stroke-[2]" viewBox="0 0 60 20">
+            <svg className="w-16 h-6 stroke-[#16805D] fill-none stroke-[2]" viewBox="0 0 60 20">
               <path d="M0 18 Q 15 12, 30 10 T 60 3" />
             </svg>
           </div>
-          <p className="text-[11px] text-[#6B7280]">Verified & available capacity</p>
+          <p className="text-[11px] text-[#085D40] font-medium flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#16805D]" />
+            Available for immediate dispatch
+          </p>
         </div>
 
         {/* Card 3: Network Coverage */}
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-3 relative overflow-hidden">
+        <div className="card-command p-5 space-y-3 relative overflow-hidden">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-[#DBEAFE] flex items-center justify-center text-[#2563EB]">
-                <Network size={18} />
+              <div className="w-8 h-8 rounded-lg bg-[#EFF4FB] flex items-center justify-center text-[#3567B7]">
+                <Network size={17} />
               </div>
-              <span className="text-xs font-semibold text-[#4B5563]">Network Coverage</span>
+              <span className="text-xs font-semibold text-[#667085]">Operational Coverage</span>
             </div>
-            <div className="w-7 h-7 rounded-md bg-blue-50 border border-blue-100 flex items-center justify-center text-[#2563EB]">
-              <Network size={14} />
-            </div>
+            <span className="text-[11px] font-bold text-[#234B8E] bg-[#EFF4FB] border border-[#B9D3F8] px-2 py-0.5 rounded-full">
+              Grid
+            </span>
           </div>
           <div className="flex items-baseline justify-between">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-[#111827] font-display">
+              <span className="text-3xl font-bold text-[#17212B] font-display">
                 {loading && !metrics
                   ? '...'
                   : `${Math.round(metrics?.operational_coverage_pct ?? metrics?.network_coverage_percent ?? 87)}%`}
               </span>
-              <span className="text-xs font-semibold text-[#2563EB] bg-[#DBEAFE] px-1.5 py-0.5 rounded">
-                Grid
-              </span>
+              <span className="text-xs text-[#667085]">district capacity</span>
             </div>
             {/* Sparkline SVG */}
-            <svg className="w-16 h-6 stroke-[#2563EB] fill-none stroke-[2]" viewBox="0 0 60 20">
+            <svg className="w-16 h-6 stroke-[#3567B7] fill-none stroke-[2]" viewBox="0 0 60 20">
               <path d="M0 16 Q 15 8, 30 12 T 60 5" />
             </svg>
           </div>
-          <p className="text-[11px] text-[#6B7280]">Operational district coverage</p>
+          <p className="text-[11px] text-[#667085]">12 active urban & sub-urban clusters</p>
         </div>
 
         {/* Card 4: Median Response */}
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-3 relative overflow-hidden">
+        <div className="card-command p-5 space-y-3 relative overflow-hidden">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-[#FEF3C7] flex items-center justify-center text-[#D97706]">
-                <Clock size={18} />
+              <div className="w-8 h-8 rounded-lg bg-[#FEF7EC] flex items-center justify-center text-[#B7791F]">
+                <Clock size={17} />
               </div>
-              <span className="text-xs font-semibold text-[#4B5563]">Median Response</span>
+              <span className="text-xs font-semibold text-[#667085]">Median Response Time</span>
             </div>
-            <div className="w-7 h-7 rounded-md bg-amber-50 border border-amber-100 flex items-center justify-center text-[#D97706]">
-              <Clock size={14} />
-            </div>
+            <span className="text-[11px] font-bold text-[#8D5A0F] bg-[#FEF7EC] border border-[#FDE2B5] px-2 py-0.5 rounded-full">
+              Avg
+            </span>
           </div>
           <div className="flex items-baseline justify-between">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-[#111827] font-display">
+              <span className="text-3xl font-bold text-[#17212B] font-display">
                 {metrics?.median_response_minutes ? `${metrics.median_response_minutes.toFixed(1)}m` : '8m 42s'}
               </span>
-              <span className="text-xs font-semibold text-[#059669] bg-[#D1FAE5] px-1.5 py-0.5 rounded">
-                Avg
-              </span>
+              <span className="text-xs text-[#667085]">first response</span>
             </div>
             {/* Sparkline SVG */}
-            <svg className="w-16 h-6 stroke-[#D97706] fill-none stroke-[2]" viewBox="0 0 60 20">
+            <svg className="w-16 h-6 stroke-[#B7791F] fill-none stroke-[2]" viewBox="0 0 60 20">
               <path d="M0 6 Q 15 14, 30 8 T 60 16" />
             </svg>
           </div>
-          <p className="text-[11px] text-[#6B7280]">From request to first response</p>
+          <p className="text-[11px] text-[#667085]">From wave trigger to donor match</p>
         </div>
       </div>
 
       {/* SECTION 2, 3, 4 — Middle 3-Column Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Card 1: Network Health Index (Col 4) */}
-        <div className="lg:col-span-4 bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-2xs flex flex-col justify-between space-y-4">
+        <div className="lg:col-span-4 card-command p-5 flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-              <h3 className="text-sm font-bold text-[#111827] font-display">Network Health Index</h3>
-              <Info size={14} className="text-[#9CA3AF]" />
+              <h3 className="text-sm font-bold text-[#17212B] font-display">Network Health Index</h3>
+              <Info size={14} className="text-[#98A2B3]" />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold text-[#059669] bg-[#D1FAE5] px-1.5 py-0.5 rounded">
-                Live
+              <span className="text-[11px] font-semibold text-[#085D40] bg-[#EBFDF5] border border-[#A6F4C5] px-2 py-0.5 rounded-full">
+                Active
               </span>
               <select
                 value={healthRange}
                 onChange={(e) => setHealthRange(e.target.value)}
-                className="text-[11px] font-medium text-[#4B5563] bg-[#F9FAFB] border border-[#E5E7EB] rounded-md px-2 py-0.5 outline-none"
+                className="text-[11px] font-medium text-[#475467] bg-[#F8F9FA] border border-[#E6E8EC] rounded-lg px-2 py-0.5 outline-none focus:border-[#B42336]"
               >
                 <option>Last 24 hours</option>
                 <option>Last 7 days</option>
@@ -312,8 +308,8 @@ export function OverviewPage() {
             </div>
           </div>
 
-          <p className="text-xs text-[#6B7280]">
-            Real-time operational health of Pune blood supply network
+          <p className="text-xs text-[#667085]">
+            Composite resilience score across supply, response, and transit telemetry.
           </p>
 
           {/* Semi-circular Radial Donut Gauge */}
@@ -323,15 +319,15 @@ export function OverviewPage() {
               <path
                 d="M 10 50 A 40 40 0 0 1 90 50"
                 fill="none"
-                stroke="#F3F4F6"
+                stroke="#F2F4F7"
                 strokeWidth="10"
                 strokeLinecap="round"
               />
-              {/* Foreground green arc */}
+              {/* Foreground arc */}
               <path
                 d="M 10 50 A 40 40 0 0 1 90 50"
                 fill="none"
-                stroke="#10B981"
+                stroke="#16805D"
                 strokeWidth="10"
                 strokeDasharray="125.6"
                 strokeDashoffset={125.6 * (1 - (Math.round(metrics?.operational_coverage_pct ?? metrics?.network_coverage_percent ?? 87) / 100))}
@@ -339,11 +335,11 @@ export function OverviewPage() {
               />
             </svg>
             <div className="absolute bottom-2 text-center">
-              <span className="text-3xl font-bold font-display text-[#111827] leading-none block">
+              <span className="text-3xl font-bold font-display text-[#17212B] leading-none block">
                 {Math.round(metrics?.operational_coverage_pct ?? metrics?.network_coverage_percent ?? 87)}
               </span>
-              <span className="text-xs font-semibold text-[#10B981] mt-0.5 block">
-                {(metrics?.operational_coverage_pct ?? metrics?.network_coverage_percent ?? 87) >= 75 ? 'Healthy' : 'Needs Attention'}
+              <span className="text-xs font-semibold text-[#16805D] mt-0.5 block">
+                {(metrics?.operational_coverage_pct ?? metrics?.network_coverage_percent ?? 87) >= 75 ? 'Resilient & Ready' : 'Capacity Deficit'}
               </span>
             </div>
           </div>
@@ -352,44 +348,44 @@ export function OverviewPage() {
           <div className="space-y-3 pt-2">
             <div>
               <div className="flex justify-between text-xs mb-1">
-                <span className="text-[#4B5563] font-medium">Supply Stability</span>
-                <span className="font-bold text-[#111827]">92%</span>
+                <span className="text-[#475467] font-medium">Supply Stability</span>
+                <span className="font-bold text-[#17212B]">92%</span>
               </div>
-              <div className="h-2 rounded-full bg-[#F3F4F6] overflow-hidden">
-                <div className="h-full bg-[#10B981] rounded-full" style={{ width: '92%' }} />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-[#4B5563] font-medium">Response Efficiency</span>
-                <span className="font-bold text-[#111827]">84%</span>
-              </div>
-              <div className="h-2 rounded-full bg-[#F3F4F6] overflow-hidden">
-                <div className="h-full bg-[#2563EB] rounded-full" style={{ width: '84%' }} />
+              <div className="h-1.5 rounded-full bg-[#F2F4F7] overflow-hidden">
+                <div className="h-full bg-[#16805D] rounded-full" style={{ width: '92%' }} />
               </div>
             </div>
 
             <div>
               <div className="flex justify-between text-xs mb-1">
-                <span className="text-[#4B5563] font-medium">Transit Fluidity</span>
-                <span className="font-bold text-[#111827]">78%</span>
+                <span className="text-[#475467] font-medium">Response Efficiency</span>
+                <span className="font-bold text-[#17212B]">84%</span>
               </div>
-              <div className="h-2 rounded-full bg-[#F3F4F6] overflow-hidden">
-                <div className="h-full bg-[#F59E0B] rounded-full" style={{ width: '78%' }} />
+              <div className="h-1.5 rounded-full bg-[#F2F4F7] overflow-hidden">
+                <div className="h-full bg-[#3567B7] rounded-full" style={{ width: '84%' }} />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-[#475467] font-medium">Transit Fluidity</span>
+                <span className="font-bold text-[#17212B]">78%</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-[#F2F4F7] overflow-hidden">
+                <div className="h-full bg-[#B7791F] rounded-full" style={{ width: '78%' }} />
               </div>
             </div>
           </div>
         </div>
 
         {/* Card 2: Supply vs Demand Trend (Col 4) */}
-        <div className="lg:col-span-4 bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-2xs flex flex-col justify-between space-y-4">
+        <div className="lg:col-span-4 card-command p-5 flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-[#111827] font-display">Supply vs Demand Trend</h3>
+            <h3 className="text-sm font-bold text-[#17212B] font-display">Supply vs Demand Trend</h3>
             <select
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
-              className="text-[11px] font-medium text-[#4B5563] bg-[#F9FAFB] border border-[#E5E7EB] rounded-md px-2 py-0.5 outline-none"
+              className="text-[11px] font-medium text-[#475467] bg-[#F8F9FA] border border-[#E6E8EC] rounded-lg px-2 py-0.5 outline-none focus:border-[#B42336]"
             >
               <option>Last 7 days</option>
               <option>Last 30 days</option>
@@ -398,38 +394,38 @@ export function OverviewPage() {
 
           <div className="flex items-center gap-4 text-xs">
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#E11D48]" />
-              <span className="text-[#4B5563] font-medium">Units Supplied</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-[#B42336]" />
+              <span className="text-[#475467] font-medium">Supplied</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#FDA4AF]" />
-              <span className="text-[#4B5563] font-medium">Units Requested</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-[#D0D5DD]" />
+              <span className="text-[#475467] font-medium">Requested</span>
             </div>
           </div>
 
           <div className="h-[210px] w-full pt-2">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={SUPPLY_DEMAND_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
-                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 10 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 10 }} domain={[0, 80]} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F2F4F7" />
+                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#667085', fontSize: 10 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#667085', fontSize: 10 }} domain={[0, 80]} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#111827', color: '#FFF', borderRadius: '8px', fontSize: '11px' }}
+                  contentStyle={{ backgroundColor: '#17212B', border: 'none', color: '#FFFFFF', borderRadius: '8px', fontSize: '11px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                 />
-                <Bar dataKey="supplied" fill="#E11D48" radius={[3, 3, 0, 0]} barSize={10} />
-                <Bar dataKey="requested" fill="#FDA4AF" radius={[3, 3, 0, 0]} barSize={10} />
+                <Bar dataKey="supplied" fill="#B42336" radius={[3, 3, 0, 0]} barSize={9} />
+                <Bar dataKey="requested" fill="#D0D5DD" radius={[3, 3, 0, 0]} barSize={9} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Card 3: Blood Group Resilience (Col 4) */}
-        <div className="lg:col-span-4 bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-2xs flex flex-col justify-between space-y-4">
+        <div className="lg:col-span-4 card-command p-5 flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-[#111827] font-display">Blood Group Resilience</h3>
+            <h3 className="text-sm font-bold text-[#17212B] font-display">Blood Group Resilience</h3>
             <button
               onClick={() => navigate('/intelligence')}
-              className="text-xs font-semibold text-[#E11D48] hover:underline flex items-center gap-0.5"
+              className="text-xs font-semibold text-[#B42336] hover:text-[#861D2B] flex items-center gap-0.5"
             >
               <span>View Details</span>
               <ChevronRight size={13} />
@@ -443,19 +439,19 @@ export function OverviewPage() {
                 className={cn(
                   'p-2 rounded-lg border text-center space-y-1 transition-all',
                   bg.color === 'red'
-                    ? 'bg-[#FFF1F2] border-[#FECDD3]'
+                    ? 'bg-[#FEF3F2] border-[#FECDCA]'
                     : bg.color === 'orange'
-                    ? 'bg-[#FFFBEB] border-[#FDE68A]'
-                    : 'bg-[#F9FAFB] border-[#E5E7EB]'
+                    ? 'bg-[#FEF7EC] border-[#FDE2B5]'
+                    : 'bg-[#F8F9FA] border-[#E6E8EC]'
                 )}
               >
-                <div className="font-bold text-sm text-[#111827]">{bg.group}</div>
-                <div className="text-[11px] font-semibold text-[#6B7280]">{bg.percent}%</div>
-                <div className="h-1 rounded-full bg-[#E5E7EB] overflow-hidden">
+                <div className="font-bold text-sm text-[#17212B] font-mono">{bg.group}</div>
+                <div className="text-[11px] font-semibold text-[#667085]">{bg.percent}%</div>
+                <div className="h-1 rounded-full bg-[#E6E8EC] overflow-hidden">
                   <div
                     className={cn(
                       'h-full rounded-full',
-                      bg.color === 'red' ? 'bg-[#E11D48]' : bg.color === 'orange' ? 'bg-[#D97706]' : 'bg-[#10B981]'
+                      bg.color === 'red' ? 'bg-[#C62828]' : bg.color === 'orange' ? 'bg-[#B7791F]' : 'bg-[#16805D]'
                     )}
                     style={{ width: `${bg.percent}%` }}
                   />
@@ -464,10 +460,10 @@ export function OverviewPage() {
                   className={cn(
                     'inline-block px-1 py-0.2 text-[9px] font-bold rounded uppercase',
                     bg.color === 'red'
-                      ? 'bg-[#FFE4E6] text-[#E11D48]'
+                      ? 'bg-[#FEF3F2] text-[#912020]'
                       : bg.color === 'orange'
-                      ? 'bg-[#FEF3C7] text-[#D97706]'
-                      : 'bg-[#D1FAE5] text-[#059669]'
+                      ? 'bg-[#FEF7EC] text-[#8D5A0F]'
+                      : 'bg-[#EBFDF5] text-[#085D40]'
                   )}
                 >
                   {bg.status}
@@ -481,26 +477,26 @@ export function OverviewPage() {
       {/* SECTION 5 & 6 — Lower 2-Column Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Card 1: Active Blood Requirements (Col 6) */}
-        <div className="lg:col-span-6 bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
+        <div className="lg:col-span-6 card-command p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-[#111827] font-display">Active Blood Requirements</h3>
-              <p className="text-xs text-[#6B7280]">Live and recent incident requests across Pune network</p>
+              <h3 className="text-sm font-bold text-[#17212B] font-display">Active Requisitions Queue</h3>
+              <p className="text-xs text-[#667085]">Live hospital demand needing coordinator verification or wave dispatch</p>
             </div>
             <button
               onClick={() => navigate('/incidents')}
-              className="text-xs font-semibold text-[#E11D48] hover:underline flex items-center gap-0.5"
+              className="text-xs font-semibold text-[#B42336] hover:text-[#861D2B] flex items-center gap-0.5"
             >
               <span>View all ({activeIncidents.length})</span>
               <ChevronRight size={13} />
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {activeIncidents.length === 0 ? (
-              <div className="p-8 text-center text-xs text-[#6B7280] space-y-2 bg-[#F9FAFB] rounded-xl border border-[#E5E7EB]">
-                <CheckCircle2 size={24} className="mx-auto text-emerald-500" />
-                <p className="font-semibold text-gray-700">No active incidents</p>
+              <div className="p-8 text-center text-xs text-[#667085] space-y-2 bg-[#F8F9FA] rounded-xl border border-[#E6E8EC]">
+                <CheckCircle2 size={24} className="mx-auto text-[#16805D]" />
+                <p className="font-semibold text-[#17212B]">No active requisitions</p>
                 <p>All blood requirements have been fulfilled or resolved.</p>
               </div>
             ) : (
@@ -509,56 +505,56 @@ export function OverviewPage() {
                   key={req.incident_id}
                   onClick={() => navigate(`/incidents/${req.incident_id}`)}
                   className={cn(
-                    'p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 hover:shadow-xs',
+                    'p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 hover:shadow-xs group',
                     idx === 0
-                      ? 'bg-[#FFF1F2]/60 border-[#FECDD3] border-l-4 border-l-[#E11D48]'
-                      : 'bg-[#F9FAFB] border-[#E5E7EB] hover:bg-white'
+                      ? 'bg-[#FDF2F4]/70 border-[#F8D7DC] border-l-4 border-l-[#B42336]'
+                      : 'bg-[#F8F9FA] border-[#E6E8EC] hover:bg-white'
                   )}
                 >
                   <div className="flex items-center gap-3">
                     <div
                       className={cn(
-                        'w-9 h-9 rounded-full font-bold text-sm flex items-center justify-center border shadow-2xs shrink-0',
+                        'w-9 h-9 rounded-lg font-mono font-bold text-sm flex items-center justify-center border shrink-0',
                         req.urgency?.toLowerCase() === 'critical'
-                          ? 'bg-[#FFE4E6] text-[#E11D48] border-[#FECDD3]'
+                          ? 'bg-[#FEF3F2] text-[#912020] border-[#FECDCA]'
                           : req.urgency?.toLowerCase() === 'high'
-                          ? 'bg-[#FEF3C7] text-[#D97706] border-[#FDE68A]'
-                          : 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]'
+                          ? 'bg-[#FEF7EC] text-[#8D5A0F] border-[#FDE2B5]'
+                          : 'bg-[#EFF4FB] text-[#234B8E] border-[#B9D3F8]'
                       )}
                     >
                       {req.blood_group}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-[#111827] font-mono">{req.incident_id}</span>
-                        <span className="text-xs font-semibold text-[#374151]">
-                          {req.units_requested} {req.units_requested === 1 ? 'unit' : 'units'} required
+                        <span className="text-xs font-bold text-[#17212B] font-mono">{req.incident_id}</span>
+                        <span className="text-xs font-semibold text-[#475467]">
+                          {req.units_requested} {req.units_requested === 1 ? 'unit' : 'units'} needed
                         </span>
                         <span
                           className={cn(
-                            'px-2 py-0.5 rounded-full text-[10px] font-bold',
+                            'px-2 py-0.5 rounded-full text-[10px] font-bold border',
                             req.urgency?.toLowerCase() === 'critical'
-                              ? 'bg-[#FFE4E6] text-[#E11D48]'
+                              ? 'bg-[#FEF3F2] text-[#912020] border-[#FECDCA]'
                               : req.urgency?.toLowerCase() === 'high'
-                              ? 'bg-[#FEF3C7] text-[#D97706]'
-                              : 'bg-[#EFF6FF] text-[#2563EB]'
+                              ? 'bg-[#FEF7EC] text-[#8D5A0F] border-[#FDE2B5]'
+                              : 'bg-[#EFF4FB] text-[#234B8E] border-[#B9D3F8]'
                           )}
                         >
                           {req.urgency}
                         </span>
                       </div>
-                      <p className="text-[11px] text-[#6B7280] flex items-center gap-1 mt-0.5">
-                        <MapPin size={12} className="text-[#9CA3AF]" />
+                      <p className="text-[11px] text-[#667085] flex items-center gap-1 mt-0.5">
+                        <MapPin size={12} className="text-[#98A2B3]" />
                         {req.zone || 'Pune'} · {req.requesting_facility}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[11px] font-mono text-[#6B7280]">
+                    <span className="text-[11px] font-mono text-[#667085]">
                       {new Date(req.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
-                    <ChevronRight size={16} className="text-[#9CA3AF]" />
+                    <ChevronRight size={16} className="text-[#98A2B3] group-hover:text-[#17212B] transition-colors" />
                   </div>
                 </div>
               ))
@@ -570,31 +566,30 @@ export function OverviewPage() {
         <div className="lg:col-span-6">
           <PuneNetworkMap />
         </div>
-
       </div>
 
       {/* SECTION 7 & 8 — Bottom 2-Column Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Card 1: Recent Activity (Col 6) */}
-        <div className="lg:col-span-6 bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
+        <div className="lg:col-span-6 card-command p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-[#111827] font-display">Recent Activity</h3>
-              <p className="text-xs text-[#6B7280]">Live operational updates from audit trail</p>
+              <h3 className="text-sm font-bold text-[#17212B] font-display">Operational Audit Stream</h3>
+              <p className="text-xs text-[#667085]">Verified dispatch, verification, and fulfilment lifecycle events</p>
             </div>
             <button
               onClick={() => navigate('/audit')}
-              className="text-xs font-semibold text-[#E11D48] hover:underline flex items-center gap-0.5"
+              className="text-xs font-semibold text-[#B42336] hover:text-[#861D2B] flex items-center gap-0.5"
             >
-              <span>View all</span>
+              <span>View Audit Log</span>
               <ChevronRight size={13} />
             </button>
           </div>
 
-          <div className="space-y-3 pt-1">
+          <div className="space-y-2.5 pt-1">
             {auditEvents.length === 0 ? (
-              <div className="p-6 text-center text-xs text-[#6B7280]">
-                No recent activity logged.
+              <div className="p-6 text-center text-xs text-[#667085] bg-[#F8F9FA] rounded-xl border border-[#E6E8EC]">
+                No recent activity logged in current session.
               </div>
             ) : (
               auditEvents.slice(0, 5).map((act, i) => {
@@ -603,22 +598,22 @@ export function OverviewPage() {
                 const IconComponent = isPositive ? CheckCircle2 : isWave ? Zap : UserCheck
 
                 return (
-                  <div key={act.event_id || i} className="flex items-center justify-between text-xs py-1.5 border-b border-[#F3F4F6] last:border-none">
+                  <div key={act.event_id || i} className="flex items-center justify-between text-xs py-2 border-b border-[#F2F4F7] last:border-none">
                     <div className="flex items-center gap-3">
-                      <span className="font-mono text-[#9CA3AF] text-[11px] w-12">
+                      <span className="font-mono text-[#98A2B3] text-[11px] w-12">
                         {new Date(act.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                       <div className={cn(
-                        'w-6 h-6 rounded-full flex items-center justify-center shrink-0',
-                        isPositive ? 'text-[#10B981] bg-[#ECFDF5]' : isWave ? 'text-[#E11D48] bg-[#FFE4E6]' : 'text-[#2563EB] bg-[#EFF6FF]'
+                        'w-6 h-6 rounded-md flex items-center justify-center shrink-0 border',
+                        isPositive ? 'text-[#085D40] bg-[#EBFDF5] border-[#A6F4C5]' : isWave ? 'text-[#912020] bg-[#FEF3F2] border-[#FECDCA]' : 'text-[#234B8E] bg-[#EFF4FB] border-[#B9D3F8]'
                       )}>
                         <IconComponent size={13} />
                       </div>
-                      <span className="font-medium text-[#111827]">
+                      <span className="font-medium text-[#17212B]">
                         {act.action?.replace(/_/g, ' ').toUpperCase()}: {act.entity_id || act.entity_type}
                       </span>
                     </div>
-                    <span className="text-[#6B7280] text-[11px] text-right font-medium">
+                    <span className="text-[#667085] text-[11px] text-right font-medium">
                       {act.actor_id ? `By ${act.actor_id}` : act.details?.notes || 'Operational Event'}
                     </span>
                   </div>
@@ -629,52 +624,52 @@ export function OverviewPage() {
         </div>
 
         {/* Card 2: System Alerts & Insights (Col 6) */}
-        <div className="lg:col-span-6 bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
+        <div className="lg:col-span-6 card-command p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-[#111827] font-display">System Alerts & Insights</h3>
-              <p className="text-xs text-[#6B7280]">Key network observability and recommendations</p>
+              <h3 className="text-sm font-bold text-[#17212B] font-display">System Resilience Signals</h3>
+              <p className="text-xs text-[#667085]">Network capacity alerts, demand velocity & re-engagement signals</p>
             </div>
             <button
               onClick={() => navigate('/intelligence')}
-              className="text-xs font-semibold text-[#E11D48] hover:underline flex items-center gap-0.5"
+              className="text-xs font-semibold text-[#B42336] hover:text-[#861D2B] flex items-center gap-0.5"
             >
-              <span>View all</span>
+              <span>Explore Analytics</span>
               <ChevronRight size={13} />
             </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* Card 1: Critical Capacity Gap */}
-            <div className="p-3.5 rounded-xl bg-[#FFF1F2] border border-[#FECDD3] space-y-2">
-              <div className="flex items-center gap-2 text-[#E11D48]">
+            <div className="p-3.5 rounded-xl bg-[#FEF3F2] border border-[#FECDCA] space-y-2">
+              <div className="flex items-center gap-2 text-[#912020]">
                 <AlertTriangle size={15} />
-                <span className="font-bold text-xs">Critical Capacity Gap</span>
+                <span className="font-bold text-xs">Capacity Watch</span>
               </div>
-              <p className="text-[11px] text-[#4B5563] leading-snug">
-                O- supply low in Wagholi region. 11 ready donors within 5km.
+              <p className="text-[11px] text-[#475467] leading-snug">
+                O- supply low in Wagholi cluster. 11 eligible verified donors within 5km.
               </p>
             </div>
 
             {/* Card 2: Rising Demand Trend */}
-            <div className="p-3.5 rounded-xl bg-[#FEF3C7]/60 border border-[#FDE68A] space-y-2">
-              <div className="flex items-center gap-2 text-[#D97706]">
+            <div className="p-3.5 rounded-xl bg-[#FEF7EC] border border-[#FDE2B5] space-y-2">
+              <div className="flex items-center gap-2 text-[#8D5A0F]">
                 <AlertTriangle size={15} />
-                <span className="font-bold text-xs">Rising Demand Trend</span>
+                <span className="font-bold text-xs">Demand Spike</span>
               </div>
-              <p className="text-[11px] text-[#4B5563] leading-snug">
-                2x increase in requests in last 24 hours.
+              <p className="text-[11px] text-[#475467] leading-snug">
+                B+ requisitions elevated in Pune Central zone over last 24 hours.
               </p>
             </div>
 
             {/* Card 3: Re-engagement Opportunity */}
-            <div className="p-3.5 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE] space-y-2">
-              <div className="flex items-center gap-2 text-[#2563EB]">
+            <div className="p-3.5 rounded-xl bg-[#EFF4FB] border border-[#B9D3F8] space-y-2">
+              <div className="flex items-center gap-2 text-[#234B8E]">
                 <Info size={15} />
-                <span className="font-bold text-xs">Re-engagement Opportunity</span>
+                <span className="font-bold text-xs">Donor Availability</span>
               </div>
-              <p className="text-[11px] text-[#4B5563] leading-snug">
-                15 inactive donors in Baner can be re-engaged.
+              <p className="text-[11px] text-[#475467] leading-snug">
+                15 inactive donors in Baner cluster ready for re-activation.
               </p>
             </div>
           </div>

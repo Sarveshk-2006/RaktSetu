@@ -70,36 +70,36 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in font-body text-[#111827] max-w-[1400px] mx-auto pb-16">
+    <div className="space-y-6 animate-fade-in font-body text-[#17212B] max-w-[1400px] mx-auto pb-16">
       {/* Toast Notification */}
       {showToast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#111827] text-white px-4 py-3 rounded-xl shadow-xl border border-gray-800 flex items-center gap-3 animate-slide-up">
-          <CheckCircle2 size={18} className="text-[#10B981]" />
+        <div className="fixed bottom-6 right-6 z-50 bg-[#17212B] text-white px-4 py-3 rounded-xl shadow-xl border border-[#2A3441] flex items-center gap-3 animate-slide-up">
+          <CheckCircle2 size={18} className="text-[#16805D]" />
           <div className="text-xs">
             <span className="font-bold block">Settings Saved</span>
-            <span className="text-gray-400">{toastMessage}</span>
+            <span className="text-[#98A2B3]">{toastMessage}</span>
           </div>
-          <button onClick={() => setShowToast(false)} className="text-gray-400 hover:text-white ml-2">
+          <button onClick={() => setShowToast(false)} className="text-[#98A2B3] hover:text-white ml-2">
             <X size={14} />
           </button>
         </div>
       )}
 
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 border-b border-[#E6E8EC]">
         <div>
-          <h1 className="text-2xl font-bold font-display text-[#111827] tracking-tight flex items-center gap-2.5">
-            <Settings size={24} className="text-[#E11D48]" />
+          <h1 className="text-2xl font-bold font-display text-[#17212B] tracking-tight flex items-center gap-2.5">
+            <Settings size={22} className="text-[#B42336]" />
             <span>Settings</span>
           </h1>
-          <p className="text-xs text-[#6B7280] mt-0.5">
-            Manage system preferences, notifications, data privacy and account settings.
+          <p className="text-xs text-[#667085] mt-0.5">
+            Manage system preferences, notifications, data privacy and node configuration.
           </p>
         </div>
       </div>
 
       {/* Settings Navigation Tabs */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] p-2 shadow-2xs flex items-center gap-1 overflow-x-auto scrollbar-none">
+      <div className="card-command p-2 flex items-center gap-1 overflow-x-auto scrollbar-none">
         {(['General', 'Notifications', 'Data & Privacy', 'Account'] as const).map((tab) => {
           const isActive = activeTab === tab
           return (
@@ -107,10 +107,10 @@ export function SettingsPage() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={cn(
-                'px-5 py-2 rounded-lg text-xs font-bold transition-all shrink-0',
+                'px-4 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0',
                 isActive
-                  ? 'bg-[#E11D48] text-white shadow-2xs'
-                  : 'text-[#4B5563] hover:bg-gray-100 hover:text-[#111827]'
+                  ? 'bg-[#B42336] text-white shadow-xs'
+                  : 'text-[#667085] hover:bg-[#F2F4F7] hover:text-[#17212B]'
               )}
             >
               {tab}
@@ -123,21 +123,21 @@ export function SettingsPage() {
       {(activeTab === 'General' || activeTab === 'Notifications' || activeTab === 'Data & Privacy' || activeTab === 'Account') && (
         <div className="space-y-6">
           {/* SECTION 1 — Organisation Information (Full Width) */}
-          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
-            <div className="flex items-center justify-between border-b border-[#F3F4F6] pb-3">
+          <div className="card-command p-5 space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E6E8EC] pb-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#FFF1F2] border border-[#FECDD3] text-[#E11D48] flex items-center justify-center shrink-0">
-                  <Building2 size={20} />
+                <div className="w-10 h-10 rounded-xl bg-[#FEF3F2] border border-[#FECDCA] text-[#B42336] flex items-center justify-center shrink-0">
+                  <Building2 size={18} />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold font-display text-[#111827]">Organisation Information</h3>
-                  <p className="text-xs text-[#6B7280]">Basic configuration for this RAKTSETU node.</p>
+                  <h3 className="text-sm font-bold font-display text-[#17212B] uppercase tracking-wider">Node & Organisation Profile</h3>
+                  <p className="text-xs text-[#667085]">Basic configuration for this RAKTSETU node.</p>
                 </div>
               </div>
 
               <button
                 onClick={() => setShowEditOrgModal(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E5E7EB] hover:bg-gray-50 text-xs font-semibold text-[#4B5563] transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E6E8EC] hover:bg-[#F8F9FA] text-xs font-bold text-[#475467] transition-colors"
               >
                 <Edit3 size={14} />
                 <span>Edit</span>
@@ -145,52 +145,52 @@ export function SettingsPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-              <div className="p-3 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB]">
-                <span className="text-[#6B7280] text-[11px] font-medium block">Node Name</span>
-                <span className="font-bold text-[#111827] text-sm">Pune Central Node</span>
+              <div className="p-3 rounded-xl bg-[#F8F9FA] border border-[#E6E8EC]">
+                <span className="text-[#667085] text-[11px] font-medium block">Node Name</span>
+                <span className="font-bold text-[#17212B] text-sm">Pune Central Node</span>
               </div>
 
-              <div className="p-3 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB]">
-                <span className="text-[#6B7280] text-[11px] font-medium block">Region</span>
-                <span className="font-bold text-[#111827] text-sm">Pune Metropolitan Area</span>
+              <div className="p-3 rounded-xl bg-[#F8F9FA] border border-[#E6E8EC]">
+                <span className="text-[#667085] text-[11px] font-medium block">Region</span>
+                <span className="font-bold text-[#17212B] text-sm">Pune Metropolitan Area</span>
               </div>
 
-              <div className="p-3 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB]">
-                <span className="text-[#6B7280] text-[11px] font-medium block">Timezone</span>
-                <span className="font-bold text-[#111827] text-sm">Asia/Kolkata (IST)</span>
+              <div className="p-3 rounded-xl bg-[#F8F9FA] border border-[#E6E8EC]">
+                <span className="text-[#667085] text-[11px] font-medium block">Timezone</span>
+                <span className="font-bold text-[#17212B] text-sm font-mono">Asia/Kolkata (IST)</span>
               </div>
 
-              <div className="p-3 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB]">
-                <span className="text-[#6B7280] text-[11px] font-medium block">Primary Contact</span>
-                <span className="font-bold text-[#111827] text-sm">RAKTSETU Operations Team</span>
+              <div className="p-3 rounded-xl bg-[#F8F9FA] border border-[#E6E8EC]">
+                <span className="text-[#667085] text-[11px] font-medium block">Primary Contact</span>
+                <span className="font-bold text-[#17212B] text-sm">RAKTSETU Operations Desk</span>
               </div>
             </div>
           </div>
 
           {/* SECTION 2 — 2-Column Grid (Operational Preferences + Notification Settings) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* LEFT COLUMN: Operational Preferences (Col 6 / 50%) */}
-            <div className="lg:col-span-6 bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
-              <div className="flex items-center gap-3 border-b border-[#F3F4F6] pb-3">
-                <div className="w-9 h-9 rounded-xl bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center shrink-0">
-                  <Sliders size={18} />
+            {/* LEFT COLUMN: Operational Preferences */}
+            <div className="lg:col-span-6 card-command p-5 space-y-4">
+              <div className="flex items-center gap-3 border-b border-[#E6E8EC] pb-3">
+                <div className="w-8 h-8 rounded-lg bg-[#EFF8FF] text-[#3567B7] flex items-center justify-center shrink-0 border border-[#B2DDFF]">
+                  <Sliders size={16} />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold font-display text-[#111827]">Operational Preferences</h3>
-                  <p className="text-xs text-[#6B7280]">Configure default behaviour for the operator console.</p>
+                  <h3 className="text-sm font-bold font-display text-[#17212B] uppercase tracking-wider">Operational Preferences</h3>
+                  <p className="text-xs text-[#667085]">Configure default behaviour for the operator console.</p>
                 </div>
               </div>
 
               <div className="space-y-3.5 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-[#374151]">Default View</span>
+                  <span className="font-bold text-[#17212B]">Default View</span>
                   <select
                     value={defaultView}
                     onChange={(e) => {
                       setDefaultView(e.target.value)
                       triggerToast(`Default view set to ${e.target.value}`)
                     }}
-                    className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-xs text-[#111827] font-semibold outline-none cursor-pointer hover:border-[#CBD5E1]"
+                    className="bg-[#F8F9FA] border border-[#E6E8EC] rounded-xl px-3 py-1.5 text-xs text-[#17212B] font-semibold outline-none cursor-pointer hover:border-[#D0D5DD]"
                   >
                     <option value="Overview">Overview</option>
                     <option value="Incidents">Emergency Incidents</option>
@@ -199,15 +199,15 @@ export function SettingsPage() {
                   </select>
                 </div>
 
-                <div className="flex items-center justify-between border-t border-[#F3F4F6] pt-3">
-                  <span className="font-semibold text-[#374151]">Auto-refresh Interval</span>
+                <div className="flex items-center justify-between border-t border-[#E6E8EC] pt-3">
+                  <span className="font-bold text-[#17212B]">Auto-refresh Interval</span>
                   <select
                     value={autoRefresh}
                     onChange={(e) => {
                       setAutoRefresh(e.target.value)
                       triggerToast(`Auto-refresh interval updated to ${e.target.value}`)
                     }}
-                    className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-xs text-[#111827] font-semibold outline-none cursor-pointer hover:border-[#CBD5E1]"
+                    className="bg-[#F8F9FA] border border-[#E6E8EC] rounded-xl px-3 py-1.5 text-xs text-[#17212B] font-semibold outline-none cursor-pointer hover:border-[#D0D5DD]"
                   >
                     <option value="30 seconds">30 seconds</option>
                     <option value="1 minute">1 minute</option>
@@ -216,30 +216,30 @@ export function SettingsPage() {
                   </select>
                 </div>
 
-                <div className="flex items-center justify-between border-t border-[#F3F4F6] pt-3">
-                  <span className="font-semibold text-[#374151]">Distance Unit</span>
+                <div className="flex items-center justify-between border-t border-[#E6E8EC] pt-3">
+                  <span className="font-bold text-[#17212B]">Distance Unit</span>
                   <select
                     value={distanceUnit}
                     onChange={(e) => {
                       setDistanceUnit(e.target.value)
                       triggerToast(`Distance unit set to ${e.target.value}`)
                     }}
-                    className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-xs text-[#111827] font-semibold outline-none cursor-pointer hover:border-[#CBD5E1]"
+                    className="bg-[#F8F9FA] border border-[#E6E8EC] rounded-xl px-3 py-1.5 text-xs text-[#17212B] font-semibold outline-none cursor-pointer hover:border-[#D0D5DD]"
                   >
                     <option value="Kilometres (km)">Kilometres (km)</option>
                     <option value="Miles (mi)">Miles (mi)</option>
                   </select>
                 </div>
 
-                <div className="flex items-center justify-between border-t border-[#F3F4F6] pt-3">
-                  <span className="font-semibold text-[#374151]">Default Map Center</span>
+                <div className="flex items-center justify-between border-t border-[#E6E8EC] pt-3">
+                  <span className="font-bold text-[#17212B]">Default Map Center</span>
                   <select
                     value={defaultMapCenter}
                     onChange={(e) => {
                       setDefaultMapCenter(e.target.value)
                       triggerToast(`Default map center set to ${e.target.value}`)
                     }}
-                    className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-xs text-[#111827] font-semibold outline-none cursor-pointer hover:border-[#CBD5E1]"
+                    className="bg-[#F8F9FA] border border-[#E6E8EC] rounded-xl px-3 py-1.5 text-xs text-[#17212B] font-semibold outline-none cursor-pointer hover:border-[#D0D5DD]"
                   >
                     <option value="Pune Metropolitan Area">Pune Metropolitan Area</option>
                     <option value="Wagholi Sector">Wagholi Sector</option>
@@ -249,24 +249,24 @@ export function SettingsPage() {
               </div>
             </div>
 
-            {/* RIGHT COLUMN: Notification Settings (Col 6 / 50%) */}
-            <div className="lg:col-span-6 bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
-              <div className="flex items-center gap-3 border-b border-[#F3F4F6] pb-3">
-                <div className="w-9 h-9 rounded-xl bg-[#FFF1F2] text-[#E11D48] flex items-center justify-center shrink-0">
-                  <Bell size={18} />
+            {/* RIGHT COLUMN: Notification Settings */}
+            <div className="lg:col-span-6 card-command p-5 space-y-4">
+              <div className="flex items-center gap-3 border-b border-[#E6E8EC] pb-3">
+                <div className="w-8 h-8 rounded-lg bg-[#FEF3F2] text-[#B42336] flex items-center justify-center shrink-0 border border-[#FECDCA]">
+                  <Bell size={16} />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold font-display text-[#111827]">Notification Settings</h3>
-                  <p className="text-xs text-[#6B7280]">Choose what notifications you want to receive.</p>
+                  <h3 className="text-sm font-bold font-display text-[#17212B] uppercase tracking-wider">Notification Settings</h3>
+                  <p className="text-xs text-[#667085]">Choose what notifications you want to receive.</p>
                 </div>
               </div>
 
               <div className="space-y-3.5 text-xs">
-                {/* Toggle 1: New Blood Requirements */}
+                {/* Toggle 1 */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="font-bold text-[#111827] block">New Blood Requirements</span>
-                    <span className="text-[11px] text-[#6B7280]">Get notified when new verified requirements are created.</span>
+                    <span className="font-bold text-[#17212B] block">New Blood Requirements</span>
+                    <span className="text-[11px] text-[#667085]">Notified when verified requirements are created.</span>
                   </div>
                   <button
                     onClick={() => {
@@ -275,18 +275,18 @@ export function SettingsPage() {
                     }}
                     className={cn(
                       'w-11 h-6 rounded-full transition-colors relative flex items-center p-0.5 shrink-0',
-                      notifyNewReq ? 'bg-[#E11D48]' : 'bg-gray-300'
+                      notifyNewReq ? 'bg-[#B42336]' : 'bg-[#D0D5DD]'
                     )}
                   >
                     <div className={cn('w-5 h-5 rounded-full bg-white shadow-xs transition-transform', notifyNewReq ? 'translate-x-5' : 'translate-x-0')} />
                   </button>
                 </div>
 
-                {/* Toggle 2: Incident Updates */}
-                <div className="flex items-center justify-between border-t border-[#F3F4F6] pt-3">
+                {/* Toggle 2 */}
+                <div className="flex items-center justify-between border-t border-[#E6E8EC] pt-3">
                   <div>
-                    <span className="font-bold text-[#111827] block">Incident Updates</span>
-                    <span className="text-[11px] text-[#6B7280]">Notifications for incident status changes.</span>
+                    <span className="font-bold text-[#17212B] block">Incident Updates</span>
+                    <span className="text-[11px] text-[#667085]">Notifications for incident status changes.</span>
                   </div>
                   <button
                     onClick={() => {
@@ -295,18 +295,18 @@ export function SettingsPage() {
                     }}
                     className={cn(
                       'w-11 h-6 rounded-full transition-colors relative flex items-center p-0.5 shrink-0',
-                      notifyIncidentUpdate ? 'bg-[#E11D48]' : 'bg-gray-300'
+                      notifyIncidentUpdate ? 'bg-[#B42336]' : 'bg-[#D0D5DD]'
                     )}
                   >
                     <div className={cn('w-5 h-5 rounded-full bg-white shadow-xs transition-transform', notifyIncidentUpdate ? 'translate-x-5' : 'translate-x-0')} />
                   </button>
                 </div>
 
-                {/* Toggle 3: Partner Alerts */}
-                <div className="flex items-center justify-between border-t border-[#F3F4F6] pt-3">
+                {/* Toggle 3 */}
+                <div className="flex items-center justify-between border-t border-[#E6E8EC] pt-3">
                   <div>
-                    <span className="font-bold text-[#111827] block">Partner Alerts</span>
-                    <span className="text-[11px] text-[#6B7280]">Alerts when partner support is required.</span>
+                    <span className="font-bold text-[#17212B] block">Partner Alerts</span>
+                    <span className="text-[11px] text-[#667085]">Alerts when partner support is requested.</span>
                   </div>
                   <button
                     onClick={() => {
@@ -315,18 +315,18 @@ export function SettingsPage() {
                     }}
                     className={cn(
                       'w-11 h-6 rounded-full transition-colors relative flex items-center p-0.5 shrink-0',
-                      notifyPartnerAlerts ? 'bg-[#E11D48]' : 'bg-gray-300'
+                      notifyPartnerAlerts ? 'bg-[#B42336]' : 'bg-[#D0D5DD]'
                     )}
                   >
                     <div className={cn('w-5 h-5 rounded-full bg-white shadow-xs transition-transform', notifyPartnerAlerts ? 'translate-x-5' : 'translate-x-0')} />
                   </button>
                 </div>
 
-                {/* Toggle 4: System Alerts */}
-                <div className="flex items-center justify-between border-t border-[#F3F4F6] pt-3">
+                {/* Toggle 4 */}
+                <div className="flex items-center justify-between border-t border-[#E6E8EC] pt-3">
                   <div>
-                    <span className="font-bold text-[#111827] block">System Alerts</span>
-                    <span className="text-[11px] text-[#6B7280]">Important system notifications.</span>
+                    <span className="font-bold text-[#17212B] block">System Alerts</span>
+                    <span className="text-[11px] text-[#667085]">Operational anomalies and critical warnings.</span>
                   </div>
                   <button
                     onClick={() => {
@@ -335,27 +335,27 @@ export function SettingsPage() {
                     }}
                     className={cn(
                       'w-11 h-6 rounded-full transition-colors relative flex items-center p-0.5 shrink-0',
-                      notifySystemAlerts ? 'bg-[#E11D48]' : 'bg-gray-300'
+                      notifySystemAlerts ? 'bg-[#B42336]' : 'bg-[#D0D5DD]'
                     )}
                   >
                     <div className={cn('w-5 h-5 rounded-full bg-white shadow-xs transition-transform', notifySystemAlerts ? 'translate-x-5' : 'translate-x-0')} />
                   </button>
                 </div>
 
-                {/* Toggle 5: Email Notifications */}
-                <div className="flex items-center justify-between border-t border-[#F3F4F6] pt-3">
+                {/* Toggle 5 */}
+                <div className="flex items-center justify-between border-t border-[#E6E8EC] pt-3">
                   <div>
-                    <span className="font-bold text-[#111827] block">Email Notifications</span>
-                    <span className="text-[11px] text-[#6B7280]">Receive critical notifications via email.</span>
+                    <span className="font-bold text-[#17212B] block">Email Notifications</span>
+                    <span className="text-[11px] text-[#667085]">Receive critical escalation alerts via email.</span>
                   </div>
                   <button
                     onClick={() => {
                       setNotifyEmail(!notifyEmail)
-                      triggerToast(`Email notifications ${!notifyEmail ? 'enabled' : 'disabled'}`)
+                      triggerToast(`Email alerts ${!notifyEmail ? 'enabled' : 'disabled'}`)
                     }}
                     className={cn(
                       'w-11 h-6 rounded-full transition-colors relative flex items-center p-0.5 shrink-0',
-                      notifyEmail ? 'bg-[#E11D48]' : 'bg-gray-300'
+                      notifyEmail ? 'bg-[#B42336]' : 'bg-[#D0D5DD]'
                     )}
                   >
                     <div className={cn('w-5 h-5 rounded-full bg-white shadow-xs transition-transform', notifyEmail ? 'translate-x-5' : 'translate-x-0')} />
@@ -367,15 +367,15 @@ export function SettingsPage() {
 
           {/* SECTION 3 — 2-Column Grid (Data & Privacy + System Preferences) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* LEFT COLUMN: Data & Privacy (Col 6 / 50%) */}
-            <div className="lg:col-span-6 bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
-              <div className="flex items-center gap-3 border-b border-[#F3F4F6] pb-3">
-                <div className="w-9 h-9 rounded-xl bg-[#D1FAE5] text-[#10B981] flex items-center justify-center shrink-0">
-                  <Shield size={18} />
+            {/* LEFT COLUMN: Data & Privacy */}
+            <div className="lg:col-span-6 card-command p-5 space-y-4">
+              <div className="flex items-center gap-3 border-b border-[#E6E8EC] pb-3">
+                <div className="w-8 h-8 rounded-lg bg-[#EBFDF5] text-[#16805D] flex items-center justify-center shrink-0 border border-[#A6F4C5]">
+                  <Shield size={16} />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold font-display text-[#111827]">Data & Privacy</h3>
-                  <p className="text-xs text-[#6B7280]">Manage data visibility and privacy settings.</p>
+                  <h3 className="text-sm font-bold font-display text-[#17212B] uppercase tracking-wider">Data & Privacy Safeguards</h3>
+                  <p className="text-xs text-[#667085]">Manage data visibility and privacy settings.</p>
                 </div>
               </div>
 
@@ -383,8 +383,8 @@ export function SettingsPage() {
                 {/* Privacy Toggle 1 */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="font-bold text-[#111827] block">Show Donor Personal Details</span>
-                    <span className="text-[11px] text-[#6B7280]">Names and contact information.</span>
+                    <span className="font-bold text-[#17212B] block">Show Donor Personal Details</span>
+                    <span className="text-[11px] text-[#667085]">Masked by default to protect donor privacy.</span>
                   </div>
                   <button
                     onClick={() => {
@@ -393,7 +393,7 @@ export function SettingsPage() {
                     }}
                     className={cn(
                       'w-11 h-6 rounded-full transition-colors relative flex items-center p-0.5 shrink-0',
-                      showDonorPII ? 'bg-[#E11D48]' : 'bg-gray-300'
+                      showDonorPII ? 'bg-[#B42336]' : 'bg-[#D0D5DD]'
                     )}
                   >
                     <div className={cn('w-5 h-5 rounded-full bg-white shadow-xs transition-transform', showDonorPII ? 'translate-x-5' : 'translate-x-0')} />
@@ -401,10 +401,10 @@ export function SettingsPage() {
                 </div>
 
                 {/* Privacy Toggle 2 */}
-                <div className="flex items-center justify-between border-t border-[#F3F4F6] pt-3">
+                <div className="flex items-center justify-between border-t border-[#E6E8EC] pt-3">
                   <div>
-                    <span className="font-bold text-[#111827] block">Show Exact Locations</span>
-                    <span className="text-[11px] text-[#6B7280]">Precise donor addresses.</span>
+                    <span className="font-bold text-[#17212B] block">Show Exact Locations</span>
+                    <span className="text-[11px] text-[#667085]">Coarse zone coordinates used by default.</span>
                   </div>
                   <button
                     onClick={() => {
@@ -413,7 +413,7 @@ export function SettingsPage() {
                     }}
                     className={cn(
                       'w-11 h-6 rounded-full transition-colors relative flex items-center p-0.5 shrink-0',
-                      showExactLocations ? 'bg-[#E11D48]' : 'bg-gray-300'
+                      showExactLocations ? 'bg-[#B42336]' : 'bg-[#D0D5DD]'
                     )}
                   >
                     <div className={cn('w-5 h-5 rounded-full bg-white shadow-xs transition-transform', showExactLocations ? 'translate-x-5' : 'translate-x-0')} />
@@ -421,10 +421,10 @@ export function SettingsPage() {
                 </div>
 
                 {/* Retention Period Dropdown */}
-                <div className="flex items-center justify-between border-t border-[#F3F4F6] pt-3">
+                <div className="flex items-center justify-between border-t border-[#E6E8EC] pt-3">
                   <div>
-                    <span className="font-bold text-[#111827] block">Data Retention Period</span>
-                    <span className="text-[11px] text-[#6B7280]">How long operational data is retained.</span>
+                    <span className="font-bold text-[#17212B] block">Data Retention Period</span>
+                    <span className="text-[11px] text-[#667085]">How long operational data is retained.</span>
                   </div>
                   <select
                     value={retentionPeriod}
@@ -432,7 +432,7 @@ export function SettingsPage() {
                       setRetentionPeriod(e.target.value)
                       triggerToast(`Data retention period set to ${e.target.value}`)
                     }}
-                    className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-xs text-[#111827] font-semibold outline-none cursor-pointer hover:border-[#CBD5E1]"
+                    className="bg-[#F8F9FA] border border-[#E6E8EC] rounded-xl px-3 py-1.5 text-xs text-[#17212B] font-semibold outline-none cursor-pointer hover:border-[#D0D5DD]"
                   >
                     <option value="6 months">6 months</option>
                     <option value="12 months">12 months</option>
@@ -441,10 +441,10 @@ export function SettingsPage() {
                 </div>
 
                 {/* Audit Access Dropdown */}
-                <div className="flex items-center justify-between border-t border-[#F3F4F6] pt-3">
+                <div className="flex items-center justify-between border-t border-[#E6E8EC] pt-3">
                   <div>
-                    <span className="font-bold text-[#111827] block">Audit Log Access</span>
-                    <span className="text-[11px] text-[#6B7280]">Who can view audit and traceability logs.</span>
+                    <span className="font-bold text-[#17212B] block">Audit Log Access</span>
+                    <span className="text-[11px] text-[#667085]">Role requirement to view audit trails.</span>
                   </div>
                   <select
                     value={auditAccess}
@@ -452,7 +452,7 @@ export function SettingsPage() {
                       setAuditAccess(e.target.value)
                       triggerToast(`Audit log access updated to ${e.target.value}`)
                     }}
-                    className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-xs text-[#111827] font-semibold outline-none cursor-pointer hover:border-[#CBD5E1]"
+                    className="bg-[#F8F9FA] border border-[#E6E8EC] rounded-xl px-3 py-1.5 text-xs text-[#17212B] font-semibold outline-none cursor-pointer hover:border-[#D0D5DD]"
                   >
                     <option value="Operators Only">Operators Only</option>
                     <option value="System Admins">System Admins</option>
@@ -461,74 +461,74 @@ export function SettingsPage() {
               </div>
             </div>
 
-            {/* RIGHT COLUMN: System Preferences (Col 6 / 50%) */}
-            <div className="lg:col-span-6 bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
-              <div className="flex items-center gap-3 border-b border-[#F3F4F6] pb-3">
-                <div className="w-9 h-9 rounded-xl bg-[#F3E8FF] text-[#8B5CF6] flex items-center justify-center shrink-0">
-                  <Globe size={18} />
+            {/* RIGHT COLUMN: System Preferences */}
+            <div className="lg:col-span-6 card-command p-5 space-y-4">
+              <div className="flex items-center gap-3 border-b border-[#E6E8EC] pb-3">
+                <div className="w-8 h-8 rounded-lg bg-[#F9F5FF] text-[#7C3AED] flex items-center justify-center shrink-0 border border-[#E9D7FE]">
+                  <Globe size={16} />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold font-display text-[#111827]">System Preferences</h3>
-                  <p className="text-xs text-[#6B7280]">Configure system behaviour and display settings.</p>
+                  <h3 className="text-sm font-bold font-display text-[#17212B] uppercase tracking-wider">System Preferences</h3>
+                  <p className="text-xs text-[#667085]">Configure display settings and locale format.</p>
                 </div>
               </div>
 
               <div className="space-y-3.5 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-[#374151]">Theme</span>
+                  <span className="font-bold text-[#17212B]">Theme</span>
                   <select
                     value={theme}
                     onChange={(e) => {
                       setTheme(e.target.value)
                       triggerToast(`Theme preference updated to ${e.target.value}`)
                     }}
-                    className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-xs text-[#111827] font-semibold outline-none cursor-pointer hover:border-[#CBD5E1]"
+                    className="bg-[#F8F9FA] border border-[#E6E8EC] rounded-xl px-3 py-1.5 text-xs text-[#17212B] font-semibold outline-none cursor-pointer hover:border-[#D0D5DD]"
                   >
-                    <option value="Light">Light</option>
+                    <option value="Light">Light Command Centre</option>
                     <option value="System Default">System Default</option>
                   </select>
                 </div>
 
-                <div className="flex items-center justify-between border-t border-[#F3F4F6] pt-3">
-                  <span className="font-semibold text-[#374151]">Language</span>
+                <div className="flex items-center justify-between border-t border-[#E6E8EC] pt-3">
+                  <span className="font-bold text-[#17212B]">Language</span>
                   <select
                     value={language}
                     onChange={(e) => {
                       setLanguage(e.target.value)
                       triggerToast(`Language set to ${e.target.value}`)
                     }}
-                    className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-xs text-[#111827] font-semibold outline-none cursor-pointer hover:border-[#CBD5E1]"
+                    className="bg-[#F8F9FA] border border-[#E6E8EC] rounded-xl px-3 py-1.5 text-xs text-[#17212B] font-semibold outline-none cursor-pointer hover:border-[#D0D5DD]"
                   >
                     <option value="English">English</option>
-                    <option value="Marathi">Marathi</option>
-                    <option value="Hindi">Hindi</option>
+                    <option value="Marathi">Marathi (मराठी)</option>
+                    <option value="Hindi">Hindi (हिन्दी)</option>
                   </select>
                 </div>
 
-                <div className="flex items-center justify-between border-t border-[#F3F4F6] pt-3">
-                  <span className="font-semibold text-[#374151]">Date Format</span>
+                <div className="flex items-center justify-between border-t border-[#E6E8EC] pt-3">
+                  <span className="font-bold text-[#17212B]">Date Format</span>
                   <select
                     value={dateFormat}
                     onChange={(e) => {
                       setDateFormat(e.target.value)
                       triggerToast(`Date format set to ${e.target.value}`)
                     }}
-                    className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-xs text-[#111827] font-semibold outline-none cursor-pointer hover:border-[#CBD5E1]"
+                    className="bg-[#F8F9FA] border border-[#E6E8EC] rounded-xl px-3 py-1.5 text-xs text-[#17212B] font-semibold outline-none cursor-pointer hover:border-[#D0D5DD]"
                   >
                     <option value="YYYY-MM-DD">YYYY-MM-DD</option>
                     <option value="DD/MM/YYYY">DD/MM/YYYY</option>
                   </select>
                 </div>
 
-                <div className="flex items-center justify-between border-t border-[#F3F4F6] pt-3">
-                  <span className="font-semibold text-[#374151]">Time Format</span>
+                <div className="flex items-center justify-between border-t border-[#E6E8EC] pt-3">
+                  <span className="font-bold text-[#17212B]">Time Format</span>
                   <select
                     value={timeFormat}
                     onChange={(e) => {
                       setTimeFormat(e.target.value)
                       triggerToast(`Time format set to ${e.target.value}`)
                     }}
-                    className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-xs text-[#111827] font-semibold outline-none cursor-pointer hover:border-[#CBD5E1]"
+                    className="bg-[#F8F9FA] border border-[#E6E8EC] rounded-xl px-3 py-1.5 text-xs text-[#17212B] font-semibold outline-none cursor-pointer hover:border-[#D0D5DD]"
                   >
                     <option value="24 hour (14:30)">24 hour (14:30)</option>
                     <option value="12 hour (02:30 PM)">12 hour (02:30 PM)</option>
@@ -539,22 +539,22 @@ export function SettingsPage() {
           </div>
 
           {/* SECTION 4 — Danger Zone (Full Width Card at Bottom) */}
-          <div className="bg-[#FFF1F2] rounded-2xl border border-[#FECDD3] p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="card-command p-5 border-l-4 border-l-[#B42336] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#FFE4E6] text-[#E11D48] flex items-center justify-center shrink-0">
-                <AlertTriangle size={20} />
+              <div className="w-10 h-10 rounded-xl bg-[#FEF3F2] text-[#B42336] flex items-center justify-center shrink-0 border border-[#FECDCA]">
+                <AlertTriangle size={18} />
               </div>
               <div>
-                <h3 className="text-base font-bold font-display text-[#E11D48]">Danger Zone</h3>
-                <p className="text-xs text-[#4B5563]">
-                  Reset all local preferences to default values. This will not affect your operational data.
+                <h3 className="text-sm font-bold font-display text-[#B42336] uppercase tracking-wider">Reset Local Console</h3>
+                <p className="text-xs text-[#667085]">
+                  Reset local UI preferences to default values. This will not alter operational or database records.
                 </p>
               </div>
             </div>
 
             <button
               onClick={() => setShowResetModal(true)}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-[#E11D48] bg-white text-[#E11D48] hover:bg-[#E11D48] hover:text-white text-xs font-bold transition-all shadow-2xs self-start sm:self-auto shrink-0"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-[#B42336] text-[#B42336] hover:bg-[#B42336] hover:text-white text-xs font-bold transition-all shadow-xs self-start sm:self-auto shrink-0"
             >
               <RotateCcw size={14} />
               <span>Reset Local Settings</span>
@@ -566,50 +566,50 @@ export function SettingsPage() {
       {/* EDIT ORGANISATION MODAL */}
       {showEditOrgModal && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full border border-[#E5E7EB] shadow-2xl overflow-hidden space-y-4 animate-scale-up">
-            <div className="p-4 bg-[#F9FAFB] border-b border-[#E5E7EB] flex items-center justify-between">
+          <div className="card-command max-w-md w-full overflow-hidden space-y-4 animate-scale-up border-[#E6E8EC] shadow-2xl">
+            <div className="p-4 bg-[#F8F9FA] border-b border-[#E6E8EC] flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Building2 size={18} className="text-[#E11D48]" />
-                <h3 className="font-bold font-display text-sm text-[#111827]">Edit Node Information</h3>
+                <Building2 size={18} className="text-[#B42336]" />
+                <h3 className="font-bold font-display text-sm text-[#17212B]">Edit Node Information</h3>
               </div>
-              <button onClick={() => setShowEditOrgModal(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setShowEditOrgModal(false)} className="text-[#98A2B3] hover:text-[#17212B]">
                 <X size={16} />
               </button>
             </div>
 
             <div className="p-5 space-y-3 text-xs">
               <div>
-                <label className="block text-[11px] font-bold text-gray-700 mb-1">Node Name</label>
+                <label className="block text-[11px] font-bold text-[#475467] mb-1">Node Name</label>
                 <input
                   type="text"
                   defaultValue="Pune Central Node"
-                  className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-2 text-xs outline-none focus:border-[#E11D48]"
+                  className="w-full bg-[#F8F9FA] border border-[#E6E8EC] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#B42336]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-700 mb-1">Region</label>
+                <label className="block text-[11px] font-bold text-[#475467] mb-1">Region</label>
                 <input
                   type="text"
                   defaultValue="Pune Metropolitan Area"
-                  className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-2 text-xs outline-none focus:border-[#E11D48]"
+                  className="w-full bg-[#F8F9FA] border border-[#E6E8EC] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#B42336]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-700 mb-1">Primary Contact</label>
+                <label className="block text-[11px] font-bold text-[#475467] mb-1">Primary Contact</label>
                 <input
                   type="text"
-                  defaultValue="RAKTSETU Operations Team"
-                  className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-2 text-xs outline-none focus:border-[#E11D48]"
+                  defaultValue="RAKTSETU Operations Desk"
+                  className="w-full bg-[#F8F9FA] border border-[#E6E8EC] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#B42336]"
                 />
               </div>
             </div>
 
-            <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-2">
+            <div className="p-4 bg-[#F8F9FA] border-t border-[#E6E8EC] flex justify-end gap-2">
               <button
                 onClick={() => setShowEditOrgModal(false)}
-                className="px-4 py-2 rounded-lg border border-gray-300 text-xs font-semibold text-gray-700 hover:bg-gray-100"
+                className="px-4 py-2 rounded-xl border border-[#E6E8EC] text-xs font-bold text-[#475467] hover:bg-white"
               >
                 Cancel
               </button>
@@ -618,7 +618,7 @@ export function SettingsPage() {
                   setShowEditOrgModal(false)
                   triggerToast('Node information updated successfully.')
                 }}
-                className="px-4 py-2 rounded-lg bg-[#E11D48] hover:bg-[#BE123C] text-white text-xs font-bold shadow-xs flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl bg-[#B42336] hover:bg-[#861D2B] text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-colors"
               >
                 <span>Save Changes</span>
                 <Check size={14} />
@@ -631,34 +631,34 @@ export function SettingsPage() {
       {/* RESET CONFIRMATION MODAL */}
       {showResetModal && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full border border-[#E5E7EB] shadow-2xl overflow-hidden space-y-4 animate-scale-up">
-            <div className="p-4 bg-[#FFF1F2] border-b border-[#FECDD3] flex items-center justify-between">
+          <div className="card-command max-w-md w-full overflow-hidden space-y-4 animate-scale-up border-[#E6E8EC] shadow-2xl">
+            <div className="p-4 bg-[#FEF3F2] border-b border-[#FECDCA] flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <AlertTriangle size={18} className="text-[#E11D48]" />
-                <h3 className="font-bold font-display text-sm text-[#E11D48]">Reset Local Preferences?</h3>
+                <AlertTriangle size={18} className="text-[#B42336]" />
+                <h3 className="font-bold font-display text-sm text-[#861D2B]">Reset Local Preferences?</h3>
               </div>
-              <button onClick={() => setShowResetModal(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setShowResetModal(false)} className="text-[#98A2B3] hover:text-[#17212B]">
                 <X size={16} />
               </button>
             </div>
 
-            <div className="p-5 space-y-2 text-xs text-gray-700">
-              <p className="font-semibold text-gray-900">Are you sure you want to restore all local preferences to defaults?</p>
-              <p className="text-gray-500">
+            <div className="p-5 space-y-2 text-xs text-[#475467]">
+              <p className="font-bold text-[#17212B]">Are you sure you want to restore all local preferences to defaults?</p>
+              <p className="text-[#667085]">
                 This will reset your view defaults, notification toggles, and display options. Your operational donor, incident, and partner records will remain intact.
               </p>
             </div>
 
-            <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-2">
+            <div className="p-4 bg-[#F8F9FA] border-t border-[#E6E8EC] flex justify-end gap-2">
               <button
                 onClick={() => setShowResetModal(false)}
-                className="px-4 py-2 rounded-lg border border-gray-300 text-xs font-semibold text-gray-700 hover:bg-gray-100"
+                className="px-4 py-2 rounded-xl border border-[#E6E8EC] text-xs font-bold text-[#475467] hover:bg-white"
               >
                 Cancel
               </button>
               <button
                 onClick={handleResetPreferences}
-                className="px-4 py-2 rounded-lg bg-[#E11D48] hover:bg-[#BE123C] text-white text-xs font-bold shadow-xs flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl bg-[#B42336] hover:bg-[#861D2B] text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-colors"
               >
                 <span>Reset to Defaults</span>
                 <RotateCcw size={14} />

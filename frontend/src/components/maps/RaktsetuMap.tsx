@@ -38,14 +38,14 @@ interface RaktsetuMapProps {
 }
 
 const severityColorMap: Record<string, string> = {
-  Critical: '#E11D48',
-  'High Risk': '#F59E0B',
-  Moderate: '#F59E0B',
-  'Moderate Capacity': '#F59E0B',
-  'Low Capacity': '#E11D48',
-  Stable: '#2563EB',
-  Strong: '#10B981',
-  'High Capacity': '#10B981',
+  Critical: '#C62828',
+  'High Risk': '#B7791F',
+  Moderate: '#B7791F',
+  'Moderate Capacity': '#B7791F',
+  'Low Capacity': '#C62828',
+  Stable: '#3567B7',
+  Strong: '#16805D',
+  'High Capacity': '#16805D',
 }
 
 export function RaktsetuMap({
@@ -99,10 +99,14 @@ export function RaktsetuMap({
 
     // Render Zones as soft translucent coverage halos / circles
     zones.forEach((zone) => {
-      const color = severityColorMap[zone.severity] || '#3B82F6'
+      const lat = Number(zone.lat)
+      const lng = Number(zone.lng)
+      if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) return
+
+      const color = severityColorMap[zone.severity] || '#3567B7'
       const circleRadius = zone.radius || (zone.severity === 'Critical' || zone.severity === 'Low Capacity' ? 2400 : 2000)
 
-      const circle = L.circle([zone.lat, zone.lng], {
+      const circle = L.circle([lat, lng], {
         radius: circleRadius,
         color,
         fillColor: color,
@@ -117,8 +121,8 @@ export function RaktsetuMap({
             ${zone.severity}
           </div>
           <div style="font-size: 11px; color: #4B5563; margin-top: 4px; border-top: 1px solid #E5E7EB; padding-top: 4px;">
-            <strong>${zone.readyNow.toLocaleString()}</strong> ready donors
-            ${zone.donorCount ? `<br/><span style="color:#6B7280; font-size:10px;">${zone.donorCount.toLocaleString()} total in zone</span>` : ''}
+            <strong>${(zone.readyNow ?? zone.donorCount ?? 0).toLocaleString()}</strong> ready donors
+            ${zone.donorCount !== undefined ? `<br/><span style="color:#667085; font-size:10px;">${zone.donorCount.toLocaleString()} total in zone</span>` : ''}
           </div>
         </div>
       `
@@ -131,6 +135,10 @@ export function RaktsetuMap({
 
     // Render Markers
     markers.forEach((node) => {
+      const lat = Number(node.lat)
+      const lng = Number(node.lng)
+      if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) return
+
       const customIcon = L.divIcon({
         className: 'custom-map-node-marker',
         html: `

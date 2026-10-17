@@ -8,7 +8,7 @@ export function AppShell() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-[#F7F8FA] text-[#17202A] selection:bg-red-100 selection:text-[#DC2626]">
+    <div className="min-h-screen bg-[#F7F8FA] text-[#17212B] selection:bg-[#FDF2F4] selection:text-[#861D2B]">
       <TopBar
         onMobileMenuToggle={() => setMobileOpen(!mobileOpen)}
         isMobileMenuOpen={mobileOpen}
@@ -17,8 +17,8 @@ export function AppShell() {
         mobileOpen={mobileOpen}
         onCloseMobile={() => setMobileOpen(false)}
       />
-      <main className="md:pl-[250px] pt-[64px] min-h-[calc(100vh-64px)] bg-[#F7F8FA] p-4 sm:p-6 transition-all">
-        <div className="max-w-[1440px] mx-auto">
+      <main className="md:pl-[256px] pt-[64px] min-h-[calc(100vh-64px)] bg-[#F7F8FA] p-4 sm:p-6 lg:p-8 transition-all">
+        <div className="max-w-[1600px] mx-auto">
           <Outlet />
         </div>
       </main>

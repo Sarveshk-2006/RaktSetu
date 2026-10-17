@@ -37,79 +37,79 @@ export function pct(value: number): string {
 
 export function urgencyColor(urgency: IncidentUrgency): string {
   switch (urgency) {
-    case 'Critical': return 'text-[#DC2626] bg-red-50 border-red-200'
-    case 'High':     return 'text-amber-800 bg-amber-50 border-amber-200'
-    case 'Moderate': return 'text-blue-800 bg-blue-50 border-blue-200'
-    case 'Routine':  return 'text-slate-700 bg-slate-100 border-slate-200'
+    case 'Critical': return 'text-[#912020] bg-[#FEF3F2] border-[#FECDCA]'
+    case 'High':     return 'text-[#8D5A0F] bg-[#FEF7EC] border-[#FDE2B5]'
+    case 'Moderate': return 'text-[#234B8E] bg-[#EFF4FB] border-[#B9D3F8]'
+    case 'Routine':  return 'text-[#475467] bg-[#F8F9FA] border-[#E6E8EC]'
   }
 }
 
 export function statusColor(status: IncidentStatus): string {
   switch (status) {
-    case 'PendingVerification': return 'text-purple-700 bg-purple-50 border-purple-200'
-    case 'Verified':            return 'text-blue-700 bg-blue-50 border-blue-200'
-    case 'Matching':            return 'text-amber-700 bg-amber-50 border-amber-200'
-    case 'Mobilising':          return 'text-orange-700 bg-orange-50 border-orange-200'
-    case 'Partially Fulfilled': return 'text-teal-700 bg-teal-50 border-teal-200'
-    case 'Fulfilled':           return 'text-emerald-700 bg-emerald-50 border-emerald-200'
-    case 'Escalated':           return 'text-rose-700 bg-rose-50 border-rose-200'
-    case 'Cancelled':           return 'text-stone-600 bg-stone-100 border-stone-200'
-    case 'Closed':              return 'text-slate-600 bg-slate-100 border-slate-200'
-    default:                    return 'text-slate-700 bg-slate-50 border-slate-200'
+    case 'PendingVerification': return 'text-[#6941C6] bg-[#F9F5FF] border-[#E9D7FE]'
+    case 'Verified':            return 'text-[#234B8E] bg-[#EFF4FB] border-[#B9D3F8]'
+    case 'Matching':            return 'text-[#8D5A0F] bg-[#FEF7EC] border-[#FDE2B5]'
+    case 'Mobilising':          return 'text-[#B42336] bg-[#FDF2F4] border-[#F8D7DC]'
+    case 'Partially Fulfilled': return 'text-[#0E7090] bg-[#ECFEFF] border-[#A5F3FC]'
+    case 'Fulfilled':           return 'text-[#085D40] bg-[#EBFDF5] border-[#A6F4C5]'
+    case 'Escalated':           return 'text-[#912020] bg-[#FEF3F2] border-[#FECDCA]'
+    case 'Cancelled':           return 'text-[#475467] bg-[#F8F9FA] border-[#E6E8EC]'
+    case 'Closed':              return 'text-[#475467] bg-[#F2F4F7] border-[#EAECF0]'
+    default:                    return 'text-[#475467] bg-[#F8F9FA] border-[#E6E8EC]'
   }
 }
 
 export function severityColor(severity: SeverityLevel): string {
   switch (severity) {
-    case 'Critical':  return 'text-[#DC2626]'
-    case 'High Risk': return 'text-amber-700'
-    case 'Stable':    return 'text-blue-700'
-    case 'Strong':    return 'text-emerald-700'
+    case 'Critical':  return 'text-[#C62828]'
+    case 'High Risk': return 'text-[#B7791F]'
+    case 'Stable':    return 'text-[#3567B7]'
+    case 'Strong':    return 'text-[#16805D]'
   }
 }
 
 export function severityBg(severity: SeverityLevel): string {
   switch (severity) {
-    case 'Critical':  return 'bg-red-50 border-red-200'
-    case 'High Risk': return 'bg-amber-50 border-amber-200'
-    case 'Stable':    return 'bg-blue-50 border-blue-200'
-    case 'Strong':    return 'bg-emerald-50 border-emerald-200'
+    case 'Critical':  return 'bg-[#FEF3F2] border-[#FECDCA]'
+    case 'High Risk': return 'bg-[#FEF7EC] border-[#FDE2B5]'
+    case 'Stable':    return 'bg-[#EFF4FB] border-[#B9D3F8]'
+    case 'Strong':    return 'bg-[#EBFDF5] border-[#A6F4C5]'
   }
 }
 
 export function bloodGroupColor(bg: BloodGroup): string {
-  if (bg.includes('-')) return 'text-[#DC2626] bg-red-50 border-red-200'
-  return 'text-[#17202A] bg-slate-100 border-slate-200'
+  if (bg.includes('-')) return 'text-[#861D2B] bg-[#FDF2F4] border-[#F8D7DC]'
+  return 'text-[#17212B] bg-[#F8F9FA] border-[#E6E8EC]'
 }
 
 export function readinessColor(r: DonorReadiness): string {
   switch (r) {
-    case 'Ready':       return 'text-emerald-600 font-semibold'
-    case 'Maybe':       return 'text-amber-600 font-semibold'
-    case 'Unavailable': return 'text-red-600 font-semibold'
-    case 'Unknown':     return 'text-slate-500'
-    default:            return 'text-slate-500'
+    case 'Ready':       return 'text-[#16805D] font-semibold'
+    case 'Maybe':       return 'text-[#B7791F] font-semibold'
+    case 'Unavailable': return 'text-[#C62828] font-semibold'
+    case 'Unknown':     return 'text-[#667085]'
+    default:            return 'text-[#667085]'
   }
 }
 
 export function waveStatusColor(s: WaveStatus): string {
   switch (s) {
-    case 'Active':       return 'text-amber-700'
-    case 'Complete':     return 'text-emerald-700'
-    case 'Completed':    return 'text-emerald-700'
-    case 'Insufficient': return 'text-[#DC2626]'
-    case 'Exhausted':    return 'text-[#DC2626]'
-    case 'Cancelled':    return 'text-slate-400'
-    case 'Dispatched':   return 'text-blue-700'
-    case 'Evaluating':   return 'text-purple-700'
-    case 'Pending':      return 'text-slate-500'
-    default:             return 'text-slate-500'
+    case 'Active':       return 'text-[#B7791F]'
+    case 'Complete':     return 'text-[#16805D]'
+    case 'Completed':    return 'text-[#16805D]'
+    case 'Insufficient': return 'text-[#C62828]'
+    case 'Exhausted':    return 'text-[#C62828]'
+    case 'Cancelled':    return 'text-[#98A2B3]'
+    case 'Dispatched':   return 'text-[#3567B7]'
+    case 'Evaluating':   return 'text-[#6941C6]'
+    case 'Pending':      return 'text-[#667085]'
+    default:             return 'text-[#667085]'
   }
 }
 
 export function coverageBarColor(pct: number): string {
-  if (pct >= 80) return 'bg-emerald-500'
-  if (pct >= 60) return 'bg-blue-500'
-  if (pct >= 40) return 'bg-amber-500'
-  return 'bg-[#DC2626]'
+  if (pct >= 80) return 'bg-[#16805D]'
+  if (pct >= 60) return 'bg-[#3567B7]'
+  if (pct >= 40) return 'bg-[#B7791F]'
+  return 'bg-[#C62828]'
 }

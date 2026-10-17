@@ -19,10 +19,10 @@ type FilterKey = 'All' | 'Critical' | 'High' | 'Active' | 'Fulfilled'
 
 function getUrgencyBadge(urgency: string) {
   switch (urgency) {
-    case 'Critical': return 'bg-[#FFE4E6] text-[#E11D48]'
-    case 'High':     return 'bg-[#FEF3C7] text-[#D97706]'
-    case 'Moderate': return 'bg-[#EFF6FF] text-[#2563EB]'
-    default:         return 'bg-[#F9FAFB] text-[#374151]'
+    case 'Critical': return 'bg-[#FEF3F2] text-[#912020] border border-[#FECDCA]'
+    case 'High':     return 'bg-[#FEF7EC] text-[#8D5A0F] border border-[#FDE2B5]'
+    case 'Moderate': return 'bg-[#EFF4FB] text-[#234B8E] border border-[#B9D3F8]'
+    default:         return 'bg-[#F8F9FA] text-[#475467] border border-[#E6E8EC]'
   }
 }
 
@@ -30,23 +30,23 @@ function getStatusBadge(status: string) {
   switch (status) {
     case 'Fulfilled':
     case 'Closed':
-      return 'bg-[#D1FAE5] text-[#059669]'
+      return 'bg-[#EBFDF5] text-[#085D40] border border-[#A6F4C5]'
     case 'Verified':
     case 'Matching':
-      return 'bg-[#EFF6FF] text-[#2563EB]'
+      return 'bg-[#EFF4FB] text-[#234B8E] border border-[#B9D3F8]'
     case 'Mobilising':
     case 'Partially Fulfilled':
-      return 'bg-[#FEF3C7] text-[#D97706]'
+      return 'bg-[#FDF2F4] text-[#861D2B] border border-[#F8D7DC]'
     case 'PendingVerification':
-      return 'bg-[#FEE2E2] text-[#DC2626]'
+      return 'bg-[#F9F5FF] text-[#6941C6] border border-[#E9D7FE]'
     default:
-      return 'bg-gray-100 text-gray-700'
+      return 'bg-[#F8F9FA] text-[#475467] border border-[#E6E8EC]'
   }
 }
 
 function getBloodGroupBg(bg: string) {
-  if (bg.includes('-')) return 'bg-[#E11D48] text-white'
-  return 'bg-[#2563EB] text-white'
+  if (bg.includes('-')) return 'bg-[#B42336] text-white shadow-xs'
+  return 'bg-[#17212B] text-white shadow-xs'
 }
 
 function formatRelativeTime(dateStr?: string) {
@@ -128,10 +128,10 @@ export function IncidentsPage() {
 
   // Chart Data derived from real records
   const statusChartData = [
-    { name: 'Critical', value: criticalCount || 1, color: '#E11D48' },
-    { name: 'High', value: highCount || 1, color: '#F59E0B' },
-    { name: 'Active', value: activeCount || 1, color: '#2563EB' },
-    { name: 'Fulfilled', value: fulfilledCount || 0, color: '#10B981' },
+    { name: 'Critical', value: criticalCount || 1, color: '#C62828' },
+    { name: 'High', value: highCount || 1, color: '#B7791F' },
+    { name: 'Active', value: activeCount || 1, color: '#3567B7' },
+    { name: 'Fulfilled', value: fulfilledCount || 0, color: '#16805D' },
   ]
 
   const timelineData = [
@@ -144,20 +144,20 @@ export function IncidentsPage() {
   ]
 
   return (
-    <div className="space-y-5 animate-fade-in font-body text-[#111827] max-w-[1600px] mx-auto pb-8">
+    <div className="space-y-6 animate-fade-in font-body text-[#17212B] max-w-[1600px] mx-auto pb-10">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 border-b border-[#E5E7EB]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E6E8EC]">
         <div>
-          <div className="flex items-center gap-2 text-[#E11D48] font-bold text-lg">
-            <div className="w-8 h-8 rounded-lg bg-[#FFE4E6] flex items-center justify-center text-[#E11D48]">
+          <div className="flex items-center gap-2 text-[#B42336] font-bold text-lg">
+            <div className="w-8 h-8 rounded-lg bg-[#FEF3F2] flex items-center justify-center text-[#B42336]">
               <AlertTriangle size={18} />
             </div>
-            <h1 className="text-2xl font-bold font-display text-[#111827] tracking-tight">
-              Emergency Incidents
+            <h1 className="text-2xl font-bold font-display text-[#17212B] tracking-tight">
+              Operational Incidents Work Queue
             </h1>
           </div>
-          <p className="text-xs text-[#6B7280] mt-1 pl-10">
-            Authoritative blood requirements, verification status and response coordination.
+          <p className="text-xs text-[#667085] mt-1 pl-10">
+            Authoritative clinical blood requirements, live verification status, and response coordination queue.
           </p>
         </div>
 
@@ -165,15 +165,15 @@ export function IncidentsPage() {
           <button
             onClick={() => loadIncidents(true)}
             disabled={isRefreshing || isLoading}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#E5E7EB] bg-white hover:bg-[#F9FAFB] text-xs font-semibold text-[#374151] transition-colors shadow-2xs disabled:opacity-60"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#E6E8EC] bg-white hover:bg-[#F8F9FA] text-xs font-semibold text-[#475467] transition-colors shadow-2xs disabled:opacity-60"
           >
-            <RefreshCw size={14} className={cn('text-[#6B7280]', isRefreshing && 'animate-spin text-[#E11D48]')} />
+            <RefreshCw size={14} className={cn('text-[#667085]', isRefreshing && 'animate-spin text-[#B42336]')} />
             <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
           </button>
 
           <button
             onClick={() => navigate('/incidents/create')}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#E11D48] hover:bg-[#BE123C] text-white text-xs font-semibold shadow-xs transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#B42336] hover:bg-[#861D2B] text-white text-xs font-semibold shadow-xs transition-all duration-150 active:scale-[0.98]"
           >
             <Plus size={16} />
             <span>Create Blood Incident</span>
@@ -183,17 +183,17 @@ export function IncidentsPage() {
 
       {/* Error Banner */}
       {error && (
-        <div className="bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-4 flex items-start justify-between gap-3 text-xs text-[#991B1B]">
+        <div className="bg-[#FEF3F2] border border-[#FECDCA] rounded-xl p-4 flex items-start justify-between gap-3 text-xs text-[#912020]">
           <div className="flex items-start gap-2.5">
-            <AlertCircle size={18} className="text-[#DC2626] shrink-0 mt-0.5" />
+            <AlertCircle size={18} className="text-[#C62828] shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold text-sm text-[#991B1B]">Incidents Service Unavailable</p>
-              <p className="mt-0.5 text-[#B91C1C]">{error}</p>
+              <p className="font-bold text-sm text-[#912020]">Incidents Service Unavailable</p>
+              <p className="mt-0.5 text-[#B42336]">{error}</p>
             </div>
           </div>
           <button
             onClick={() => loadIncidents(true)}
-            className="px-3 py-1 bg-white border border-[#FCA5A5] rounded-lg text-xs font-bold text-[#DC2626] hover:bg-[#FEE2E2] shrink-0"
+            className="px-3 py-1 bg-white border border-[#FECDCA] rounded-lg text-xs font-bold text-[#C62828] hover:bg-[#FEF3F2] shrink-0"
           >
             Retry Connection
           </button>
@@ -203,107 +203,111 @@ export function IncidentsPage() {
       {/* SECTION 1 — 5 KPI Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
         {/* Card 1: Total Incidents */}
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-2 relative">
+        <div className="card-command p-4 space-y-2 relative">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-[#FFE4E6] flex items-center justify-center text-[#E11D48]">
+              <div className="w-7 h-7 rounded-lg bg-[#FEF3F2] flex items-center justify-center text-[#B42336]">
                 <AlertTriangle size={15} />
               </div>
-              <span className="text-xs font-semibold text-[#4B5563]">Total Incidents</span>
+              <span className="text-xs font-semibold text-[#667085]">Total Incidents</span>
             </div>
-            <Activity size={15} className="text-[#E11D48]" />
+            <Activity size={15} className="text-[#B42336]" />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold font-display text-[#111827]">
+            <span className="text-2xl font-bold font-display text-[#17212B]">
               {isLoading ? '...' : totalCount}
             </span>
-            <span className="text-[11px] font-semibold text-[#059669]">
-              Canonical Records
+            <span className="text-[11px] font-semibold text-[#085D40]">
+              Canonical
             </span>
           </div>
         </div>
 
         {/* Card 2: Critical */}
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-2 relative">
+        <div className="card-command p-4 space-y-2 relative">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-[#FFE4E6] flex items-center justify-center text-[#E11D48]">
+              <div className="w-7 h-7 rounded-lg bg-[#FEF3F2] flex items-center justify-center text-[#912020]">
                 <ShieldAlert size={15} />
               </div>
-              <span className="text-xs font-semibold text-[#4B5563]">Critical</span>
+              <span className="text-xs font-semibold text-[#667085]">Critical</span>
             </div>
-            <ChevronRight size={15} className="text-[#9CA3AF]" />
+            <ChevronRight size={15} className="text-[#98A2B3]" />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold font-display text-[#111827]">
+            <span className="text-2xl font-bold font-display text-[#17212B]">
               {isLoading ? '...' : criticalCount}
             </span>
+            <span className="text-[11px] font-semibold text-[#912020]">Immediate</span>
           </div>
-          <p className="text-[11px] text-[#6B7280]">Requires immediate response</p>
+          <p className="text-[11px] text-[#667085]">Requires priority dispatch</p>
         </div>
 
         {/* Card 3: High Priority */}
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-2 relative">
+        <div className="card-command p-4 space-y-2 relative">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-[#FEF3C7] flex items-center justify-center text-[#D97706]">
+              <div className="w-7 h-7 rounded-lg bg-[#FEF7EC] flex items-center justify-center text-[#8D5A0F]">
                 <Users size={15} />
               </div>
-              <span className="text-xs font-semibold text-[#4B5563]">High Priority</span>
+              <span className="text-xs font-semibold text-[#667085]">High Priority</span>
             </div>
-            <ChevronRight size={15} className="text-[#9CA3AF]" />
+            <ChevronRight size={15} className="text-[#98A2B3]" />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold font-display text-[#111827]">
+            <span className="text-2xl font-bold font-display text-[#17212B]">
               {isLoading ? '...' : highCount}
             </span>
+            <span className="text-[11px] font-semibold text-[#8D5A0F]">Active</span>
           </div>
-          <p className="text-[11px] text-[#6B7280]">Under mobilisation</p>
+          <p className="text-[11px] text-[#667085]">Under mobilisation</p>
         </div>
 
         {/* Card 4: Active Responses */}
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-2 relative">
+        <div className="card-command p-4 space-y-2 relative">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-[#EFF6FF] flex items-center justify-center text-[#2563EB]">
+              <div className="w-7 h-7 rounded-lg bg-[#EFF4FB] flex items-center justify-center text-[#234B8E]">
                 <Users size={15} />
               </div>
-              <span className="text-xs font-semibold text-[#4B5563]">Active Cases</span>
+              <span className="text-xs font-semibold text-[#667085]">Active Cases</span>
             </div>
-            <ChevronRight size={15} className="text-[#9CA3AF]" />
+            <ChevronRight size={15} className="text-[#98A2B3]" />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold font-display text-[#111827]">
+            <span className="text-2xl font-bold font-display text-[#17212B]">
               {isLoading ? '...' : activeCount}
             </span>
+            <span className="text-[11px] font-semibold text-[#234B8E]">Waves Open</span>
           </div>
-          <p className="text-[11px] text-[#6B7280]">Waves & matching ongoing</p>
+          <p className="text-[11px] text-[#667085]">Matching in progress</p>
         </div>
 
         {/* Card 5: Fulfilled Units */}
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-2 relative">
+        <div className="card-command p-4 space-y-2 relative">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-[#D1FAE5] flex items-center justify-center text-[#10B981]">
+              <div className="w-7 h-7 rounded-lg bg-[#EBFDF5] flex items-center justify-center text-[#085D40]">
                 <CheckCircle2 size={15} />
               </div>
-              <span className="text-xs font-semibold text-[#4B5563]">Units Secured</span>
+              <span className="text-xs font-semibold text-[#667085]">Units Secured</span>
             </div>
-            <ChevronRight size={15} className="text-[#9CA3AF]" />
+            <ChevronRight size={15} className="text-[#98A2B3]" />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold font-display text-[#111827]">
+            <span className="text-2xl font-bold font-display text-[#17212B]">
               {isLoading ? '...' : totalSecured}
             </span>
+            <span className="text-[11px] font-semibold text-[#085D40]">Confirmed</span>
           </div>
-          <p className="text-[11px] text-[#6B7280]">Confirmed units delivered</p>
+          <p className="text-[11px] text-[#667085]">Hospital deliveries logged</p>
         </div>
       </div>
 
       {/* SECTION 2 — Filter & Sort Control Bar */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] p-3 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="card-command p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-          <div className="p-1.5 text-[#6B7280] shrink-0">
+          <div className="p-1.5 text-[#667085] shrink-0">
             <Filter size={15} />
           </div>
           {(['All', 'Critical', 'High', 'Active', 'Fulfilled'] as FilterKey[]).map((f) => {
@@ -322,12 +326,12 @@ export function IncidentsPage() {
                 className={cn(
                   'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 flex items-center gap-1.5',
                   isActive
-                    ? 'bg-[#E11D48] text-white shadow-2xs'
-                    : 'bg-[#F9FAFB] text-[#4B5563] hover:bg-[#F3F4F6] border border-[#E5E7EB]'
+                    ? 'bg-[#B42336] text-white shadow-2xs'
+                    : 'bg-[#F8F9FA] text-[#475467] hover:bg-[#F2F4F7] border border-[#E6E8EC]'
                 )}
               >
                 <span>{f}</span>
-                <span className={cn('px-1.5 py-0.2 rounded-full text-[10px]', isActive ? 'bg-white/20 text-white' : 'bg-[#E5E7EB] text-[#6B7280]')}>
+                <span className={cn('px-1.5 py-0.2 rounded-full text-[10px]', isActive ? 'bg-white/20 text-white' : 'bg-[#E6E8EC] text-[#667085]')}>
                   {count}
                 </span>
               </button>
@@ -335,12 +339,12 @@ export function IncidentsPage() {
           })}
         </div>
 
-        <div className="flex items-center gap-2 shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 border-[#E5E7EB]">
-          <span className="text-xs text-[#6B7280] font-medium">Sort by:</span>
+        <div className="flex items-center gap-2 shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 border-[#E6E8EC]">
+          <span className="text-xs text-[#667085] font-medium">Sort by:</span>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="text-xs font-semibold text-[#111827] bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 outline-none cursor-pointer"
+            className="text-xs font-semibold text-[#17212B] bg-[#F8F9FA] border border-[#E6E8EC] rounded-lg px-3 py-1.5 outline-none cursor-pointer focus:border-[#B42336]"
           >
             <option>Urgency</option>
             <option>Time Created</option>
@@ -352,23 +356,23 @@ export function IncidentsPage() {
       {/* SECTION 3 — 2-Column Dashboard Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* LEFT COLUMN: Incidents List (Col 7 / ~60%) */}
-        <div className="lg:col-span-7 space-y-4">
+        <div className="lg:col-span-7 space-y-3.5">
           {isLoading && incidents.length === 0 ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-32 bg-white rounded-xl border border-[#E5E7EB] animate-pulse" />
+                <div key={i} className="h-32 bg-white rounded-xl border border-[#E6E8EC] animate-pulse" />
               ))}
             </div>
           ) : filteredIncidents.length === 0 ? (
-            <div className="bg-white rounded-xl border border-[#E5E7EB] p-10 text-center space-y-3">
-              <CheckCircle2 size={32} className="text-[#10B981] mx-auto" />
-              <h3 className="font-bold text-sm text-[#111827]">No Matching Incidents</h3>
-              <p className="text-xs text-[#6B7280]">
-                No blood requirements currently match the selected '{activeFilter}' filter.
+            <div className="card-command p-10 text-center space-y-3">
+              <CheckCircle2 size={32} className="text-[#16805D] mx-auto" />
+              <h3 className="font-bold text-sm text-[#17212B]">No Matching Incidents</h3>
+              <p className="text-xs text-[#667085]">
+                No blood requirements currently match the selected '{activeFilter}' filter criteria.
               </p>
               <button
                 onClick={() => navigate('/incidents/create')}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#E11D48] text-white text-xs font-bold rounded-lg hover:bg-[#BE123C]"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#B42336] text-white text-xs font-bold rounded-lg hover:bg-[#861D2B] transition-colors shadow-2xs"
               >
                 <Plus size={14} />
                 <span>Create Blood Incident</span>
@@ -390,20 +394,20 @@ export function IncidentsPage() {
                 <div
                   key={inc.incident_id}
                   onClick={() => navigate(`/incidents/${inc.incident_id}`)}
-                  className="bg-white rounded-xl border border-[#E5E7EB] border-l-4 border-l-[#E11D48] p-4 shadow-2xs hover:shadow-md transition-all cursor-pointer space-y-3.5 relative overflow-hidden group"
+                  className="card-command border-l-4 border-l-[#B42336] p-4.5 transition-all cursor-pointer space-y-3.5 relative overflow-hidden group hover:border-[#B42336]"
                 >
                   {/* Top Row: Group Badge + Incident Meta + Secured Pill */}
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3">
-                      {/* Large Blood Group Badge */}
-                      <div className={cn('w-11 h-11 rounded-full flex items-center justify-center text-base font-bold font-display shadow-xs shrink-0', getBloodGroupBg(bg))}>
+                    <div className="flex items-start gap-3.5">
+                      {/* Blood Group Badge */}
+                      <div className={cn('w-11 h-11 rounded-lg flex items-center justify-center text-sm font-bold font-mono tracking-tight shrink-0', getBloodGroupBg(bg))}>
                         {bg}
                       </div>
 
                       {/* Main Details */}
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-bold font-mono text-[#111827] group-hover:text-[#E11D48] transition-colors">
+                          <span className="text-xs font-bold font-mono text-[#17212B] group-hover:text-[#B42336] transition-colors">
                             {inc.incident_id}
                           </span>
                           <span className={cn('px-2 py-0.5 rounded-full text-[10px] font-bold uppercase', getUrgencyBadge(urgency))}>
@@ -415,21 +419,21 @@ export function IncidentsPage() {
                         </div>
 
                         <div className="flex items-baseline gap-2">
-                          <h3 className="text-sm font-bold text-[#111827] uppercase font-display tracking-tight">
+                          <h3 className="text-sm font-bold text-[#17212B] uppercase font-display tracking-tight">
                             {unitsReq} UNIT{unitsReq > 1 ? 'S' : ''} {inc.component || 'WHOLE BLOOD'}
                           </h3>
                         </div>
 
-                        <div className="flex items-center gap-4 text-xs text-[#6B7280] flex-wrap pt-0.5">
+                        <div className="flex items-center gap-4 text-xs text-[#667085] flex-wrap pt-0.5">
                           <span className="flex items-center gap-1 font-medium">
-                            <Building2 size={13} className="text-[#9CA3AF]" />
+                            <Building2 size={13} className="text-[#98A2B3]" />
                             {facility}
                           </span>
                           <span className="flex items-center gap-1 font-medium">
-                            <MapPin size={13} className="text-[#9CA3AF]" />
+                            <MapPin size={13} className="text-[#98A2B3]" />
                             {zone}
                           </span>
-                          <span className="flex items-center gap-1 font-mono text-[11px] text-[#9CA3AF]">
+                          <span className="flex items-center gap-1 font-mono text-[11px] text-[#98A2B3]">
                             <Clock size={12} />
                             {formatRelativeTime(inc.created_at)}
                           </span>
@@ -438,34 +442,34 @@ export function IncidentsPage() {
                     </div>
 
                     {/* Right: Units Secured Pill */}
-                    <div className="p-3 rounded-xl border border-[#E5E7EB] shrink-0 text-right min-w-[130px] flex items-center justify-between gap-3 bg-[#F9FAFB]">
+                    <div className="p-3 rounded-xl border border-[#E6E8EC] shrink-0 text-right min-w-[130px] flex items-center justify-between gap-3 bg-[#F8F9FA]">
                       <div>
                         <div className="flex items-baseline justify-end gap-1">
-                          <span className="text-base font-bold text-[#111827] font-display">
+                          <span className="text-base font-bold text-[#17212B] font-display">
                             {unitsSec} / {unitsReq}
                           </span>
                         </div>
-                        <span className="text-[10px] font-semibold text-[#6B7280] block">Units secured</span>
-                        <div className="h-1.5 w-full bg-[#E5E7EB] rounded-full overflow-hidden mt-1.5">
-                          <div className="h-full rounded-full bg-[#E11D48]" style={{ width: `${pct}%` }} />
+                        <span className="text-[10px] font-semibold text-[#667085] block">Units secured</span>
+                        <div className="h-1.5 w-full bg-[#E6E8EC] rounded-full overflow-hidden mt-1.5">
+                          <div className="h-full rounded-full bg-[#B42336]" style={{ width: `${pct}%` }} />
                         </div>
                       </div>
-                      <ChevronRight size={18} className="text-[#9CA3AF] group-hover:text-[#E11D48] transition-colors" />
+                      <ChevronRight size={18} className="text-[#98A2B3] group-hover:text-[#B42336] transition-colors" />
                     </div>
                   </div>
 
                   {/* Bottom Row: Response Progression Cascade */}
-                  <div className="pt-3 border-t border-[#F3F4F6] flex items-center gap-4 sm:gap-6 text-xs overflow-x-auto">
+                  <div className="pt-2.5 border-t border-[#F2F4F7] flex items-center gap-4 sm:gap-6 text-xs overflow-x-auto">
                     {waves.length === 0 ? (
-                      <span className="text-[11px] text-[#9CA3AF] italic">
+                      <span className="text-[11px] text-[#98A2B3] italic">
                         {status === 'PendingVerification' ? 'Pending clinical verification before wave activation' : 'Response waves ready for activation'}
                       </span>
                     ) : (
                       waves.map((w: any, idx: number) => (
                         <div key={idx} className="flex items-center gap-2 shrink-0">
-                          <span className={cn('w-2 h-2 rounded-full', w.status === 'completed' || w.status === 'Completed' ? 'bg-[#10B981]' : 'bg-[#E11D48]')} />
-                          <span className="font-bold text-[#111827]">Wave {w.wave_number || idx + 1}</span>
-                          <span className="text-[11px] text-[#6B7280] font-medium">
+                          <span className={cn('w-2 h-2 rounded-full', w.status === 'completed' || w.status === 'Completed' ? 'bg-[#16805D]' : 'bg-[#B42336]')} />
+                          <span className="font-bold text-[#17212B]">Wave {w.wave_number || idx + 1}</span>
+                          <span className="text-[11px] text-[#667085] font-medium">
                             {w.status || 'Active'}
                           </span>
                         </div>
@@ -486,8 +490,8 @@ export function IncidentsPage() {
           {/* Card 2: Analytics Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Donut Chart: Incidents by Status */}
-            <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-3">
-              <h4 className="text-xs font-bold text-[#111827] font-display">Incidents by Status</h4>
+            <div className="card-command p-4 space-y-3">
+              <h4 className="text-xs font-bold text-[#17212B] font-display">Incidents by Status</h4>
 
               <div className="flex items-center gap-3">
                 <div className="w-24 h-24 relative flex items-center justify-center shrink-0">
@@ -507,33 +511,33 @@ export function IncidentsPage() {
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                    <span className="text-base font-bold font-display text-[#111827] leading-none">
+                    <span className="text-base font-bold font-display text-[#17212B] leading-none">
                       {totalCount}
                     </span>
-                    <span className="text-[9px] font-semibold text-[#6B7280]">Total</span>
+                    <span className="text-[9px] font-semibold text-[#667085]">Total</span>
                   </div>
                 </div>
 
                 <div className="space-y-1 text-[11px]">
-                  <div className="flex items-center gap-1.5 font-medium"><span className="w-2 h-2 rounded-full bg-[#E11D48]" /> {criticalCount} Critical</div>
-                  <div className="flex items-center gap-1.5 font-medium"><span className="w-2 h-2 rounded-full bg-[#F59E0B]" /> {highCount} High</div>
-                  <div className="flex items-center gap-1.5 font-medium"><span className="w-2 h-2 rounded-full bg-[#2563EB]" /> {activeCount} Active</div>
-                  <div className="flex items-center gap-1.5 font-medium"><span className="w-2 h-2 rounded-full bg-[#10B981]" /> {fulfilledCount} Fulfilled</div>
+                  <div className="flex items-center gap-1.5 font-medium"><span className="w-2 h-2 rounded-full bg-[#C62828]" /> {criticalCount} Critical</div>
+                  <div className="flex items-center gap-1.5 font-medium"><span className="w-2 h-2 rounded-full bg-[#B7791F]" /> {highCount} High</div>
+                  <div className="flex items-center gap-1.5 font-medium"><span className="w-2 h-2 rounded-full bg-[#3567B7]" /> {activeCount} Active</div>
+                  <div className="flex items-center gap-1.5 font-medium"><span className="w-2 h-2 rounded-full bg-[#16805D]" /> {fulfilledCount} Fulfilled</div>
                 </div>
               </div>
             </div>
 
-            {/* Bar Chart: Response Timeline */}
-            <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-3">
-              <h4 className="text-xs font-bold text-[#111827] font-display">Response Load</h4>
+            {/* Bar Chart: Response Load */}
+            <div className="card-command p-4 space-y-3">
+              <h4 className="text-xs font-bold text-[#17212B] font-display">Response Load</h4>
 
               <div className="h-[90px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={timelineData} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
-                    <XAxis dataKey="time" tick={{ fill: '#9CA3AF', fontSize: 9 }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fill: '#9CA3AF', fontSize: 9 }} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={{ backgroundColor: '#111827', color: '#FFF', borderRadius: '6px', fontSize: '10px' }} />
-                    <Bar dataKey="count" fill="#E11D48" radius={[2, 2, 0, 0]} />
+                    <XAxis dataKey="time" tick={{ fill: '#98A2B3', fontSize: 9 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: '#98A2B3', fontSize: 9 }} axisLine={false} tickLine={false} />
+                    <Tooltip contentStyle={{ backgroundColor: '#17212B', border: 'none', color: '#FFF', borderRadius: '6px', fontSize: '10px' }} />
+                    <Bar dataKey="count" fill="#B42336" radius={[2, 2, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

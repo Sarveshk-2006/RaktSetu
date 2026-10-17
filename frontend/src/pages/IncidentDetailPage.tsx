@@ -198,25 +198,25 @@ export function IncidentDetailPage() {
   ]
 
   return (
-    <div className="space-y-5 animate-fade-in font-body text-[#111827] max-w-[1600px] mx-auto pb-12">
+    <div className="space-y-6 animate-fade-in font-body text-[#17212B] max-w-[1600px] mx-auto pb-12">
       {/* Notifications */}
       {successMsg && (
-        <div className="p-3 bg-[#ECFDF5] border border-[#A7F3D0] rounded-xl flex items-center justify-between text-xs text-[#065F46] animate-slide-up">
+        <div className="p-3.5 bg-[#EBFDF5] border border-[#A6F4C5] rounded-xl flex items-center justify-between text-xs text-[#085D40] animate-fade-in">
           <div className="flex items-center gap-2">
-            <CheckCircle2 size={16} className="text-[#10B981]" />
-            <span>{successMsg}</span>
+            <CheckCircle2 size={16} className="text-[#16805D]" />
+            <span className="font-medium">{successMsg}</span>
           </div>
-          <button onClick={() => setSuccessMsg(null)} className="text-[#065F46] hover:text-[#047857]">✕</button>
+          <button onClick={() => setSuccessMsg(null)} className="text-[#085D40] hover:text-[#16805D] font-bold">✕</button>
         </div>
       )}
 
       {error && (
-        <div className="p-3 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl flex items-center justify-between text-xs text-[#991B1B]">
+        <div className="p-3.5 bg-[#FEF3F2] border border-[#FECDCA] rounded-xl flex items-center justify-between text-xs text-[#912020] animate-fade-in">
           <div className="flex items-center gap-2">
-            <AlertCircle size={16} className="text-[#DC2626]" />
-            <span>{error}</span>
+            <AlertCircle size={16} className="text-[#C62828]" />
+            <span className="font-medium">{error}</span>
           </div>
-          <button onClick={() => setError(null)} className="text-[#991B1B] hover:text-[#7F1D1D]">✕</button>
+          <button onClick={() => setError(null)} className="text-[#912020] hover:text-[#C62828] font-bold">✕</button>
         </div>
       )}
 
@@ -224,30 +224,30 @@ export function IncidentDetailPage() {
       <div className="space-y-3">
         <button
           onClick={() => navigate('/incidents')}
-          className="text-xs font-semibold text-[#6B7280] hover:text-[#111827] flex items-center gap-1 transition-colors"
+          className="text-xs font-semibold text-[#667085] hover:text-[#17212B] flex items-center gap-1 transition-colors"
         >
-          <ArrowLeft size={14} /> Back to Incidents
+          <ArrowLeft size={14} /> Back to Incidents Work Queue
         </button>
 
         {/* Header Main Bar */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-[#E5E7EB] shadow-2xs">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 card-command p-5">
           <div className="space-y-1">
             <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-xl font-bold font-mono text-[#111827] tracking-wider">
+              <h1 className="text-xl font-bold font-mono text-[#17212B] tracking-wider">
                 {incident.incident_id}
               </h1>
-              <span className="px-2 py-0.5 rounded-full bg-[#FFE4E6] text-[#E11D48] text-xs font-bold font-mono">
+              <span className="px-2.5 py-0.5 rounded-lg bg-[#FEF3F2] text-[#912020] border border-[#FECDCA] text-xs font-bold font-mono">
                 {req.blood_group}
               </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-[#FFF1F2] border border-[#FECDD3] text-[#E11D48] text-xs font-bold tracking-wide">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#FEF3F2] border border-[#FECDCA] text-[#912020] text-xs font-bold tracking-wide">
                 {req.urgency || 'CRITICAL'} · {unitsReq} UNITS
               </span>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-700">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#F8F9FA] border border-[#E6E8EC] text-[#475467]">
                 {status}
               </span>
             </div>
-            <p className="text-xs text-[#6B7280]">
-              Authoritative incident record · {unitsSecured} of {unitsReq} units secured
+            <p className="text-xs text-[#667085]">
+              Authoritative incident record · {unitsSecured} of {unitsReq} units clinically secured
             </p>
           </div>
 
@@ -259,23 +259,23 @@ export function IncidentDetailPage() {
                 <div key={s.label} className="flex items-center gap-1.5">
                   <div className="flex items-center gap-1">
                     {s.status === 'done' ? (
-                      <CheckCircle2 size={16} className="text-[#10B981]" />
+                      <CheckCircle2 size={16} className="text-[#16805D]" />
                     ) : s.status === 'active' ? (
-                      <div className="w-4 h-4 rounded-full border-2 border-[#E11D48] bg-[#FFE4E6] flex items-center justify-center">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#E11D48]" />
+                      <div className="w-4 h-4 rounded-full border-2 border-[#B42336] bg-[#FEF3F2] flex items-center justify-center">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#B42336]" />
                       </div>
                     ) : (
-                      <Circle size={16} className="text-[#D1D5DB]" />
+                      <Circle size={16} className="text-[#D0D5DD]" />
                     )}
                     <span className={cn(
                       'text-[11px] font-semibold',
-                      s.status === 'done' ? 'text-[#10B981]' : s.status === 'active' ? 'text-[#E11D48]' : 'text-[#9CA3AF]'
+                      s.status === 'done' ? 'text-[#16805D]' : s.status === 'active' ? 'text-[#B42336]' : 'text-[#98A2B3]'
                     )}>
                       {s.label}
                     </span>
                   </div>
                   {idx < STAGES.length - 1 && (
-                    <div className={cn('w-4 h-0.5', s.status === 'done' ? 'bg-[#10B981]' : 'bg-[#E5E7EB]')} />
+                    <div className={cn('w-4 h-0.5', s.status === 'done' ? 'bg-[#16805D]' : 'bg-[#E6E8EC]')} />
                   )}
                 </div>
               ))}
@@ -287,10 +287,10 @@ export function IncidentDetailPage() {
                 <button
                   onClick={handleVerifyRequirement}
                   disabled={isActionPending}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white font-bold text-xs shadow-xs transition-colors"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#B7791F] hover:bg-[#8D5A0F] text-white font-bold text-xs shadow-xs transition-colors"
                 >
                   <ShieldCheck size={15} />
-                  <span>{isActionPending ? 'Verifying...' : 'Verify Requirement'}</span>
+                  <span>{isActionPending ? 'Verifying...' : 'Verify Requisition'}</span>
                 </button>
               )}
 
@@ -298,7 +298,7 @@ export function IncidentDetailPage() {
                 <button
                   onClick={handleLaunchWave}
                   disabled={isActionPending}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#E11D48] hover:bg-[#BE123C] text-white font-bold text-xs shadow-xs transition-colors"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#B42336] hover:bg-[#861D2B] text-white font-bold text-xs shadow-xs transition-colors"
                 >
                   <Zap size={15} />
                   <span>{isActionPending ? 'Launching...' : 'Launch Wave 1'}</span>
@@ -309,7 +309,7 @@ export function IncidentDetailPage() {
                 <>
                   <button
                     onClick={() => navigate(`/response?incident=${incident.incident_id}`)}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#E11D48] hover:bg-[#BE123C] text-white font-bold text-xs shadow-xs transition-colors"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#B42336] hover:bg-[#861D2B] text-white font-bold text-xs shadow-xs transition-colors"
                   >
                     <Zap size={15} />
                     <span>Manage Response Cascade</span>
@@ -318,7 +318,7 @@ export function IncidentDetailPage() {
                   <button
                     onClick={handleConfirmFulfilment}
                     disabled={isActionPending}
-                    className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs shadow-xs transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#16805D] hover:bg-[#085D40] text-white font-bold text-xs shadow-xs transition-colors"
                   >
                     <Check size={14} />
                     <span>Confirm Fulfilment</span>
@@ -330,7 +330,7 @@ export function IncidentDetailPage() {
                 <button
                   onClick={handleCloseIncident}
                   disabled={isActionPending}
-                  className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-gray-900 hover:bg-black text-white font-bold text-xs shadow-xs transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#17212B] hover:bg-black text-white font-bold text-xs shadow-xs transition-colors"
                 >
                   <CheckCircle2 size={14} />
                   <span>Close Incident</span>
@@ -340,7 +340,7 @@ export function IncidentDetailPage() {
               <button
                 onClick={() => loadData(true)}
                 disabled={isRefreshing}
-                className="p-2.5 rounded-xl border border-[#E5E7EB] text-[#6B7280] hover:text-[#111827] hover:bg-[#F9FAFB] transition-colors"
+                className="p-2.5 rounded-xl border border-[#E6E8EC] text-[#667085] hover:text-[#17212B] hover:bg-[#F8F9FA] transition-colors"
               >
                 <RefreshCw size={15} className={cn(isRefreshing && 'animate-spin')} />
               </button>
@@ -351,76 +351,76 @@ export function IncidentDetailPage() {
 
       {/* Incident Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-2">
+        <div className="card-command p-4 space-y-2">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-[#EFF4FB] text-[#3567B7] flex items-center justify-center shrink-0">
               <MapPin size={16} />
             </div>
             <div>
-              <span className="text-[11px] text-[#6B7280] block font-medium">Location</span>
-              <span className="text-xs font-bold text-[#111827] block font-display">{req.location?.zone || incident.zone}, Pune</span>
-              <span className="text-[10px] text-[#6B7280] block truncate">{req.requesting_facility}</span>
+              <span className="text-[11px] text-[#667085] block font-medium">Location</span>
+              <span className="text-xs font-bold text-[#17212B] block font-display">{req.location?.zone || incident.zone}, Pune</span>
+              <span className="text-[10px] text-[#667085] block truncate">{req.requesting_facility}</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-2">
+        <div className="card-command p-4 space-y-2">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-[#FFE4E6] text-[#E11D48] flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-[#FEF3F2] text-[#B42336] flex items-center justify-center shrink-0">
               <Droplets size={16} />
             </div>
             <div>
-              <span className="text-[11px] text-[#6B7280] block font-medium">Blood Group</span>
-              <span className="text-xs font-bold text-[#111827] block font-display">{req.blood_group}</span>
-              <span className="text-[10px] text-[#6B7280] block">{unitsReq} Unit{unitsReq > 1 ? 's' : ''} requested</span>
+              <span className="text-[11px] text-[#667085] block font-medium">Blood Group</span>
+              <span className="text-xs font-bold text-[#17212B] block font-mono">{req.blood_group}</span>
+              <span className="text-[10px] text-[#667085] block">{unitsReq} Unit{unitsReq > 1 ? 's' : ''} requested</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-2">
+        <div className="card-command p-4 space-y-2">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-[#FEF3C7] text-[#D97706] flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-[#FEF7EC] text-[#B7791F] flex items-center justify-center shrink-0">
               <Layers size={16} />
             </div>
             <div>
-              <span className="text-[11px] text-[#6B7280] block font-medium">Units Secured</span>
-              <span className="text-xs font-bold text-[#111827] block font-display">{unitsSecured} / {unitsReq} Units</span>
-              <span className="text-[10px] text-[#6B7280] block">{Math.round((unitsSecured / unitsReq) * 100)}% Fulfilled</span>
+              <span className="text-[11px] text-[#667085] block font-medium">Units Secured</span>
+              <span className="text-xs font-bold text-[#17212B] block font-display">{unitsSecured} / {unitsReq} Units</span>
+              <span className="text-[10px] text-[#667085] block">{Math.round((unitsSecured / unitsReq) * 100)}% Fulfilled</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-2">
+        <div className="card-command p-4 space-y-2">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-[#EFF4FB] text-[#3567B7] flex items-center justify-center shrink-0">
               <Clock size={16} />
             </div>
             <div>
-              <span className="text-[11px] text-[#6B7280] block font-medium">Elapsed Duration</span>
-              <span className="text-xs font-bold text-[#111827] block font-mono">
+              <span className="text-[11px] text-[#667085] block font-medium">Elapsed Duration</span>
+              <span className="text-xs font-bold text-[#17212B] block font-mono">
                 {incident.elapsed_seconds ? `${Math.floor(incident.elapsed_seconds / 60)}m ${incident.elapsed_seconds % 60}s` : 'Live Tracking'}
               </span>
-              <span className="text-[10px] text-[#6B7280] block">Since requirement</span>
+              <span className="text-[10px] text-[#667085] block">Since requirement</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-2">
+        <div className="card-command p-4 space-y-2">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-[#FFE4E6] text-[#E11D48] flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-[#FEF3F2] text-[#B42336] flex items-center justify-center shrink-0">
               <AlertTriangle size={16} />
             </div>
             <div>
-              <span className="text-[11px] text-[#6B7280] block font-medium">Incident Urgency</span>
-              <span className="text-xs font-bold text-[#E11D48] block font-display">{req.urgency || 'High'}</span>
-              <span className="text-[10px] text-[#6B7280] block">Cascade Priority</span>
+              <span className="text-[11px] text-[#667085] block font-medium">Incident Urgency</span>
+              <span className="text-xs font-bold text-[#912020] block font-display">{req.urgency || 'High'}</span>
+              <span className="text-[10px] text-[#667085] block">Cascade Priority</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Tab Navigation Bar */}
-      <div className="border-b border-[#E5E7EB] flex items-center gap-6 text-xs font-semibold overflow-x-auto pb-0.5">
+      <div className="border-b border-[#E6E8EC] flex items-center gap-6 text-xs font-semibold overflow-x-auto pb-0.5">
         {TABS.map((tab) => {
           const isActive = activeTab === tab
           return (
@@ -430,8 +430,8 @@ export function IncidentDetailPage() {
               className={cn(
                 'py-2.5 transition-all relative whitespace-nowrap',
                 isActive
-                  ? 'text-[#E11D48] font-bold border-b-2 border-[#E11D48]'
-                  : 'text-[#6B7280] hover:text-[#111827]'
+                  ? 'text-[#B42336] font-bold border-b-2 border-[#B42336]'
+                  : 'text-[#667085] hover:text-[#17212B]'
               )}
             >
               {tab}
@@ -446,27 +446,27 @@ export function IncidentDetailPage() {
         <div className="lg:col-span-8 space-y-5">
           {/* TAB 1: Donor Matching */}
           {activeTab === 'Donor Matching' && (
-            <div className="bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
+            <div className="card-command p-5 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h3 className="text-sm font-bold text-[#111827] font-display">
+                  <h3 className="text-sm font-bold text-[#17212B] font-display">
                     Authoritative Candidate Rankings
                   </h3>
-                  <p className="text-xs text-[#6B7280]">
+                  <p className="text-xs text-[#667085]">
                     Candidates ranked by deterministic multi-factor scoring (compatibility, proximity, reliability, cooldown).
                   </p>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-bold text-[#059669] bg-[#D1FAE5] px-2.5 py-1 rounded-full border border-[#A7F3D0]">
+                  <span className="text-xs font-bold text-[#085D40] bg-[#EBFDF5] px-2.5 py-1 rounded-full border border-[#A6F4C5]">
                     {candidates.length} candidates available
                   </span>
                 </div>
               </div>
 
               {candidates.length === 0 ? (
-                <div className="text-center py-10 text-xs text-[#6B7280]">
-                  <p className="font-semibold text-sm text-[#111827]">No eligible candidates available</p>
+                <div className="text-center py-10 text-xs text-[#667085] bg-[#F8F9FA] rounded-xl border border-[#E6E8EC]">
+                  <p className="font-semibold text-sm text-[#17212B]">No eligible candidates available</p>
                   <p className="mt-1">All compatible donors may have recent contact attempts or cooldown active.</p>
                 </div>
               ) : (
@@ -476,29 +476,29 @@ export function IncidentDetailPage() {
                     return (
                       <div
                         key={c.donor_id}
-                        className="p-4 rounded-xl border border-[#E5E7EB] hover:border-[#E11D48] transition-all bg-[#F9FAFB] space-y-3"
+                        className="p-4 rounded-xl border border-[#E6E8EC] hover:border-[#B42336] transition-all bg-[#F8F9FA] space-y-3"
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
-                            <span className="font-bold text-xs text-[#6B7280]">#{c.rank || idx + 1}</span>
-                            <span className="font-mono font-bold text-sm text-[#111827]">{c.donor_id}</span>
-                            <span className="px-2 py-0.5 rounded bg-[#FFE4E6] text-[#E11D48] font-bold text-xs font-mono">
+                            <span className="font-bold text-xs text-[#667085]">#{c.rank || idx + 1}</span>
+                            <span className="font-mono font-bold text-sm text-[#17212B]">{c.donor_id}</span>
+                            <span className="px-2 py-0.5 rounded bg-[#FEF3F2] text-[#912020] border border-[#FECDCA] font-bold text-xs font-mono">
                               {c.blood_group}
                             </span>
-                            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#D1FAE5] text-[#059669]">
+                            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#EBFDF5] text-[#085D40] border border-[#A6F4C5]">
                               {c.readiness || 'Ready'}
                             </span>
                           </div>
 
-                          <div className="flex items-center gap-4 text-xs text-[#6B7280]">
+                          <div className="flex items-center gap-4 text-xs text-[#667085]">
                             <span>📍 {c.distance_km?.toFixed(1) || '3.2'} km</span>
                             <span>⏱ ~{c.estimated_arrival_minutes || 15} mins</span>
-                            <span className="font-bold text-[#10B981]">
+                            <span className="font-bold text-[#16805D]">
                               Score: {c.composite_score ? Math.round(c.composite_score * 100) : 88}%
                             </span>
                             <button
                               onClick={() => setExpandedId(isExpanded ? null : c.donor_id)}
-                              className="text-xs font-semibold text-[#E11D48] hover:underline"
+                              className="text-xs font-semibold text-[#B42336] hover:underline"
                             >
                               {isExpanded ? 'Less' : 'Why?'}
                             </button>
@@ -507,10 +507,10 @@ export function IncidentDetailPage() {
 
                         {/* Explainable Factor Breakdown */}
                         {isExpanded && (
-                          <div className="pt-2 border-t border-[#E5E7EB] text-xs text-[#4B5563] space-y-1 bg-white p-3 rounded-lg">
-                            <span className="font-bold text-[#111827] block">Match Explanation:</span>
+                          <div className="pt-2 border-t border-[#E6E8EC] text-xs text-[#475467] space-y-1 bg-white p-3 rounded-lg border border-[#E6E8EC]">
+                            <span className="font-bold text-[#17212B] block">Match Explanation:</span>
                             <p>{c.explanation || `Antigen match confirmed for ${c.blood_group}. Located in ${c.zone || 'Pune'} zone.`}</p>
-                            <div className="grid grid-cols-3 gap-2 pt-1 text-[11px] font-mono text-[#6B7280]">
+                            <div className="grid grid-cols-3 gap-2 pt-1 text-[11px] font-mono text-[#667085]">
                               <div>Distance Score: {c.distance_score ? c.distance_score.toFixed(2) : '0.90'}</div>
                               <div>Reliability: {c.reliability_contribution ? c.reliability_contribution.toFixed(2) : '0.85'}</div>
                               <div>Cooldown Penalty: {c.cooldown_penalty ? c.cooldown_penalty.toFixed(2) : '0.00'}</div>
@@ -527,46 +527,46 @@ export function IncidentDetailPage() {
 
           {/* TAB 2: Response Cascade */}
           {activeTab === 'Response Cascade' && (
-            <div className="bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
+            <div className="card-command p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-[#111827] font-display">
+                  <h3 className="text-sm font-bold text-[#17212B] font-display">
                     Response Cascade & Outreach Waves
                   </h3>
-                  <p className="text-xs text-[#6B7280]">
+                  <p className="text-xs text-[#667085]">
                     Authoritative wave progression and outreach tracking.
                   </p>
                 </div>
                 <button
                   onClick={() => navigate(`/response?incident=${incident.incident_id}`)}
-                  className="px-3.5 py-1.5 rounded-lg bg-[#E11D48] text-white text-xs font-bold hover:bg-[#BE123C]"
+                  className="px-3.5 py-1.5 rounded-lg bg-[#B42336] text-white text-xs font-bold hover:bg-[#861D2B] transition-colors"
                 >
                   Open Cascade Workspace
                 </button>
               </div>
 
               {waves.length === 0 ? (
-                <div className="text-center py-8 text-xs text-[#6B7280]">
+                <div className="text-center py-8 text-xs text-[#667085] bg-[#F8F9FA] rounded-xl border border-[#E6E8EC]">
                   No response waves have been activated yet. Verify requirement and launch Wave 1.
                 </div>
               ) : (
                 <div className="space-y-3">
                   {waves.map((w: any) => (
-                    <div key={w.wave_number} className="p-4 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] flex items-center justify-between text-xs">
+                    <div key={w.wave_number} className="p-4 rounded-xl border border-[#E6E8EC] bg-[#F8F9FA] flex items-center justify-between text-xs">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm text-[#111827]">Wave {w.wave_number}</span>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EFF6FF] text-[#2563EB]">
+                          <span className="font-bold text-sm text-[#17212B]">Wave {w.wave_number}</span>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EFF4FB] border border-[#B9D3F8] text-[#234B8E]">
                             {w.status}
                           </span>
                         </div>
-                        <p className="text-[#6B7280]">
+                        <p className="text-[#667085]">
                           {w.donors_contacted} donors contacted · {w.responses_received || 0} responses · {w.confirmed || 0} confirmed
                         </p>
                       </div>
 
                       <div className="text-right">
-                        <span className="text-sm font-bold text-[#10B981] font-display">
+                        <span className="text-sm font-bold text-[#16805D] font-display">
                           {w.units_secured || 0} units secured
                         </span>
                       </div>
@@ -579,26 +579,26 @@ export function IncidentDetailPage() {
 
           {/* TAB 3: Audit Log */}
           {activeTab === 'Audit Log' && (
-            <div className="bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
-              <h3 className="text-sm font-bold text-[#111827] font-display">
+            <div className="card-command p-5 space-y-4">
+              <h3 className="text-sm font-bold text-[#17212B] font-display">
                 Incident Audit Ledger
               </h3>
               {auditEvents.length === 0 ? (
-                <div className="text-center py-8 text-xs text-[#6B7280]">
+                <div className="text-center py-8 text-xs text-[#667085] bg-[#F8F9FA] rounded-xl border border-[#E6E8EC]">
                   No audit trail recorded for this incident yet.
                 </div>
               ) : (
-                <div className="divide-y divide-gray-100 max-h-96 overflow-y-auto">
+                <div className="divide-y divide-[#F2F4F7] max-h-96 overflow-y-auto">
                   {auditEvents.map((evt: any) => (
                     <div key={evt.event_id || evt.id} className="py-2.5 text-xs flex items-center justify-between">
                       <div>
-                        <span className="font-bold text-[#111827]">{evt.action_type || evt.action}</span>
-                        <span className="text-[#6B7280] ml-2">by {evt.actor_id || 'System'}</span>
-                        <span className="text-[#9CA3AF] ml-2 font-mono text-[10px]">
+                        <span className="font-bold text-[#17212B]">{evt.action_type || evt.action}</span>
+                        <span className="text-[#667085] ml-2">by {evt.actor_id || 'System'}</span>
+                        <span className="text-[#98A2B3] ml-2 font-mono text-[10px]">
                           {evt.timestamp ? new Date(evt.timestamp).toLocaleTimeString() : ''}
                         </span>
                       </div>
-                      <span className="font-mono text-[10px] text-gray-400">
+                      <span className="font-mono text-[10px] text-[#98A2B3]">
                         {evt.state_hash ? evt.state_hash.slice(0, 10) + '...' : ''}
                       </span>
                     </div>
@@ -611,25 +611,25 @@ export function IncidentDetailPage() {
 
         {/* RIGHT COLUMN: Map & Explanations (Col 4 / ~32%) */}
         <div className="lg:col-span-4 space-y-5">
-          <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-3">
-            <h4 className="text-xs font-bold text-[#111827] font-display">Hospital & Response Zone</h4>
-            <div className="h-48 rounded-xl overflow-hidden border border-[#E5E7EB]">
+          <div className="card-command p-4 space-y-3">
+            <h4 className="text-xs font-bold text-[#17212B] font-display">Hospital & Response Zone</h4>
+            <div className="rounded-xl overflow-hidden border border-[#E6E8EC]">
               <PuneNetworkMap />
             </div>
-            <div className="text-xs text-[#4B5563] space-y-1 pt-1">
-              <div className="font-bold text-[#111827]">{req.requesting_facility}</div>
-              <div className="text-[11px] text-[#6B7280]">{req.location?.zone || incident.zone}, Pune District</div>
+            <div className="text-xs text-[#475467] space-y-1 pt-1">
+              <div className="font-bold text-[#17212B]">{req.requesting_facility}</div>
+              <div className="text-[11px] text-[#667085]">{req.location?.zone || incident.zone}, Pune District</div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-2xs space-y-3">
+          <div className="card-command p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold text-[#111827] font-display">Matching Criteria</h4>
-              <span className="text-[10px] font-bold text-[#2563EB] bg-[#EFF6FF] px-2 py-0.5 rounded-full border border-[#BFDBFE] flex items-center gap-1">
+              <h4 className="text-xs font-bold text-[#17212B] font-display">Matching Criteria</h4>
+              <span className="text-[10px] font-bold text-[#234B8E] bg-[#EFF4FB] px-2 py-0.5 rounded-full border border-[#B9D3F8] flex items-center gap-1">
                 <Sparkles size={11} /> Explainable
               </span>
             </div>
-            <p className="text-xs text-[#6B7280]">
+            <p className="text-xs text-[#667085]">
               Candidates are evaluated against strict clinical safety standards. Contact attempts exclude previously contacted donors.
             </p>
           </div>

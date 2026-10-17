@@ -37,28 +37,28 @@ const URGENCY_OPTIONS: { level: IncidentUrgency; label: string; desc: string; ic
     label: 'Critical',
     desc: 'Immediate response required',
     icon: Flame,
-    activeColor: 'border-[#E11D48] bg-[#FFF1F2] text-[#E11D48]',
+    activeColor: 'border-[#B42336] bg-[#FEF3F2] text-[#912020]',
   },
   {
     level: 'High',
     label: 'High',
     desc: 'Within 2–6 hours',
     icon: ShieldAlert,
-    activeColor: 'border-[#F59E0B] bg-[#FFFBEB] text-[#D97706]',
+    activeColor: 'border-[#B7791F] bg-[#FEF7EC] text-[#8D5A0F]',
   },
   {
     level: 'Moderate',
     label: 'Moderate',
     desc: 'Within 6–24 hours',
     icon: Clock,
-    activeColor: 'border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]',
+    activeColor: 'border-[#3567B7] bg-[#EFF4FB] text-[#234B8E]',
   },
   {
     level: 'Routine',
     label: 'Routine',
-    desc: 'Planned requirement',
+    desc: 'Planned requisition',
     icon: Building2,
-    activeColor: 'border-[#4B5563] bg-[#F9FAFB] text-[#374151]',
+    activeColor: 'border-[#667085] bg-[#F8F9FA] text-[#17212B]',
   },
 ]
 
@@ -149,49 +149,49 @@ export function CreateIncidentPage() {
   }
 
   return (
-    <div className="space-y-5 animate-fade-in font-body text-[#111827] max-w-[1600px] mx-auto pb-12">
+    <div className="space-y-6 animate-fade-in font-body text-[#17212B] max-w-[1600px] mx-auto pb-12">
       {/* Back Link & Header Row */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-1 border-b border-[#E5E7EB]">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-[#E6E8EC]">
         <div>
           <button
             onClick={() => navigate('/incidents')}
-            className="text-xs font-semibold text-[#6B7280] hover:text-[#111827] mb-1 flex items-center gap-1 transition-colors"
+            className="text-xs font-semibold text-[#667085] hover:text-[#17212B] mb-1.5 flex items-center gap-1 transition-colors"
           >
-            <ArrowLeft size={14} /> Back to Incidents
+            <ArrowLeft size={14} /> Back to Incidents Work Queue
           </button>
-          <h1 className="text-2xl font-bold font-display text-[#111827] tracking-tight">
-            Create Blood Incident
+          <h1 className="text-2xl sm:text-3xl font-bold font-display text-[#17212B] tracking-tight">
+            Create Blood Requirement Requisition
           </h1>
-          <p className="text-xs text-[#6B7280] mt-0.5">
-            Submit a real blood requirement to the canonical database and trigger candidate matching.
+          <p className="text-xs text-[#667085] mt-0.5">
+            Submit a real clinical blood requirement to the canonical database and trigger candidate matching waves.
           </p>
         </div>
 
         {/* Top Right Contextual Alert Pill */}
-        <div className="p-3 rounded-xl bg-[#FFF1F2] border border-[#FECDD3] flex items-center gap-3 self-start lg:self-auto max-w-md">
-          <div className="w-8 h-8 rounded-full bg-[#E11D48] text-white flex items-center justify-center shrink-0 shadow-2xs">
+        <div className="p-3 rounded-xl bg-[#FEF3F2] border border-[#FECDCA] flex items-center gap-3 self-start lg:self-auto max-w-md">
+          <div className="w-8 h-8 rounded-lg bg-[#B42336] text-white flex items-center justify-center shrink-0 shadow-2xs">
             <Droplets size={16} />
           </div>
           <div>
-            <span className="text-xs font-bold text-[#E11D48] block">Authoritative Requirement Flow</span>
-            <span className="text-[11px] text-[#4B5563]">Requirements are persisted to database as PendingVerification until clinically approved.</span>
+            <span className="text-xs font-bold text-[#912020] block">Authoritative Clinical Flow</span>
+            <span className="text-[11px] text-[#475467]">Requirements are persisted to database as PendingVerification until clinically approved.</span>
           </div>
         </div>
       </div>
 
       {/* Error Banner */}
       {error && (
-        <div className="bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-4 flex items-start justify-between gap-3 text-xs text-[#991B1B]">
+        <div className="bg-[#FEF3F2] border border-[#FECDCA] rounded-xl p-4 flex items-start justify-between gap-3 text-xs text-[#912020]">
           <div className="flex items-start gap-2.5">
-            <AlertCircle size={18} className="text-[#DC2626] shrink-0 mt-0.5" />
+            <AlertCircle size={18} className="text-[#C62828] shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold text-sm text-[#991B1B]">Submission Error</p>
-              <p className="mt-0.5 text-[#B91C1C]">{error}</p>
+              <p className="font-bold text-sm text-[#912020]">Submission Error</p>
+              <p className="mt-0.5 text-[#B42336]">{error}</p>
             </div>
           </div>
           <button
             onClick={() => setError(null)}
-            className="text-xs font-semibold text-[#DC2626] hover:underline"
+            className="text-xs font-semibold text-[#B42336] hover:underline"
           >
             Dismiss
           </button>
@@ -203,10 +203,10 @@ export function CreateIncidentPage() {
         <form onSubmit={handleSubmitRequirement}>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* LEFT COLUMN: Requirement Specifications (7 cols) */}
-            <div className="lg:col-span-7 bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-2xs space-y-6">
+            <div className="lg:col-span-7 card-command p-6 space-y-6">
               {/* Section 1: Blood Group & Units */}
               <div className="space-y-3">
-                <label className="text-xs font-bold text-[#111827] uppercase tracking-wider block">
+                <label className="text-xs font-bold text-[#17212B] uppercase tracking-wider block">
                   Required Blood Group
                 </label>
                 <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
@@ -216,10 +216,10 @@ export function CreateIncidentPage() {
                       type="button"
                       onClick={() => setForm({ ...form, blood_group: bg })}
                       className={cn(
-                        'py-2.5 rounded-xl text-xs font-bold font-display border transition-all text-center',
+                        'py-2.5 rounded-xl text-xs font-bold font-mono border transition-all text-center',
                         form.blood_group === bg
-                          ? 'bg-[#E11D48] text-white border-[#E11D48] shadow-xs'
-                          : 'bg-[#F9FAFB] text-[#4B5563] border-[#E5E7EB] hover:bg-gray-100 hover:border-gray-300'
+                          ? 'bg-[#B42336] text-white border-[#B42336] shadow-xs'
+                          : 'bg-[#F8F9FA] text-[#475467] border-[#E6E8EC] hover:bg-[#F2F4F7] hover:border-[#D0D5DD]'
                       )}
                     >
                       {bg}
@@ -228,7 +228,7 @@ export function CreateIncidentPage() {
                 </div>
 
                 <div className="pt-3">
-                  <label className="text-xs font-bold text-[#111827] uppercase tracking-wider block mb-2">
+                  <label className="text-xs font-bold text-[#17212B] uppercase tracking-wider block mb-2">
                     Units Required
                   </label>
                   <div className="grid grid-cols-6 gap-2">
@@ -240,8 +240,8 @@ export function CreateIncidentPage() {
                         className={cn(
                           'py-2 rounded-xl text-xs font-bold border transition-all',
                           form.units === u
-                            ? 'bg-[#111827] text-white border-[#111827]'
-                            : 'bg-[#F9FAFB] text-[#4B5563] border-[#E5E7EB] hover:bg-gray-100'
+                            ? 'bg-[#17212B] text-white border-[#17212B]'
+                            : 'bg-[#F8F9FA] text-[#475467] border-[#E6E8EC] hover:bg-[#F2F4F7]'
                         )}
                       >
                         {u} Unit{u > 1 ? 's' : ''}
@@ -252,8 +252,8 @@ export function CreateIncidentPage() {
               </div>
 
               {/* Section 2: Clinical Urgency Level */}
-              <div className="space-y-3 pt-2 border-t border-[#F3F4F6]">
-                <label className="text-xs font-bold text-[#111827] uppercase tracking-wider block">
+              <div className="space-y-3 pt-2 border-t border-[#F2F4F7]">
+                <label className="text-xs font-bold text-[#17212B] uppercase tracking-wider block">
                   Clinical Urgency Level
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -268,15 +268,15 @@ export function CreateIncidentPage() {
                           'p-3.5 rounded-xl border transition-all cursor-pointer flex items-start gap-3',
                           isSelected
                             ? opt.activeColor
-                            : 'border-[#E5E7EB] bg-[#F9FAFB] hover:border-gray-300 hover:bg-white text-[#4B5563]'
+                            : 'border-[#E6E8EC] bg-[#F8F9FA] hover:border-[#D0D5DD] hover:bg-white text-[#475467]'
                         )}
                       >
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-white/70 shadow-2xs">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-white shadow-2xs border border-[#E6E8EC]">
                           <Icon size={16} />
                         </div>
                         <div className="space-y-0.5">
-                          <span className="font-bold text-xs block text-[#111827]">{opt.label}</span>
-                          <span className="text-[11px] leading-tight block text-[#6B7280]">{opt.desc}</span>
+                          <span className="font-bold text-xs block text-[#17212B]">{opt.label}</span>
+                          <span className="text-[11px] leading-tight block text-[#667085]">{opt.desc}</span>
                         </div>
                       </div>
                     )
@@ -285,35 +285,35 @@ export function CreateIncidentPage() {
               </div>
 
               {/* Section 3: Facility & Geographic Zone */}
-              <div className="space-y-4 pt-2 border-t border-[#F3F4F6]">
+              <div className="space-y-4 pt-2 border-t border-[#F2F4F7]">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-[#111827] mb-1.5">
+                    <label className="block text-xs font-bold text-[#17212B] mb-1.5">
                       Requesting Medical Facility *
                     </label>
                     <div className="relative">
-                      <Building2 size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <Building2 size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#98A2B3]" />
                       <input
                         type="text"
                         required
                         value={form.facility}
                         onChange={(e) => setForm({ ...form, facility: e.target.value })}
                         placeholder="Hospital or Blood Bank Name"
-                        className="w-full bg-[#F9FAFB] border border-[#E5E7EB] focus:border-[#E11D48] rounded-xl pl-9 pr-3 py-2 text-xs font-semibold text-[#111827] outline-none"
+                        className="w-full bg-[#F8F9FA] border border-[#E6E8EC] focus:border-[#B42336] focus:ring-2 focus:ring-[#FDF2F4] rounded-xl pl-9 pr-3 py-2 text-xs font-semibold text-[#17212B] outline-none transition-all"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-[#111827] mb-1.5">
+                    <label className="block text-xs font-bold text-[#17212B] mb-1.5">
                       Geographic Response Zone *
                     </label>
                     <div className="relative">
-                      <MapPin size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <MapPin size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#98A2B3]" />
                       <select
                         value={form.zone}
                         onChange={(e) => setForm({ ...form, zone: e.target.value })}
-                        className="w-full bg-[#F9FAFB] border border-[#E5E7EB] focus:border-[#E11D48] rounded-xl pl-9 pr-3 py-2 text-xs font-semibold text-[#111827] outline-none"
+                        className="w-full bg-[#F8F9FA] border border-[#E6E8EC] focus:border-[#B42336] focus:ring-2 focus:ring-[#FDF2F4] rounded-xl pl-9 pr-3 py-2 text-xs font-semibold text-[#17212B] outline-none transition-all cursor-pointer"
                       >
                         {Object.keys(ZONE_COORDINATES).map((z) => (
                           <option key={z} value={z}>{z}</option>
@@ -325,33 +325,33 @@ export function CreateIncidentPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-[#111827] mb-1.5">
+                    <label className="block text-xs font-bold text-[#17212B] mb-1.5">
                       Attending Contact Name
                     </label>
                     <div className="relative">
-                      <User size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#98A2B3]" />
                       <input
                         type="text"
                         value={form.contactPerson}
                         onChange={(e) => setForm({ ...form, contactPerson: e.target.value })}
                         placeholder="Dr. / Officer Name"
-                        className="w-full bg-[#F9FAFB] border border-[#E5E7EB] focus:border-[#E11D48] rounded-xl pl-9 pr-3 py-2 text-xs font-semibold text-[#111827] outline-none"
+                        className="w-full bg-[#F8F9FA] border border-[#E6E8EC] focus:border-[#B42336] focus:ring-2 focus:ring-[#FDF2F4] rounded-xl pl-9 pr-3 py-2 text-xs font-semibold text-[#17212B] outline-none transition-all"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-[#111827] mb-1.5">
+                    <label className="block text-xs font-bold text-[#17212B] mb-1.5">
                       Emergency Contact Number
                     </label>
                     <div className="relative">
-                      <Phone size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <Phone size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#98A2B3]" />
                       <input
                         type="text"
                         value={form.contactNumber}
                         onChange={(e) => setForm({ ...form, contactNumber: e.target.value })}
                         placeholder="+91 Phone Number"
-                        className="w-full bg-[#F9FAFB] border border-[#E5E7EB] focus:border-[#E11D48] rounded-xl pl-9 pr-3 py-2 text-xs font-semibold text-[#111827] outline-none"
+                        className="w-full bg-[#F8F9FA] border border-[#E6E8EC] focus:border-[#B42336] focus:ring-2 focus:ring-[#FDF2F4] rounded-xl pl-9 pr-3 py-2 text-xs font-semibold text-[#17212B] outline-none transition-all"
                       />
                     </div>
                   </div>
@@ -359,10 +359,10 @@ export function CreateIncidentPage() {
               </div>
 
               {/* Submit CTA */}
-              <div className="pt-3 border-t border-[#F3F4F6] flex justify-end">
+              <div className="pt-3 border-t border-[#F2F4F7] flex justify-end">
                 <button
                   type="submit"
-                  className="w-full sm:w-auto px-8 py-3 rounded-xl bg-[#E11D48] hover:bg-[#BE123C] text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto px-8 py-3 rounded-xl bg-[#B42336] hover:bg-[#861D2B] text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
                 >
                   <span>Submit Requirement to Database →</span>
                 </button>
@@ -371,30 +371,30 @@ export function CreateIncidentPage() {
 
             {/* RIGHT COLUMN: Live Summary & Map Preview (5 cols) */}
             <div className="lg:col-span-5 space-y-5">
-              <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-2xs space-y-4">
-                <h3 className="text-sm font-bold text-[#111827] uppercase tracking-wider">Requirement Summary</h3>
+              <div className="card-command p-5 space-y-4">
+                <h3 className="text-sm font-bold text-[#17212B] uppercase tracking-wider">Requirement Summary</h3>
 
-                <div className="p-4 rounded-xl bg-[#FFF1F2] border border-[#FECDD3] flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-full bg-[#E11D48] text-white flex items-center justify-center shrink-0 shadow-2xs font-bold text-sm">
+                <div className="p-4 rounded-xl bg-[#FEF3F2] border border-[#FECDCA] flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-lg bg-[#B42336] text-white flex items-center justify-center shrink-0 shadow-2xs font-bold text-sm">
                     <Droplets size={20} />
                   </div>
 
                   <div className="space-y-0.5">
-                    <div className="text-sm font-bold text-[#111827] font-display">
-                      {form.blood_group} · {form.units} Unit{form.units > 1 ? 's' : ''} · <span className="text-[#E11D48]">{form.urgency}</span>
+                    <div className="text-sm font-bold text-[#17212B] font-display">
+                      {form.blood_group} · {form.units} Unit{form.units > 1 ? 's' : ''} · <span className="text-[#912020]">{form.urgency}</span>
                     </div>
-                    <div className="text-xs text-[#4B5563] flex items-center gap-1 font-medium">
-                      <Building2 size={13} className="text-[#9CA3AF]" />
+                    <div className="text-xs text-[#475467] flex items-center gap-1 font-medium">
+                      <Building2 size={13} className="text-[#98A2B3]" />
                       {form.facility}
                     </div>
-                    <div className="text-[11px] text-[#6B7280] flex items-center gap-1">
-                      <MapPin size={12} className="text-[#9CA3AF]" />
+                    <div className="text-[11px] text-[#667085] flex items-center gap-1">
+                      <MapPin size={12} className="text-[#98A2B3]" />
                       {form.zone}
                     </div>
                   </div>
                 </div>
 
-                <div className="h-56 rounded-xl overflow-hidden border border-[#E5E7EB]">
+                <div className="rounded-xl overflow-hidden">
                   <PuneNetworkMap />
                 </div>
               </div>
@@ -405,10 +405,10 @@ export function CreateIncidentPage() {
 
       {/* Submitting State */}
       {step === 'submitting' && (
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] p-10 max-w-md mx-auto shadow-sm text-center space-y-4 animate-scale-up">
-          <Loader2 size={36} className="text-[#E11D48] animate-spin mx-auto" />
-          <h3 className="text-base font-bold text-[#111827]">Persisting Blood Requirement...</h3>
-          <p className="text-xs text-[#6B7280]">
+        <div className="card-command p-10 max-w-md mx-auto shadow-sm text-center space-y-4 animate-fade-in">
+          <Loader2 size={36} className="text-[#B42336] animate-spin mx-auto" />
+          <h3 className="text-base font-bold text-[#17212B]">Persisting Blood Requirement...</h3>
+          <p className="text-xs text-[#667085]">
             Sending canonical payload to FastAPI persistence engine and registering audit trail.
           </p>
         </div>
@@ -416,40 +416,40 @@ export function CreateIncidentPage() {
 
       {/* Created State Confirmation */}
       {step === 'created' && createdIncident && (
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] p-8 max-w-lg mx-auto shadow-sm text-center space-y-5 animate-scale-up">
-          <div className="w-16 h-16 rounded-full bg-[#ECFDF5] text-[#10B981] flex items-center justify-center mx-auto border border-[#A7F3D0]">
+        <div className="card-command p-8 max-w-lg mx-auto shadow-sm text-center space-y-5 animate-fade-in">
+          <div className="w-16 h-16 rounded-full bg-[#EBFDF5] text-[#16805D] flex items-center justify-center mx-auto border border-[#A6F4C5]">
             <CheckCircle2 size={32} />
           </div>
 
           <div>
-            <span className="text-[10px] font-bold text-[#059669] uppercase tracking-wider block">
+            <span className="text-[10px] font-bold text-[#085D40] uppercase tracking-wider block">
               CANONICAL INCIDENT PERSISTED
             </span>
-            <h2 className="text-xl font-bold text-[#111827] font-display mt-0.5">
+            <h2 className="text-xl font-bold text-[#17212B] font-display mt-0.5">
               Requirement Successfully Created
             </h2>
-            <p className="font-mono text-base font-bold text-[#E11D48] mt-2 bg-[#FFF1F2] py-1 px-3 rounded-lg inline-block border border-[#FECDD3]">
+            <p className="font-mono text-base font-bold text-[#912020] mt-2 bg-[#FEF3F2] py-1 px-3 rounded-lg inline-block border border-[#FECDCA]">
               {createdIncident.incident_id}
             </p>
-            <p className="text-xs text-[#6B7280] mt-2">
-              Status: <span className="font-bold text-[#111827]">{createdIncident.status}</span> · {createdIncident.blood_group} · {createdIncident.units_requested} Units · {createdIncident.zone}
+            <p className="text-xs text-[#667085] mt-2">
+              Status: <span className="font-bold text-[#17212B]">{createdIncident.status}</span> · {createdIncident.blood_group} · {createdIncident.units_requested} Units · {createdIncident.zone}
             </p>
           </div>
 
           {createdIncident.status === 'PendingVerification' && (
-            <div className="p-4 bg-[#FFFBEB] border border-[#FDE68A] rounded-xl text-xs text-[#92400E] text-left space-y-2">
+            <div className="p-4 bg-[#FEF7EC] border border-[#FDE2B5] rounded-xl text-xs text-[#8D5A0F] text-left space-y-2">
               <div className="flex items-center gap-1.5 font-bold">
-                <ShieldAlert size={15} className="text-[#D97706]" />
+                <ShieldAlert size={15} className="text-[#B7791F]" />
                 <span>Verification Required</span>
               </div>
-              <p className="text-[11px] text-[#B45309]">
+              <p className="text-[11px] text-[#8D5A0F]">
                 Per clinical safety rules, this requirement is saved in <strong>PendingVerification</strong> status. Waves cannot be dispatched until verified.
               </p>
               <button
                 type="button"
                 onClick={handleVerifyNow}
                 disabled={isVerifying}
-                className="w-full py-2 bg-[#D97706] hover:bg-[#B45309] disabled:opacity-60 text-white font-bold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                className="w-full py-2 bg-[#B7791F] hover:bg-[#8D5A0F] disabled:opacity-60 text-white font-bold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-2xs"
               >
                 {isVerifying ? (
                   <>
@@ -469,13 +469,13 @@ export function CreateIncidentPage() {
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <button
               onClick={() => navigate(`/incidents/${createdIncident.incident_id}`)}
-              className="flex-1 py-2.5 rounded-xl bg-[#E11D48] hover:bg-[#BE123C] text-white font-bold text-xs transition-colors shadow-xs"
+              className="flex-1 py-2.5 rounded-xl bg-[#B42336] hover:bg-[#861D2B] text-white font-bold text-xs transition-colors shadow-xs"
             >
               Open Incident Command →
             </button>
             <button
               onClick={() => navigate('/incidents')}
-              className="flex-1 py-2.5 rounded-xl border border-[#E5E7EB] text-[#4B5563] hover:text-[#111827] hover:bg-[#F9FAFB] font-semibold text-xs transition-colors"
+              className="flex-1 py-2.5 rounded-xl border border-[#E6E8EC] text-[#475467] hover:text-[#17212B] hover:bg-[#F8F9FA] font-semibold text-xs transition-colors"
             >
               Back to Incidents List
             </button>
@@ -485,3 +485,4 @@ export function CreateIncidentPage() {
     </div>
   )
 }
+

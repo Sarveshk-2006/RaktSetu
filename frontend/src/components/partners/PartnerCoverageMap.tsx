@@ -20,9 +20,12 @@ export function PartnerCoverageMap({ partner }: PartnerCoverageMapProps) {
       mapInstanceRef.current = null
     }
 
+    const lat = Number(partner.lat) || 18.5204
+    const lng = Number(partner.lng) || 73.8567
+
     // Initialize map centered at partner location
     const map = L.map(mapRef.current, {
-      center: [partner.lat, partner.lng],
+      center: [lat, lng],
       zoom: 12,
       zoomControl: false,
       attributionControl: false,
@@ -40,20 +43,20 @@ export function PartnerCoverageMap({ partner }: PartnerCoverageMapProps) {
     L.control.zoom({ position: 'topleft' }).addTo(map)
 
     // Primary Coverage Circle
-    L.circle([partner.lat, partner.lng], {
+    L.circle([lat, lng], {
       radius: 3500,
-      color: '#E11D48',
-      fillColor: '#E11D48',
+      color: '#B42336',
+      fillColor: '#B42336',
       fillOpacity: 0.18,
       weight: 1.5,
       dashArray: '4, 4',
     }).addTo(map)
 
     // Secondary Coverage Circle
-    L.circle([partner.lat, partner.lng], {
+    L.circle([lat, lng], {
       radius: 6500,
-      color: '#F59E0B',
-      fillColor: '#F59E0B',
+      color: '#B7791F',
+      fillColor: '#B7791F',
       fillOpacity: 0.08,
       weight: 1,
       dashArray: '6, 6',
@@ -64,34 +67,34 @@ export function PartnerCoverageMap({ partner }: PartnerCoverageMapProps) {
       className: 'partner-node-marker',
       html: `
         <div style="
-          width: 32px;
-          height: 32px;
+          width: 30px;
+          height: 30px;
           border-radius: 9999px;
-          background-color: #E11D48;
+          background-color: #B42336;
           color: #ffffff;
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: 800;
-          font-size: 13px;
+          font-size: 12px;
           font-family: system-ui, sans-serif;
           border: 2px solid #ffffff;
-          box-shadow: 0 4px 10px rgba(225, 29, 72, 0.4);
+          box-shadow: 0 4px 10px rgba(180, 35, 54, 0.35);
         ">
           P
         </div>
       `,
-      iconSize: [32, 32],
-      iconAnchor: [16, 16],
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
     })
 
-    const marker = L.marker([partner.lat, partner.lng], { icon: partnerIcon }).addTo(map)
+    const marker = L.marker([lat, lng], { icon: partnerIcon }).addTo(map)
 
     marker.bindPopup(`
       <div style="font-family: system-ui, sans-serif; padding: 2px;">
-        <div style="font-weight: 700; color: #111827; font-size: 12px;">${partner.name}</div>
-        <div style="font-size: 11px; color: #E11D48; font-weight: 600;">${partner.typeLabel}</div>
-        <div style="font-size: 10px; color: #6B7280; margin-top: 4px;">Zones: ${partner.zones.join(', ')}</div>
+        <div style="font-weight: 700; color: #17212B; font-size: 12px;">${partner.name}</div>
+        <div style="font-size: 11px; color: #B42336; font-weight: 600;">${partner.typeLabel || partner.type || 'Partner Node'}</div>
+        <div style="font-size: 10px; color: #667085; margin-top: 4px;">Zones: ${(partner.zones || []).join(', ') || 'Pune District'}</div>
       </div>
     `)
 
