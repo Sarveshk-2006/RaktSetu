@@ -70,11 +70,11 @@ export function PartnerDetailPage() {
   if (isLoading) {
     return (
       <div className="space-y-6 animate-fade-in font-body text-[#17212B] max-w-[1400px] mx-auto pb-16">
-        <div className="h-6 w-32 bg-gray-200 rounded animate-pulse" />
-        <div className="h-40 card-command p-6 animate-pulse" />
+        <div className="h-6 w-32 skeleton-shimmer" />
+        <div className="h-40 skeleton-shimmer border border-[#E6E8EC]" />
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-24 card-command animate-pulse" />
+            <div key={i} className="h-24 skeleton-shimmer border border-[#E6E8EC]" />
           ))}
         </div>
       </div>
@@ -445,7 +445,7 @@ export function PartnerDetailPage() {
       {/* Coordinate Modal */}
       {showCoordinateModal && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
-          <div className="card-command max-w-md w-full p-5 space-y-4 animate-scale-up border-[#E6E8EC] shadow-2xl">
+          <div className="card-command max-w-md w-full p-5 space-y-4 animate-scale-in border-[#E6E8EC] shadow-2xl">
             <div className="flex items-center justify-between pb-2 border-b border-[#E6E8EC]">
               <div className="flex items-center gap-2">
                 <Send size={16} className="text-[#B42336]" />
@@ -480,12 +480,26 @@ export function PartnerDetailPage() {
               </button>
               <button
                 onClick={handleSimulateCoordination}
-                className="px-4 py-2 rounded-xl bg-[#B42336] hover:bg-[#861D2B] text-white text-xs font-bold transition-colors shadow-xs"
+                className="px-4 py-2 rounded-xl bg-[#B42336] hover:bg-[#861D2B] text-white text-xs font-bold transition-colors shadow-xs active:scale-95"
               >
                 Send Request
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Success Toast Notification */}
+      {showSuccessToast && (
+        <div className="fixed bottom-6 right-6 z-50 bg-[#17212B] text-white px-4 py-3 rounded-xl shadow-dropdown border border-[#E6E8EC] flex items-center gap-3 animate-toast-enter">
+          <CheckCircle2 size={18} className="text-[#16805D]" />
+          <div className="text-xs">
+            <span className="font-bold block">Coordination Request Dispatched</span>
+            <span className="text-[#98A2B3]">Emergency mutual-aid alert sent to {partner.name} nodal desk.</span>
+          </div>
+          <button onClick={() => setShowSuccessToast(false)} className="text-[#98A2B3] hover:text-white ml-2 p-1 font-bold">
+            ✕
+          </button>
         </div>
       )}
     </div>

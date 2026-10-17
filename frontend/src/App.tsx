@@ -43,6 +43,7 @@ function App() {
           <Route path="/partner-network/:id" element={<PartnerDetailPage />} />
           <Route path="/audit" element={<AuditLogPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="*" element={<OverviewPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -268,7 +268,7 @@ export function AuditLogPage() {
       {/* Main Table */}
       <div className="card-command overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full min-w-[750px] text-left border-collapse text-xs">
             <thead>
               <tr className="bg-[#F8F9FA] border-b border-[#E6E8EC] text-[#667085] font-bold text-[10px] uppercase tracking-wider">
                 <th className="py-3 px-4">Event ID</th>

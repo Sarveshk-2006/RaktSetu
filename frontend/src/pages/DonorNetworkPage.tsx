@@ -517,7 +517,7 @@ export function DonorNetworkPage() {
 
             {/* Desktop Table View */}
             <div className="hidden sm:block overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full min-w-[700px] text-left text-xs">
                 <thead className="bg-[#F8F9FA] border-b border-[#E6E8EC] text-[#667085] font-bold uppercase text-[10px] tracking-wider">
                   <tr>
                     <th className="px-4 py-3">Donor ID</th>

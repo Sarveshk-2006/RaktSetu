@@ -18,7 +18,7 @@ export function AppShell() {
         mobileOpen={mobileOpen}
         onCloseMobile={() => setMobileOpen(false)}
       />
-      <main className="md:pl-[256px] pt-[64px] min-h-[calc(100vh-64px)] bg-[#F7F8FA] p-4 sm:p-6 lg:p-8 transition-all">
+      <main className="md:pl-[256px] pt-[64px] min-h-[calc(100vh-64px)] bg-[#F7F8FA] p-4 sm:p-6 lg:p-8 transition-all overflow-x-hidden">
         <div key={location.pathname} className="max-w-[1600px] mx-auto animate-page-entrance">
           <Outlet />
         </div>

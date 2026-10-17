@@ -107,7 +107,7 @@ export function SettingsPage() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={cn(
-                'px-4 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0',
+                'px-4 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 active:scale-95',
                 isActive
                   ? 'bg-[#B42336] text-white shadow-xs'
                   : 'text-[#667085] hover:bg-[#F2F4F7] hover:text-[#17212B]'

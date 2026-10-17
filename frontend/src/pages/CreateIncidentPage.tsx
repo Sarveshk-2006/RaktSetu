@@ -181,7 +181,7 @@ export function CreateIncidentPage() {
 
       {/* Error Banner */}
       {error && (
-        <div className="bg-[#FEF3F2] border border-[#FECDCA] rounded-xl p-4 flex items-start justify-between gap-3 text-xs text-[#912020]">
+        <div className="bg-[#FEF3F2] border border-[#FECDCA] rounded-xl p-4 flex items-start justify-between gap-3 text-xs text-[#912020] animate-dropdown">
           <div className="flex items-start gap-2.5">
             <AlertCircle size={18} className="text-[#C62828] shrink-0 mt-0.5" />
             <div>
