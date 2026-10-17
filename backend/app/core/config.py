@@ -57,5 +57,28 @@ class Settings(BaseSettings):
         env_file_encoding = "utf-8"
         extra = "ignore"
 
+    def validate_production_configuration(self) -> None:
+        """
+        Enforces strict production safeguards:
+        1. If ENVIRONMENT is 'production' or 'prod':
+           - AUTH_STRICT must be True.
+           - SECRET_KEY must not be the default placeholder and must be at least 32 characters.
+           - DATABASE_URL must not be SQLite (must use PostgreSQL).
+           - ALLOWED_ORIGINS must not contain localhost or wildcards.
+        """
+        if self.ENVIRONMENT.lower() in ["production", "prod"]:
+            errors = []
+            if not self.AUTH_STRICT:
+                errors.append("AUTH_STRICT must be True in production.")
+            if "change-in-env" in self.SECRET_KEY or len(self.SECRET_KEY) < 32:
+                errors.append("SECRET_KEY is insecure or using default placeholder. A strong, unique secret is required.")
+            if self.DATABASE_URL.startswith("sqlite"):
+                errors.append("DATABASE_URL cannot be SQLite in production. A PostgreSQL 16 connection is required.")
+            if any("localhost" in origin or "*" in origin for origin in self.ALLOWED_ORIGINS):
+                errors.append("ALLOWED_ORIGINS cannot contain localhost or wildcards in production.")
+            if errors:
+                raise RuntimeError("Production security validation failed:\n - " + "\n - ".join(errors))
+
 
 settings = Settings()
+

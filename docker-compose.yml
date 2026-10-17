@@ -1,0 +1,47 @@
+services:
+  # ─── PostgreSQL 16 Canonical Persistence ───────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: raktsetu-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-raktsetu_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-RaktSetuPostgresSecure2026!}
+      POSTGRES_DB: ${POSTGRES_DB:-raktsetu_prod}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-raktsetu_user} -d ${POSTGRES_DB:-raktsetu_prod}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ─── FastAPI Production Backend ────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: raktsetu-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ENVIRONMENT: production
+      AUTH_STRICT: "true"
+      SECRET_KEY: ${SECRET_KEY:-super-secure-production-key-must-be-provided-in-env-32chars}
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-raktsetu_user}:${POSTGRES_PASSWORD:-RaktSetuPostgresSecure2026!}@db:5432/${POSTGRES_DB:-raktsetu_prod}
+      ALLOWED_ORIGINS: '["https://raktsetu.vercel.app","https://raktsetu-demo.vercel.app"]'
+      DEMO_MODE: "true"
+      NOTIFICATION_PROVIDER: mock
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2"
+
+volumes:
+  pgdata:
+    driver: local

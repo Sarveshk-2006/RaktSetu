@@ -71,10 +71,10 @@ def get_current_user(
             )
 
     # No token provided
-    if settings.AUTH_STRICT:
+    if settings.AUTH_STRICT or settings.ENVIRONMENT.lower() in ["production", "prod"]:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication credentials required",
+            detail="Authentication credentials required. Fallback authentication is forbidden in production.",
             headers={"WWW-Authenticate": "Bearer"},
         )
 

@@ -16,6 +16,7 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Any
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.database import SessionLocal, create_all_tables
 from app.models.db_models import (
     Organisation,
@@ -185,11 +186,17 @@ def _hash_event(event_dict: Dict[str, Any]) -> str:
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
-def seed_database(db: Session, donor_count: int = 100) -> Dict[str, int]:
+def seed_database(db: Session, donor_count: int = 100, allow_production: bool = False) -> Dict[str, int]:
     """
     Idempotent seeding function.
     Returns counts of inserted records.
     """
+    if settings.ENVIRONMENT.lower() in ["production", "prod"] and not allow_production:
+        raise RuntimeError(
+            "CRITICAL SAFEGUARD: Seed script cannot be run in PRODUCTION environment! "
+            "Predictable synthetic accounts and seed donors must not be injected into a live database. "
+            "Use 'python -m app.cli.create_admin' to provision authenticated administrative personnel."
+        )
     counts = {
         "organisations": 0,
         "donors": 0,
