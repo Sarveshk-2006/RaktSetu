@@ -203,7 +203,25 @@ def launch_response_wave(
                 attempted_at=now,
             )
             db.add(attempt)
+            db.flush()
             donor_record.recent_load += 1  # Track outreach load for subsequent fatigue relief
+
+            # Trigger secure notification delivery through provider boundary
+            try:
+                from app.services.notifications import notification_gateway, NotificationChannel
+                delivery = notification_gateway.dispatch_wave_notification(
+                    db=db,
+                    incident_id=incident.incident_id,
+                    wave_number=wave_num,
+                    donor_id_str=cand.donor_id,
+                    operator_username=effective_actor,
+                    channel=NotificationChannel.SMS,
+                )
+                if delivery.status == "failed":
+                    attempt.status = "Failed"
+            except Exception:
+                # Fails safely without disrupting wave creation
+                pass
 
             candidate_summaries.append(
                 WaveCandidateSummary(

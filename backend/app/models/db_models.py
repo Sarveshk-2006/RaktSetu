@@ -393,3 +393,52 @@ class User(Base):
         return f"<User username={self.username} role={self.role}>"
 
 
+# ─── 12. Notification Deliveries (Milestone 7) ────────────────────────────────
+
+class NotificationDelivery(Base):
+    """
+    Persisted lifecycle record of an external SMS / WhatsApp notification.
+    Tracks provider delivery states, provider message IDs, attempt counts,
+    masked recipient identifiers, safe error diagnostics, and timestamps.
+    Separated from donor responses and fulfilment records.
+    """
+    __tablename__ = "notification_deliveries"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    dispatch_id = Column(String(64), unique=True, nullable=False, index=True)
+    idempotency_key = Column(String(128), unique=True, nullable=False, index=True)
+    incident_id = Column(Integer, ForeignKey("incidents.id", ondelete="CASCADE"), nullable=False, index=True)
+    wave_id = Column(Integer, ForeignKey("response_waves.id", ondelete="CASCADE"), nullable=False, index=True)
+    contact_attempt_id = Column(Integer, ForeignKey("contact_attempts.id", ondelete="SET NULL"), nullable=True, index=True)
+    donor_id = Column(Integer, ForeignKey("donors.id", ondelete="RESTRICT"), nullable=False, index=True)
+
+    channel = Column(String(32), nullable=False, default="sms")  # sms / whatsapp / mock
+    provider = Column(String(32), nullable=False, default="mock")  # twilio / whatsapp / mock
+    template_id = Column(String(64), nullable=False, default="EMERGENCY_MOBILISATION_V1")
+    recipient_phone_masked = Column(String(32), nullable=False)
+
+    status = Column(String(32), nullable=False, default="pending_dispatch", index=True)
+    # Lifecycle states: pending_dispatch -> dispatch_attempted -> provider_accepted -> delivered / failed / cancelled
+
+    provider_message_id = Column(String(128), nullable=True, index=True)
+    attempt_count = Column(Integer, nullable=False, default=0)
+    max_retries = Column(Integer, nullable=False, default=3)
+
+    created_at = Column(DateTime, nullable=False, default=utc_now)
+    dispatched_at = Column(DateTime, nullable=True)
+    delivered_at = Column(DateTime, nullable=True)
+    failed_at = Column(DateTime, nullable=True)
+
+    last_error = Column(String(512), nullable=True)
+    safe_metadata = Column(JSON, nullable=True)
+
+    # Relationships
+    incident = relationship("Incident", backref="notification_deliveries")
+    wave = relationship("ResponseWave", backref="notification_deliveries")
+    contact_attempt = relationship("ContactAttempt", backref="notification_deliveries")
+    donor = relationship("Donor", backref="notification_deliveries")
+
+    def __repr__(self) -> str:
+        return f"<NotificationDelivery dispatch_id={self.dispatch_id} status={self.status} provider_msg_id={self.provider_message_id}>"
+
+

@@ -38,6 +38,17 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours
     AUTH_STRICT: bool = False  # Set to True to require tokens on every protected endpoint; False allows dev/test fallback
 
+    # Notification Boundary & Providers (Milestone 7)
+    NOTIFICATION_PROVIDER: str = "mock"  # "mock" | "twilio" | "whatsapp"
+    TWILIO_ACCOUNT_SID: str = ""
+    TWILIO_AUTH_TOKEN: str = ""
+    TWILIO_FROM_NUMBER: str = ""
+    TWILIO_MESSAGING_SERVICE_SID: str = ""
+    WHATSAPP_API_TOKEN: str = ""
+    WHATSAPP_PHONE_NUMBER_ID: str = ""
+    WEBHOOK_SECRET: str = "raktsetu-webhook-secret-token"
+    DEMO_MODE: bool = True  # Strict safeguard: never send live SMS to synthetic/seed donors
+
     # Map provider (optional — falls back to OpenStreetMap if not set)
     MAPTILER_API_KEY: str = ""
 

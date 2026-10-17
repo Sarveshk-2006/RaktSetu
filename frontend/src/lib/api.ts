@@ -386,5 +386,44 @@ export const api = {
   getStoredToken(): string | null {
     return typeof window !== 'undefined' ? localStorage.getItem(AUTH_TOKEN_KEY) : null
   },
+
+  // ─── Notification Delivery (Milestone 7) ──────────────────────────────────
+  async getIncidentNotifications(incidentId: string) {
+    return request<Array<{
+      dispatch_id: string
+      idempotency_key: string
+      incident_id: string
+      wave_id: number
+      channel: string
+      provider: string
+      recipient_phone_masked: string
+      status: string
+      provider_message_id?: string
+      attempt_count: number
+      max_retries: number
+      created_at: string
+      dispatched_at?: string
+      delivered_at?: string
+      failed_at?: string
+      last_error?: string
+    }>>(`/notifications/incident/${encodeURIComponent(incidentId)}`)
+  },
+
+  async getNotificationRecord(dispatchId: string) {
+    return request<any>(`/notifications/${encodeURIComponent(dispatchId)}`)
+  },
+
+  async retryNotification(dispatchId: string) {
+    return request<{
+      status: string
+      dispatch_id: string
+      delivery_status: string
+      attempt_count: number
+      provider_message_id?: string
+    }>(`/notifications/${encodeURIComponent(dispatchId)}/retry`, {
+      method: 'POST',
+    })
+  },
 }
+
 

@@ -283,6 +283,15 @@ def confirm_fulfilment(
             if wave.status == "Active":
                 wave.status = "Complete"
                 wave.completed_at = now
+
+        # Halt any pending notifications immediately
+        try:
+            from app.services.notifications import notification_gateway
+            notification_gateway.cancel_pending_notifications_for_incident(
+                db=db, incident_id=incident.incident_id, reason="Requirement fully fulfilled."
+            )
+        except Exception:
+            pass
     else:
         validate_transition(incident.status, "Partially Fulfilled")
         incident.status = "Partially Fulfilled"
@@ -343,6 +352,15 @@ def cancel_incident(
         if wave.status == "Active":
             wave.status = "Cancelled"
             wave.completed_at = now
+
+    # Cancel any pending notifications immediately
+    try:
+        from app.services.notifications import notification_gateway
+        notification_gateway.cancel_pending_notifications_for_incident(
+            db=db, incident_id=incident.incident_id, reason=f"Incident cancelled: {reason}"
+        )
+    except Exception:
+        pass
 
     log_audit_event(
         db=db,

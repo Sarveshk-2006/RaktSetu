@@ -22,6 +22,7 @@ from app.models.db_models import (
     AuditEvent,
     User,
     UserRole,
+    NotificationDelivery,
 )
 
 
