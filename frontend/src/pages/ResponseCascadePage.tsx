@@ -127,13 +127,13 @@ export function ResponseCascadePage() {
     <div className="space-y-6 animate-fade-in font-body text-[#17212B] max-w-[1600px] mx-auto pb-16">
       {/* Toast Notification */}
       {showToast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#17212B] text-white px-4 py-3 rounded-xl shadow-dropdown border border-[#E6E8EC] flex items-center gap-3 animate-fade-in">
+        <div className="fixed bottom-6 right-6 z-50 bg-[#17212B] text-white px-4 py-3 rounded-xl shadow-dropdown border border-[#E6E8EC] flex items-center gap-3 animate-toast-enter">
           <Phone size={18} className="text-[#16805D]" />
           <div className="text-xs">
             <span className="font-bold block">Cascade Operation Confirmed</span>
             <span className="text-[#98A2B3]">{toastMsg}</span>
           </div>
-          <button onClick={() => setShowToast(false)} className="text-[#98A2B3] hover:text-white ml-2 font-bold">
+          <button onClick={() => setShowToast(false)} className="text-[#98A2B3] hover:text-white ml-2 font-bold p-1">
             ✕
           </button>
         </div>
@@ -141,7 +141,7 @@ export function ResponseCascadePage() {
 
       {/* Error Alert */}
       {error && (
-        <div className="p-4 bg-[#FEF3F2] border border-[#FECDCA] rounded-xl flex items-start justify-between gap-3 text-xs text-[#912020] animate-fade-in">
+        <div className="p-4 bg-[#FEF3F2] border border-[#FECDCA] rounded-xl flex items-start justify-between gap-3 text-xs text-[#912020] animate-dropdown">
           <div className="flex items-start gap-2.5">
             <AlertCircle size={18} className="text-[#C62828] shrink-0 mt-0.5" />
             <div>

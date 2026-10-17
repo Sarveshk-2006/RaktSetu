@@ -1,5 +1,6 @@
-// RAKTSETU — Application Router
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+// RAKTSETU — Application Router with Scroll Restoration
+import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AppShell } from '@/components/layout/AppShell'
 import { OverviewPage } from '@/pages/OverviewPage'
 import { IncidentsPage } from '@/pages/IncidentsPage'
@@ -14,9 +15,18 @@ import { PartnerDetailPage } from '@/pages/PartnerDetailPage'
 import { AuditLogPage } from '@/pages/AuditLogPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }, [pathname])
+  return null
+}
+
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route element={<AppShell />}>
           <Route index element={<OverviewPage />} />
@@ -40,3 +50,4 @@ function App() {
 }
 
 export default App
+

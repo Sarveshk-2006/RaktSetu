@@ -1,9 +1,7 @@
 @import 'leaflet/dist/leaflet.css';
 @import "tailwindcss";
 
-/* ─── RAKTSETU — Premium Light Design System ──────────────────────────────── */
-
-/* ─── RAKTSETU — Master UI Transformation Design System ──────────────────────── */
+/* ─── RAKTSETU — Master UI & Motion Design System ──────────────────────────── */
 
 @layer base {
   :root {
@@ -16,9 +14,9 @@
 
     /* Text & Ink Typography */
     --text-primary:             #17212B;
-    --text-secondary:           #667085;
-    --text-muted:               #98A2B3;
-    --text-disabled:            #D0D5DD;
+    --text-secondary:           #475467;
+    --text-muted:               #667085;
+    --text-disabled:            #98A2B3;
 
     /* Borders & Dividers */
     --border-subtle:            #F2F4F7;
@@ -42,7 +40,7 @@
 
     --status-warning:           #B7791F;
     --status-warning-bg:        #FEF7EC;
-    --status-warning-border:    #FDE2B5;
+    --status-warning-border:    #FEDF89;
     --status-warning-text:      #8D5A0F;
 
     --status-critical:          #C62828;
@@ -51,13 +49,21 @@
     --status-critical-text:     #912020;
 
     --status-info:              #3567B7;
-    --status-info-bg:           #EFF4FB;
-    --status-info-border:       #B9D3F8;
+    --status-info-bg:           #EFF8FF;
+    --status-info-border:       #B2DDFF;
     --status-info-text:         #234B8E;
 
-    /* Spacing & Layout */
-    --sidebar-width:            256px;
-    --topbar-height:            64px;
+    /* Motion Tokens & Curves */
+    --ease-out-quint:           cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-out-quad:            cubic-bezier(0.25, 1, 0.5, 1);
+    --ease-in-out-smooth:       cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-spring:              cubic-bezier(0.175, 0.885, 0.32, 1.15);
+
+    --duration-instant:         100ms;
+    --duration-fast:            150ms;
+    --duration-normal:          220ms;
+    --duration-entrance:        260ms;
+    --duration-deliberate:      350ms;
 
     /* Elevation & Shadows */
     --radius-sm:                6px;
@@ -97,7 +103,7 @@
   /* Custom Slim Scrollbars */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #E6E8EC; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb { background: #E6E8EC; border-radius: 4px; transition: background 0.15s ease; }
   ::-webkit-scrollbar-thumb:hover { background: #D0D5DD; }
 
   /* Typography Stacks */
@@ -128,35 +134,165 @@
 }
 .leaflet-tile-pane { filter: none !important; }
 
-/* ─── Animations & Micro-interactions ─────────────────────────────────────── */
+/* ─── Animations & Keyframes ──────────────────────────────────────────────── */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
+@keyframes pageEntrance {
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes modalEnter {
+  from { opacity: 0; transform: scale(0.97) translateY(4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes toastSlideIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes pulseGlow {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  50% { opacity: 0.45; }
 }
 
+@keyframes pulseSentinel {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.65; transform: scale(0.94); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ─── Animation Classes ───────────────────────────────────────────────────── */
 .animate-fade-in {
-  animation: fadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: pageEntrance var(--duration-entrance) var(--ease-out-quint) forwards;
+}
+
+.animate-page-entrance {
+  animation: pageEntrance var(--duration-entrance) var(--ease-out-quint) forwards;
+}
+
+.animate-scale-in,
+.animate-scale-up {
+  animation: modalEnter var(--duration-normal) var(--ease-out-quint) forwards;
 }
 
 .animate-slide-down {
-  animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideDown var(--duration-normal) var(--ease-out-quint) forwards;
+}
+
+.animate-slide-up,
+.animate-toast-enter {
+  animation: toastSlideIn var(--duration-normal) var(--ease-out-quint) forwards;
+}
+
+.animate-dropdown {
+  animation: dropdownFadeIn var(--duration-fast) var(--ease-out-quint) forwards;
 }
 
 .animate-pulse-glow {
   animation: pulseGlow 2.5s ease-in-out infinite;
 }
 
-/* Reduced Motion Preference Accessibility */
+.animate-pulse-sentinel {
+  animation: pulseSentinel 2.4s ease-in-out infinite;
+}
+
+/* Skeleton Loading Shimmer */
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #F2F4F7 25%, #E6E8EC 50%, #F2F4F7 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite ease-in-out;
+  border-radius: 8px;
+}
+
+/* ─── Shared UI Utility Classes & Microinteractions ───────────────────────── */
+.card-command {
+  background: #FFFFFF;
+  border: 1px solid #E6E8EC;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.03), 0 1px 2px rgba(16, 24, 40, 0.02);
+  transition: transform var(--duration-normal) var(--ease-out-quint),
+              border-color var(--duration-fast) ease,
+              box-shadow var(--duration-normal) var(--ease-out-quint);
+}
+
+.card-command:hover {
+  border-color: #D0D5DD;
+  box-shadow: 0 4px 12px -2px rgba(16, 24, 40, 0.06), 0 2px 4px -2px rgba(16, 24, 40, 0.02);
+}
+
+.card-command-interactive {
+  cursor: pointer;
+}
+.card-command-interactive:hover {
+  transform: translateY(-2px);
+  border-color: #CBD5E1;
+  box-shadow: 0 6px 16px -2px rgba(16, 24, 40, 0.08), 0 2px 6px -2px rgba(16, 24, 40, 0.03);
+}
+.card-command-interactive:active {
+  transform: translateY(0);
+}
+
+.card-command-static:hover {
+  transform: none !important;
+}
+
+.btn-command {
+  transition: all var(--duration-fast) var(--ease-out-quint);
+}
+.btn-command:hover {
+  transform: translateY(-1px);
+}
+.btn-command:active {
+  transform: translateY(0) scale(0.98);
+}
+.btn-command:disabled {
+  transform: none !important;
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.table-row-refined {
+  transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease;
+}
+.table-row-refined:hover {
+  background-color: #F8F9FA;
+}
+
+/* Input Focus Microinteractions */
+input, select, textarea {
+  transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease, background-color var(--duration-fast) ease;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--brand-crimson);
+  box-shadow: 0 0 0 3px rgba(180, 35, 54, 0.12);
+}
+
+/* Accessible Keyboard Focus Rings */
+button:focus-visible, a:focus-visible, [tabindex="0"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px var(--brand-crimson);
+}
+
+/* ─── Reduced Motion Preference Accessibility ─────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -165,26 +301,10 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+    transform: none !important;
   }
-}
-
-/* ─── Shared UI Utility Classes ───────────────────────────────────────────── */
-.card-command {
-  background: #FFFFFF;
-  border: 1px solid #E6E8EC;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.03), 0 1px 2px rgba(16, 24, 40, 0.02);
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
-}
-
-.card-command:hover {
-  border-color: #D0D5DD;
-  box-shadow: 0 3px 8px -1px rgba(16, 24, 40, 0.05), 0 1px 3px -1px rgba(16, 24, 40, 0.03);
-}
-
-.table-row-refined {
-  transition: background-color 0.14s ease;
-}
-.table-row-refined:hover {
-  background-color: #F8F9FA;
+  .skeleton-shimmer {
+    animation: none !important;
+    background: #F2F4F7 !important;
+  }
 }

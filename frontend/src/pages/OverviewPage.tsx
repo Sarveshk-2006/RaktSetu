@@ -162,10 +162,13 @@ export function OverviewPage() {
       {/* SECTION 1 — 4 KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Active Incidents */}
-        <div className="card-command p-5 space-y-3 relative overflow-hidden">
+        <div 
+          onClick={() => navigate('/incidents')}
+          className="card-command p-5 space-y-3 relative overflow-hidden cursor-pointer hover:-translate-y-0.5 hover:shadow-card-hover transition-all duration-200 group"
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#FEF3F2] flex items-center justify-center text-[#B42336]">
+              <div className="w-8 h-8 rounded-lg bg-[#FEF3F2] flex items-center justify-center text-[#B42336] transition-transform duration-200 group-hover:scale-105">
                 <AlertTriangle size={17} />
               </div>
               <span className="text-xs font-semibold text-[#667085]">Active Incidents</span>
@@ -182,21 +185,24 @@ export function OverviewPage() {
               <span className="text-xs text-[#667085]">requiring action</span>
             </div>
             {/* Sparkline SVG */}
-            <svg className="w-16 h-6 stroke-[#B42336] fill-none stroke-[2]" viewBox="0 0 60 20">
+            <svg className="w-16 h-6 stroke-[#B42336] fill-none stroke-[2] transition-transform duration-200 group-hover:scale-105" viewBox="0 0 60 20">
               <path d="M0 15 Q 15 5, 30 14 T 60 4" />
             </svg>
           </div>
           <p className="text-[11px] text-[#912020] font-medium flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#B42336]" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#B42336] animate-pulse-sentinel" />
             {criticalCount} critical requisitions active
           </p>
         </div>
 
         {/* Card 2: Ready Donors */}
-        <div className="card-command p-5 space-y-3 relative overflow-hidden">
+        <div 
+          onClick={() => navigate('/network')}
+          className="card-command p-5 space-y-3 relative overflow-hidden cursor-pointer hover:-translate-y-0.5 hover:shadow-card-hover transition-all duration-200 group"
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#EBFDF5] flex items-center justify-center text-[#16805D]">
+              <div className="w-8 h-8 rounded-lg bg-[#EBFDF5] flex items-center justify-center text-[#16805D] transition-transform duration-200 group-hover:scale-105">
                 <Users size={17} />
               </div>
               <span className="text-xs font-semibold text-[#667085]">Verified Ready Donors</span>
@@ -215,7 +221,7 @@ export function OverviewPage() {
               <span className="text-xs text-[#667085]">in Pune</span>
             </div>
             {/* Sparkline SVG */}
-            <svg className="w-16 h-6 stroke-[#16805D] fill-none stroke-[2]" viewBox="0 0 60 20">
+            <svg className="w-16 h-6 stroke-[#16805D] fill-none stroke-[2] transition-transform duration-200 group-hover:scale-105" viewBox="0 0 60 20">
               <path d="M0 18 Q 15 12, 30 10 T 60 3" />
             </svg>
           </div>
@@ -226,10 +232,13 @@ export function OverviewPage() {
         </div>
 
         {/* Card 3: Network Coverage */}
-        <div className="card-command p-5 space-y-3 relative overflow-hidden">
+        <div 
+          onClick={() => navigate('/intelligence')}
+          className="card-command p-5 space-y-3 relative overflow-hidden cursor-pointer hover:-translate-y-0.5 hover:shadow-card-hover transition-all duration-200 group"
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#EFF4FB] flex items-center justify-center text-[#3567B7]">
+              <div className="w-8 h-8 rounded-lg bg-[#EFF4FB] flex items-center justify-center text-[#3567B7] transition-transform duration-200 group-hover:scale-105">
                 <Network size={17} />
               </div>
               <span className="text-xs font-semibold text-[#667085]">Operational Coverage</span>
@@ -248,7 +257,7 @@ export function OverviewPage() {
               <span className="text-xs text-[#667085]">district capacity</span>
             </div>
             {/* Sparkline SVG */}
-            <svg className="w-16 h-6 stroke-[#3567B7] fill-none stroke-[2]" viewBox="0 0 60 20">
+            <svg className="w-16 h-6 stroke-[#3567B7] fill-none stroke-[2] transition-transform duration-200 group-hover:scale-105" viewBox="0 0 60 20">
               <path d="M0 16 Q 15 8, 30 12 T 60 5" />
             </svg>
           </div>
@@ -256,10 +265,13 @@ export function OverviewPage() {
         </div>
 
         {/* Card 4: Median Response */}
-        <div className="card-command p-5 space-y-3 relative overflow-hidden">
+        <div 
+          onClick={() => navigate('/response')}
+          className="card-command p-5 space-y-3 relative overflow-hidden cursor-pointer hover:-translate-y-0.5 hover:shadow-card-hover transition-all duration-200 group"
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#FEF7EC] flex items-center justify-center text-[#B7791F]">
+              <div className="w-8 h-8 rounded-lg bg-[#FEF7EC] flex items-center justify-center text-[#B7791F] transition-transform duration-200 group-hover:scale-105">
                 <Clock size={17} />
               </div>
               <span className="text-xs font-semibold text-[#667085]">Median Response Time</span>
@@ -276,7 +288,7 @@ export function OverviewPage() {
               <span className="text-xs text-[#667085]">first response</span>
             </div>
             {/* Sparkline SVG */}
-            <svg className="w-16 h-6 stroke-[#B7791F] fill-none stroke-[2]" viewBox="0 0 60 20">
+            <svg className="w-16 h-6 stroke-[#B7791F] fill-none stroke-[2] transition-transform duration-200 group-hover:scale-105" viewBox="0 0 60 20">
               <path d="M0 6 Q 15 14, 30 8 T 60 16" />
             </svg>
           </div>
@@ -412,8 +424,8 @@ export function OverviewPage() {
                 <Tooltip
                   contentStyle={{ backgroundColor: '#17212B', border: 'none', color: '#FFFFFF', borderRadius: '8px', fontSize: '11px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                 />
-                <Bar dataKey="supplied" fill="#B42336" radius={[3, 3, 0, 0]} barSize={9} />
-                <Bar dataKey="requested" fill="#D0D5DD" radius={[3, 3, 0, 0]} barSize={9} />
+                <Bar dataKey="supplied" fill="#B42336" radius={[3, 3, 0, 0]} barSize={9} isAnimationActive={true} animationDuration={450} animationEasing="ease-out" />
+                <Bar dataKey="requested" fill="#D0D5DD" radius={[3, 3, 0, 0]} barSize={9} isAnimationActive={true} animationDuration={450} animationEasing="ease-out" />
               </BarChart>
             </ResponsiveContainer>
           </div>

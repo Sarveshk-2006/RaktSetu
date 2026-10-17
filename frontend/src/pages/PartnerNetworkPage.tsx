@@ -326,7 +326,7 @@ export function PartnerNetworkPage() {
               <div
                 key={partnerId}
                 onClick={() => navigate(`/partners/${partnerId}`)}
-                className="card-command p-4 hover:border-[#B42336] transition-all cursor-pointer group flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                className="card-command p-4 hover:border-[#B42336] hover:-translate-y-0.5 hover:shadow-card-hover active:scale-[0.99] transition-all duration-200 cursor-pointer group flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
                 {/* Left: Icon & Title */}
                 <div className="flex items-center gap-3.5 flex-1 min-w-[220px]">

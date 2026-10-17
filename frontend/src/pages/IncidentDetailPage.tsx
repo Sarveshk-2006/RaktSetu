@@ -476,7 +476,7 @@ export function IncidentDetailPage() {
                     return (
                       <div
                         key={c.donor_id}
-                        className="p-4 rounded-xl border border-[#E6E8EC] hover:border-[#B42336] transition-all bg-[#F8F9FA] space-y-3"
+                        className="p-4 rounded-xl border border-[#E6E8EC] hover:border-[#CBD5E1] hover:-translate-y-0.5 hover:shadow-card-hover transition-all duration-200 bg-[#F8F9FA] space-y-3"
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
@@ -498,22 +498,23 @@ export function IncidentDetailPage() {
                             </span>
                             <button
                               onClick={() => setExpandedId(isExpanded ? null : c.donor_id)}
-                              className="text-xs font-semibold text-[#B42336] hover:underline"
+                              className="text-xs font-semibold text-[#B42336] hover:text-[#861D2B] flex items-center gap-1 transition-colors"
                             >
-                              {isExpanded ? 'Less' : 'Why?'}
+                              <span>{isExpanded ? 'Hide' : 'Factors'}</span>
+                              <span className={cn('inline-block transition-transform duration-200', isExpanded ? 'rotate-180' : 'rotate-0')}>▼</span>
                             </button>
                           </div>
                         </div>
 
                         {/* Explainable Factor Breakdown */}
                         {isExpanded && (
-                          <div className="pt-2 border-t border-[#E6E8EC] text-xs text-[#475467] space-y-1 bg-white p-3 rounded-lg border border-[#E6E8EC]">
-                            <span className="font-bold text-[#17212B] block">Match Explanation:</span>
+                          <div className="pt-2 border-t border-[#E6E8EC] text-xs text-[#475467] space-y-2 bg-white p-3.5 rounded-xl border border-[#E6E8EC] animate-dropdown">
+                            <span className="font-bold text-[#17212B] block">Deterministic Match Scoring:</span>
                             <p>{c.explanation || `Antigen match confirmed for ${c.blood_group}. Located in ${c.zone || 'Pune'} zone.`}</p>
                             <div className="grid grid-cols-3 gap-2 pt-1 text-[11px] font-mono text-[#667085]">
-                              <div>Distance Score: {c.distance_score ? c.distance_score.toFixed(2) : '0.90'}</div>
-                              <div>Reliability: {c.reliability_contribution ? c.reliability_contribution.toFixed(2) : '0.85'}</div>
-                              <div>Cooldown Penalty: {c.cooldown_penalty ? c.cooldown_penalty.toFixed(2) : '0.00'}</div>
+                              <div className="p-2 rounded-lg bg-[#F8F9FA] border border-[#E6E8EC]">Distance: {c.distance_score ? c.distance_score.toFixed(2) : '0.90'}</div>
+                              <div className="p-2 rounded-lg bg-[#F8F9FA] border border-[#E6E8EC]">Reliability: {c.reliability_contribution ? c.reliability_contribution.toFixed(2) : '0.85'}</div>
+                              <div className="p-2 rounded-lg bg-[#F8F9FA] border border-[#E6E8EC]">Cooldown: {c.cooldown_penalty ? c.cooldown_penalty.toFixed(2) : '0.00'}</div>
                             </div>
                           </div>
                         )}

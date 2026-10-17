@@ -25,7 +25,7 @@ export function KpiCard({ label, value, icon: Icon, trend, trendUp, accent = 'de
 
   return (
     <div className={cn(
-      'rounded-xl bg-white border border-[#E6E8EC] p-5 flex flex-col justify-between transition-all duration-200 shadow-[0_1px_3px_rgba(16,24,40,0.03)] hover:shadow-[0_4px_12px_rgba(16,24,40,0.06)] hover:border-[#D0D5DD]',
+      'rounded-xl bg-white border border-[#E6E8EC] p-5 flex flex-col justify-between transition-all duration-200 shadow-2xs hover:shadow-card-hover hover:border-[#D0D5DD] hover:-translate-y-0.5 group cursor-default',
       className,
     )}>
       <div className="flex items-center justify-between mb-2">
@@ -33,7 +33,7 @@ export function KpiCard({ label, value, icon: Icon, trend, trendUp, accent = 'de
           {label}
         </span>
         {Icon && (
-          <div className={cn('p-1.5 rounded-lg border border-transparent', colors.bg)}>
+          <div className={cn('p-1.5 rounded-lg border border-transparent transition-transform duration-200 group-hover:scale-105', colors.bg)}>
             <Icon size={16} />
           </div>
         )}

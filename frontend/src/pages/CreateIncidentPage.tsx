@@ -216,7 +216,7 @@ export function CreateIncidentPage() {
                       type="button"
                       onClick={() => setForm({ ...form, blood_group: bg })}
                       className={cn(
-                        'py-2.5 rounded-xl text-xs font-bold font-mono border transition-all text-center',
+                        'py-2.5 rounded-xl text-xs font-bold font-mono border transition-all duration-150 text-center active:scale-95',
                         form.blood_group === bg
                           ? 'bg-[#B42336] text-white border-[#B42336] shadow-xs'
                           : 'bg-[#F8F9FA] text-[#475467] border-[#E6E8EC] hover:bg-[#F2F4F7] hover:border-[#D0D5DD]'
@@ -238,9 +238,9 @@ export function CreateIncidentPage() {
                         type="button"
                         onClick={() => setForm({ ...form, units: u })}
                         className={cn(
-                          'py-2 rounded-xl text-xs font-bold border transition-all',
+                          'py-2 rounded-xl text-xs font-bold border transition-all duration-150 active:scale-95',
                           form.units === u
-                            ? 'bg-[#17212B] text-white border-[#17212B]'
+                            ? 'bg-[#17212B] text-white border-[#17212B] shadow-2xs'
                             : 'bg-[#F8F9FA] text-[#475467] border-[#E6E8EC] hover:bg-[#F2F4F7]'
                         )}
                       >
@@ -265,13 +265,13 @@ export function CreateIncidentPage() {
                         key={opt.level}
                         onClick={() => setForm({ ...form, urgency: opt.level })}
                         className={cn(
-                          'p-3.5 rounded-xl border transition-all cursor-pointer flex items-start gap-3',
+                          'p-3.5 rounded-xl border transition-all duration-150 cursor-pointer flex items-start gap-3 hover:-translate-y-0.5 active:scale-[0.99]',
                           isSelected
-                            ? opt.activeColor
+                            ? `${opt.activeColor} shadow-2xs`
                             : 'border-[#E6E8EC] bg-[#F8F9FA] hover:border-[#D0D5DD] hover:bg-white text-[#475467]'
                         )}
                       >
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-white shadow-2xs border border-[#E6E8EC]">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-white shadow-2xs border border-[#E6E8EC] transition-transform duration-150">
                           <Icon size={16} />
                         </div>
                         <div className="space-y-0.5">
@@ -416,8 +416,8 @@ export function CreateIncidentPage() {
 
       {/* Created State Confirmation */}
       {step === 'created' && createdIncident && (
-        <div className="card-command p-8 max-w-lg mx-auto shadow-sm text-center space-y-5 animate-fade-in">
-          <div className="w-16 h-16 rounded-full bg-[#EBFDF5] text-[#16805D] flex items-center justify-center mx-auto border border-[#A6F4C5]">
+        <div className="card-command p-8 max-w-lg mx-auto shadow-sm text-center space-y-5 animate-scale-in">
+          <div className="w-16 h-16 rounded-full bg-[#EBFDF5] text-[#16805D] flex items-center justify-center mx-auto border border-[#A6F4C5] transition-transform duration-300">
             <CheckCircle2 size={32} />
           </div>
 

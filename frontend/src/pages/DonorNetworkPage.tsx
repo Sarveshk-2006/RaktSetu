@@ -809,7 +809,7 @@ export function DonorNetworkPage() {
       {/* DONOR DETAIL MODAL / DRAWER */}
       {selectedDonor && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
-          <div className="card-command max-w-lg w-full overflow-hidden space-y-4 animate-scale-up border-[#E6E8EC] shadow-2xl">
+          <div className="card-command max-w-lg w-full overflow-hidden space-y-4 animate-scale-in border-[#E6E8EC] shadow-2xl">
             {/* Header */}
             <div className="p-4 bg-[#F8F9FA] border-b border-[#E6E8EC] flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -912,7 +912,7 @@ export function DonorNetworkPage() {
       {/* ADD / IMPORT DONOR MODAL */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
-          <div className="card-command max-w-md w-full overflow-hidden space-y-4 animate-scale-up border-[#E6E8EC] shadow-2xl">
+          <div className="card-command max-w-md w-full overflow-hidden space-y-4 animate-scale-in border-[#E6E8EC] shadow-2xl">
             <div className="p-4 bg-[#F8F9FA] border-b border-[#E6E8EC] flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Plus size={18} className="text-[#B42336]" />

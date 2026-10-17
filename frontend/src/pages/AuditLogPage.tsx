@@ -357,7 +357,7 @@ export function AuditLogPage() {
       {/* DETAIL MODAL */}
       {selectedEntry && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
-          <div className="card-command max-w-lg w-full p-6 space-y-4 animate-scale-up border-[#E6E8EC] shadow-2xl">
+          <div className="card-command max-w-lg w-full p-6 space-y-4 animate-scale-in border-[#E6E8EC] shadow-2xl">
             <div className="flex items-center justify-between pb-3 border-b border-[#E6E8EC]">
               <div className="flex items-center gap-2">
                 <ShieldCheck size={18} className="text-[#B42336]" />

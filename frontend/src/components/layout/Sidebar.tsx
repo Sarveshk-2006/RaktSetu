@@ -101,18 +101,18 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
                     to={to}
                     onClick={onCloseMobile}
                     className={cn(
-                      'flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all group',
+                      'flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 ease-out group active:scale-[0.98]',
                       isActive
                         ? 'bg-[#FDF2F4] text-[#861D2B] font-semibold border-l-2 border-[#B42336] shadow-2xs'
                         : 'text-[#475467] hover:text-[#17212B] hover:bg-[#F8F9FA]',
                     )}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <Icon size={16} className={cn('transition-colors', isActive ? 'text-[#B42336]' : 'text-[#667085] group-hover:text-[#17212B]')} />
+                    <div className="flex items-center gap-2.5 transition-transform duration-150 group-hover:translate-x-0.5">
+                      <Icon size={16} className={cn('transition-colors duration-150', isActive ? 'text-[#B42336]' : 'text-[#667085] group-hover:text-[#17212B]')} />
                       <span>{label}</span>
                     </div>
                     {badge && (
-                      <span className={cn('px-1.5 py-0.5 text-[10px] font-bold rounded-md leading-none', badgeColor)}>
+                      <span className={cn('px-1.5 py-0.5 text-[10px] font-bold rounded-md leading-none transition-transform duration-150 group-hover:scale-105', badgeColor)}>
                         {badge}
                       </span>
                     )}

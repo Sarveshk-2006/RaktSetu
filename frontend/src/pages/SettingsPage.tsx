@@ -566,7 +566,7 @@ export function SettingsPage() {
       {/* EDIT ORGANISATION MODAL */}
       {showEditOrgModal && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
-          <div className="card-command max-w-md w-full overflow-hidden space-y-4 animate-scale-up border-[#E6E8EC] shadow-2xl">
+          <div className="card-command max-w-md w-full overflow-hidden space-y-4 animate-scale-in border-[#E6E8EC] shadow-2xl">
             <div className="p-4 bg-[#F8F9FA] border-b border-[#E6E8EC] flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Building2 size={18} className="text-[#B42336]" />
@@ -631,7 +631,7 @@ export function SettingsPage() {
       {/* RESET CONFIRMATION MODAL */}
       {showResetModal && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
-          <div className="card-command max-w-md w-full overflow-hidden space-y-4 animate-scale-up border-[#E6E8EC] shadow-2xl">
+          <div className="card-command max-w-md w-full overflow-hidden space-y-4 animate-scale-in border-[#E6E8EC] shadow-2xl">
             <div className="p-4 bg-[#FEF3F2] border-b border-[#FECDCA] flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <AlertTriangle size={18} className="text-[#B42336]" />

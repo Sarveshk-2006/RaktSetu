@@ -276,10 +276,10 @@ export function StressLabPage() {
                   setResult(null)
                 }}
                 className={cn(
-                  'p-4 rounded-xl border transition-all cursor-pointer space-y-2 group',
+                  'p-4 rounded-xl border transition-all duration-200 cursor-pointer space-y-2 group hover:-translate-y-0.5 active:scale-[0.98]',
                   isSelected
                     ? 'border-[#B42336] bg-[#FEF3F2] shadow-xs'
-                    : 'border-[#E6E8EC] bg-white hover:border-[#D0D5DD] hover:bg-[#F8F9FA]'
+                    : 'border-[#E6E8EC] bg-white hover:border-[#D0D5DD] hover:bg-[#F8F9FA] hover:shadow-card-hover'
                 )}
               >
                 <div className="flex items-center justify-between">

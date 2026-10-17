@@ -28,8 +28,8 @@ export function IncidentCard({ incident, className, compact = false }: IncidentC
     <div
       onClick={() => navigate(`/incidents/${incident.incident_id}`)}
       className={cn(
-        'group rounded-xl border p-4 cursor-pointer transition-all duration-200 shadow-2xs hover:shadow-md font-body',
-        urgency === 'Critical' ? 'bg-red-50/40 border-red-200 hover:border-red-300' : 'bg-white border-[#E4E7EC] hover:border-[#D0D5DD]',
+        'group rounded-xl border p-4 cursor-pointer transition-all duration-200 shadow-2xs hover:shadow-card-hover hover:-translate-y-0.5 active:scale-[0.99] font-body',
+        urgency === 'Critical' ? 'bg-[#FEF3F2]/60 border-[#FECDCA] hover:border-[#F97066]' : 'bg-white border-[#E6E8EC] hover:border-[#CBD5E1]',
         className,
       )}
     >
@@ -102,8 +102,8 @@ export function IncidentCard({ incident, className, compact = false }: IncidentC
               </span>
             ))}
           </div>
-          <span className="text-xs text-[#667085] group-hover:text-[#DC2626] font-medium flex items-center gap-0.5">
-            View details <ChevronRight size={13} />
+          <span className="text-xs text-[#667085] group-hover:text-[#B42336] font-medium flex items-center gap-0.5 transition-colors duration-150">
+            View details <ChevronRight size={13} className="transition-transform duration-150 group-hover:translate-x-0.5" />
           </span>
         </div>
       )}

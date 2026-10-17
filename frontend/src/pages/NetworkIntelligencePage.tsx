@@ -329,7 +329,7 @@ const PUNE_ZONE_COORDS: Record<string, [number, number]> = {
                     <div
                       key={bg.blood_group}
                       onClick={() => setSelectedBloodGroup(bg)}
-                      className="flex flex-col items-center p-2.5 rounded-xl border border-[#E6E8EC] bg-[#F8F9FA] hover:bg-white hover:border-[#D0D5DD] hover:shadow-xs transition-all cursor-pointer text-center space-y-2 group"
+                      className="flex flex-col items-center p-2.5 rounded-xl border border-[#E6E8EC] bg-[#F8F9FA] hover:bg-white hover:border-[#D0D5DD] hover:shadow-card-hover hover:-translate-y-1 active:scale-95 transition-all duration-200 cursor-pointer text-center space-y-2 group"
                     >
                       <span className="font-bold text-sm text-[#17212B] font-display group-hover:text-[#B42336] transition-colors">
                         {bg.blood_group}
@@ -618,8 +618,8 @@ const PUNE_ZONE_COORDS: Record<string, [number, number]> = {
 
           {/* ─── BLOOD GROUP RESILIENCE DETAIL MODAL ───────────────────────────── */}
           {(showResilienceModal || selectedBloodGroup) && (
-            <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-              <div className="card-command max-w-lg w-full p-6 space-y-4 animate-scale-up shadow-2xl">
+            <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+              <div className="card-command max-w-lg w-full p-6 space-y-4 animate-scale-in shadow-2xl">
                 <div className="flex items-center justify-between pb-3 border-b border-[#E6E8EC]">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg bg-[#FEF3F2] border border-[#FECDCA] flex items-center justify-center text-[#B42336] font-bold">

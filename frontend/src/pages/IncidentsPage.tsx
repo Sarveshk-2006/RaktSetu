@@ -203,10 +203,13 @@ export function IncidentsPage() {
       {/* SECTION 1 — 5 KPI Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
         {/* Card 1: Total Incidents */}
-        <div className="card-command p-4 space-y-2 relative">
+        <div 
+          onClick={() => setActiveFilter('All')}
+          className="card-command p-4 space-y-2 relative cursor-pointer hover:-translate-y-0.5 hover:shadow-card-hover transition-all duration-200 group"
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-[#FEF3F2] flex items-center justify-center text-[#B42336]">
+              <div className="w-7 h-7 rounded-lg bg-[#FEF3F2] flex items-center justify-center text-[#B42336] transition-transform duration-200 group-hover:scale-105">
                 <AlertTriangle size={15} />
               </div>
               <span className="text-xs font-semibold text-[#667085]">Total Incidents</span>
@@ -224,15 +227,18 @@ export function IncidentsPage() {
         </div>
 
         {/* Card 2: Critical */}
-        <div className="card-command p-4 space-y-2 relative">
+        <div 
+          onClick={() => setActiveFilter('Critical')}
+          className="card-command p-4 space-y-2 relative cursor-pointer hover:-translate-y-0.5 hover:shadow-card-hover transition-all duration-200 group"
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-[#FEF3F2] flex items-center justify-center text-[#912020]">
+              <div className="w-7 h-7 rounded-lg bg-[#FEF3F2] flex items-center justify-center text-[#912020] transition-transform duration-200 group-hover:scale-105">
                 <ShieldAlert size={15} />
               </div>
               <span className="text-xs font-semibold text-[#667085]">Critical</span>
             </div>
-            <ChevronRight size={15} className="text-[#98A2B3]" />
+            <ChevronRight size={15} className="text-[#98A2B3] group-hover:translate-x-0.5 transition-transform" />
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold font-display text-[#17212B]">
@@ -244,15 +250,18 @@ export function IncidentsPage() {
         </div>
 
         {/* Card 3: High Priority */}
-        <div className="card-command p-4 space-y-2 relative">
+        <div 
+          onClick={() => setActiveFilter('High')}
+          className="card-command p-4 space-y-2 relative cursor-pointer hover:-translate-y-0.5 hover:shadow-card-hover transition-all duration-200 group"
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-[#FEF7EC] flex items-center justify-center text-[#8D5A0F]">
+              <div className="w-7 h-7 rounded-lg bg-[#FEF7EC] flex items-center justify-center text-[#8D5A0F] transition-transform duration-200 group-hover:scale-105">
                 <Users size={15} />
               </div>
               <span className="text-xs font-semibold text-[#667085]">High Priority</span>
             </div>
-            <ChevronRight size={15} className="text-[#98A2B3]" />
+            <ChevronRight size={15} className="text-[#98A2B3] group-hover:translate-x-0.5 transition-transform" />
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold font-display text-[#17212B]">
@@ -264,15 +273,18 @@ export function IncidentsPage() {
         </div>
 
         {/* Card 4: Active Responses */}
-        <div className="card-command p-4 space-y-2 relative">
+        <div 
+          onClick={() => setActiveFilter('Active')}
+          className="card-command p-4 space-y-2 relative cursor-pointer hover:-translate-y-0.5 hover:shadow-card-hover transition-all duration-200 group"
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-[#EFF4FB] flex items-center justify-center text-[#234B8E]">
+              <div className="w-7 h-7 rounded-lg bg-[#EFF4FB] flex items-center justify-center text-[#234B8E] transition-transform duration-200 group-hover:scale-105">
                 <Users size={15} />
               </div>
               <span className="text-xs font-semibold text-[#667085]">Active Cases</span>
             </div>
-            <ChevronRight size={15} className="text-[#98A2B3]" />
+            <ChevronRight size={15} className="text-[#98A2B3] group-hover:translate-x-0.5 transition-transform" />
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold font-display text-[#17212B]">
@@ -284,15 +296,18 @@ export function IncidentsPage() {
         </div>
 
         {/* Card 5: Fulfilled Units */}
-        <div className="card-command p-4 space-y-2 relative">
+        <div 
+          onClick={() => setActiveFilter('Fulfilled')}
+          className="card-command p-4 space-y-2 relative cursor-pointer hover:-translate-y-0.5 hover:shadow-card-hover transition-all duration-200 group"
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-[#EBFDF5] flex items-center justify-center text-[#085D40]">
+              <div className="w-7 h-7 rounded-lg bg-[#EBFDF5] flex items-center justify-center text-[#085D40] transition-transform duration-200 group-hover:scale-105">
                 <CheckCircle2 size={15} />
               </div>
               <span className="text-xs font-semibold text-[#667085]">Units Secured</span>
             </div>
-            <ChevronRight size={15} className="text-[#98A2B3]" />
+            <ChevronRight size={15} className="text-[#98A2B3] group-hover:translate-x-0.5 transition-transform" />
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold font-display text-[#17212B]">
@@ -360,7 +375,7 @@ export function IncidentsPage() {
           {isLoading && incidents.length === 0 ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-32 bg-white rounded-xl border border-[#E6E8EC] animate-pulse" />
+                <div key={i} className="h-32 skeleton-shimmer border border-[#E6E8EC]" />
               ))}
             </div>
           ) : filteredIncidents.length === 0 ? (
@@ -372,7 +387,7 @@ export function IncidentsPage() {
               </p>
               <button
                 onClick={() => navigate('/incidents/create')}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#B42336] text-white text-xs font-bold rounded-lg hover:bg-[#861D2B] transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#B42336] text-white text-xs font-bold rounded-lg hover:bg-[#861D2B] transition-all shadow-2xs active:scale-95"
               >
                 <Plus size={14} />
                 <span>Create Blood Incident</span>
@@ -394,7 +409,7 @@ export function IncidentsPage() {
                 <div
                   key={inc.incident_id}
                   onClick={() => navigate(`/incidents/${inc.incident_id}`)}
-                  className="card-command border-l-4 border-l-[#B42336] p-4.5 transition-all cursor-pointer space-y-3.5 relative overflow-hidden group hover:border-[#B42336]"
+                  className="card-command border-l-4 border-l-[#B42336] p-4.5 transition-all duration-200 cursor-pointer space-y-3.5 relative overflow-hidden group hover:border-[#B42336] hover:-translate-y-0.5 hover:shadow-card-hover active:scale-[0.99]"
                 >
                   {/* Top Row: Group Badge + Incident Meta + Secured Pill */}
                   <div className="flex items-start justify-between gap-3">
