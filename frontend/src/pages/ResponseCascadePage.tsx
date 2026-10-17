@@ -5,8 +5,10 @@ import {
   Zap, CheckCircle2, ShieldCheck, Phone,
   MapPin, Building2, ArrowRight,
   RefreshCw, Users, AlertCircle, ArrowLeft,
-  AlertTriangle
+  AlertTriangle, Smartphone, FileCheck
 } from 'lucide-react'
+import { DonorMobilePreviewModal } from '@/components/incidents/DonorMobilePreviewModal'
+import { IncidentCompletionModal } from '@/components/incidents/IncidentCompletionModal'
 import { cn } from '@/lib/utils'
 import { api } from '@/lib/api'
 import { DEMO_INCIDENT, DEMO_CANDIDATES } from '@/data/demoData'
@@ -24,6 +26,8 @@ export function ResponseCascadePage() {
   const [error, setError] = useState<string | null>(null)
   const [showToast, setShowToast] = useState(false)
   const [toastMsg, setToastMsg] = useState('')
+  const [previewDonor, setPreviewDonor] = useState<any | null>(null)
+  const [showCompletionModal, setShowCompletionModal] = useState(false)
 
   const loadData = useCallback(async (isManual = false) => {
     if (isManual) setIsRefreshing(true)
@@ -101,6 +105,7 @@ export function ResponseCascadePage() {
       })
       setToastMsg('Unit fulfilment confirmed in canonical ledger.')
       setShowToast(true)
+      setShowCompletionModal(true)
       await loadData()
     } catch (err: any) {
       setError(err?.message || 'Failed to confirm fulfilment.')
@@ -375,11 +380,19 @@ export function ResponseCascadePage() {
                         {c.blood_group}
                       </span>
                     </div>
-                    <div className="flex items-center gap-4 text-[#667085]">
+                    <div className="flex items-center gap-3 text-[#667085]">
                       <span>📍 {c.distance_km?.toFixed(1) || 3.5} km</span>
                       <span className="text-[#16805D] font-semibold">
                         Score: {c.composite_score ? Math.round(c.composite_score * 100) : 85}%
                       </span>
+                      <button
+                        onClick={() => setPreviewDonor(c)}
+                        className="px-2.5 py-1 rounded-lg bg-[#EFF4FB] hover:bg-[#DCE7F6] text-[#234B8E] font-bold text-xs flex items-center gap-1 transition-colors border border-[#B9D3F8]"
+                        title="Preview mobile dispatch alert as seen on donor's phone"
+                      >
+                        <Smartphone size={12} />
+                        <span>Donor Alert</span>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -410,13 +423,21 @@ export function ResponseCascadePage() {
               </span>
             </div>
 
-            {unitsSecured < totalRequired && (
+            {unitsSecured < totalRequired ? (
               <button
                 onClick={handleConfirmFulfilment}
                 disabled={isActionPending}
                 className="w-full py-2.5 rounded-xl bg-[#16805D] hover:bg-[#085D40] text-white text-xs font-bold shadow-xs transition-colors"
               >
                 Confirm Unit Fulfilment
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowCompletionModal(true)}
+                className="w-full py-2.5 rounded-xl bg-[#085D40] hover:bg-[#064e35] text-white text-xs font-bold shadow-xs transition-colors flex items-center justify-center gap-1.5"
+              >
+                <FileCheck size={14} />
+                <span>View Fulfilment Summary</span>
               </button>
             )}
           </div>
@@ -450,6 +471,37 @@ export function ResponseCascadePage() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Donor Simulation Modal (Presentation Slide 3 & 4) */}
+      {previewDonor && incident && (
+        <DonorMobilePreviewModal
+          isOpen={!!previewDonor}
+          onClose={() => setPreviewDonor(null)}
+          incidentId={incident.incident_id || incidentIdParam}
+          candidate={previewDonor}
+          facilityName={req.requesting_facility || 'Sassoon General Hospital, Pune'}
+          unitsRequested={totalRequired}
+          urgency={req.urgency || 'Critical'}
+          onResponseSimulated={async () => {
+            await loadData()
+          }}
+        />
+      )}
+
+      {/* Incident Fulfilment & Completion Certificate Modal (Presentation Slide 4 Step 5) */}
+      {showCompletionModal && incident && (
+        <IncidentCompletionModal
+          isOpen={showCompletionModal}
+          onClose={() => setShowCompletionModal(false)}
+          incidentId={incident.incident_id || incidentIdParam}
+          facilityName={req.requesting_facility || 'Sassoon General Hospital, Pune'}
+          bloodGroup={req.blood_group || 'O-'}
+          unitsSecured={unitsSecured || totalRequired}
+          unitsRequired={totalRequired}
+          responseTimeMinutes={incident.elapsed_seconds ? Math.max(1, Math.round(incident.elapsed_seconds / 60)) : 19}
+          donorsMobilisedCount={waves.reduce((acc: number, w: any) => acc + (w.confirmed || 0), 0) || unitsSecured || 2}
+        />
+      )}
     </div>
   )
 }

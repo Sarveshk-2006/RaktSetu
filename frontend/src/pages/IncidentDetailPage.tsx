@@ -4,10 +4,12 @@ import { useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowLeft, Zap, MapPin, Droplets, Layers, Clock,
   AlertTriangle, CheckCircle2, Circle, ShieldCheck,
-  Sparkles, AlertCircle, RefreshCw, Check
+  Sparkles, AlertCircle, RefreshCw, Check, Smartphone, FileCheck
 } from 'lucide-react'
 
 import { PuneNetworkMap } from '@/components/overview/PuneNetworkMap'
+import { DonorMobilePreviewModal } from '@/components/incidents/DonorMobilePreviewModal'
+import { IncidentCompletionModal } from '@/components/incidents/IncidentCompletionModal'
 import { cn } from '@/lib/utils'
 import { api } from '@/lib/api'
 import { DEMO_INCIDENT, ALL_INCIDENTS, DEMO_CANDIDATES } from '@/data/demoData'
@@ -33,6 +35,8 @@ export function IncidentDetailPage() {
   const [isActionPending, setIsActionPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
+  const [previewDonor, setPreviewDonor] = useState<any | null>(null)
+  const [showCompletionModal, setShowCompletionModal] = useState(false)
 
   const loadData = useCallback(async (isManual = false) => {
     if (!id) return
@@ -135,6 +139,7 @@ export function IncidentDetailPage() {
         notes: 'Clinical delivery confirmed.',
       })
       setSuccessMsg('Unit fulfilment confirmed and recorded in audit ledger.')
+      setShowCompletionModal(true)
       await loadData()
     } catch (err: any) {
       setError(err?.message || 'Fulfilment could not be confirmed.')
@@ -343,15 +348,26 @@ export function IncidentDetailPage() {
                 </>
               )}
 
-              {status === 'Fulfilled' && (
-                <button
-                  onClick={handleCloseIncident}
-                  disabled={isActionPending}
-                  className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#17212B] hover:bg-black text-white font-bold text-xs shadow-xs transition-colors"
-                >
-                  <CheckCircle2 size={14} />
-                  <span>Close Incident</span>
-                </button>
+              {(status === 'Fulfilled' || status === 'Closed') && (
+                <>
+                  <button
+                    onClick={() => setShowCompletionModal(true)}
+                    className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#085D40] hover:bg-[#064e35] text-white font-bold text-xs shadow-xs transition-colors"
+                  >
+                    <FileCheck size={14} />
+                    <span>Fulfilment Summary</span>
+                  </button>
+                  {status === 'Fulfilled' && (
+                    <button
+                      onClick={handleCloseIncident}
+                      disabled={isActionPending}
+                      className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#17212B] hover:bg-black text-white font-bold text-xs shadow-xs transition-colors"
+                    >
+                      <CheckCircle2 size={14} />
+                      <span>Close Incident</span>
+                    </button>
+                  )}
+                </>
               )}
 
               <button
@@ -514,6 +530,14 @@ export function IncidentDetailPage() {
                               Score: {c.composite_score ? Math.round(c.composite_score * 100) : 88}%
                             </span>
                             <button
+                              onClick={() => setPreviewDonor(c)}
+                              className="px-2.5 py-1 rounded-lg bg-[#EFF4FB] hover:bg-[#DCE7F6] text-[#234B8E] font-bold text-xs flex items-center gap-1 transition-colors border border-[#B9D3F8]"
+                              title="Preview mobile dispatch alert as received on donor phone"
+                            >
+                              <Smartphone size={12} />
+                              <span>Donor Alert</span>
+                            </button>
+                            <button
                               onClick={() => setExpandedId(isExpanded ? null : c.donor_id)}
                               className="text-xs font-semibold text-[#B42336] hover:text-[#861D2B] flex items-center gap-1 transition-colors"
                             >
@@ -653,6 +677,37 @@ export function IncidentDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Donor Simulation Modal (Presentation Slide 3 & 4) */}
+      {previewDonor && incident && (
+        <DonorMobilePreviewModal
+          isOpen={!!previewDonor}
+          onClose={() => setPreviewDonor(null)}
+          incidentId={incident.incident_id}
+          candidate={previewDonor}
+          facilityName={req.requesting_facility || 'Ruby Hall Clinic, Pune'}
+          unitsRequested={unitsReq}
+          urgency={req.urgency || 'High'}
+          onResponseSimulated={async () => {
+            await loadData()
+          }}
+        />
+      )}
+
+      {/* Incident Fulfilment & Completion Certificate Modal (Presentation Slide 4 Step 5) */}
+      {showCompletionModal && incident && (
+        <IncidentCompletionModal
+          isOpen={showCompletionModal}
+          onClose={() => setShowCompletionModal(false)}
+          incidentId={incident.incident_id}
+          facilityName={req.requesting_facility || 'Ruby Hall Clinic, Pune'}
+          bloodGroup={req.blood_group || 'O-'}
+          unitsSecured={unitsSecured || unitsReq}
+          unitsRequired={unitsReq}
+          responseTimeMinutes={incident.elapsed_seconds ? Math.max(1, Math.round(incident.elapsed_seconds / 60)) : 19}
+          donorsMobilisedCount={waves.reduce((acc: number, w: any) => acc + (w.confirmed || 0), 0) || unitsSecured || 2}
+        />
+      )}
     </div>
   )
 }

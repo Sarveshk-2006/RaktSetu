@@ -1,5 +1,5 @@
 // RAKTSETU — Create Blood Incident / Requirement Page
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   AlertTriangle, ArrowLeft, Droplets, MapPin,
@@ -68,6 +68,11 @@ export function CreateIncidentPage() {
   const [isVerifying, setIsVerifying] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [createdIncident, setCreatedIncident] = useState<any | null>(null)
+  const [duplicateAdvisory, setDuplicateAdvisory] = useState<{
+    duplicate_found: boolean
+    incident_id?: string
+    message?: string
+  } | null>(null)
 
   const [form, setForm] = useState({
     blood_group: 'O-' as BloodGroup,
@@ -80,6 +85,28 @@ export function CreateIncidentPage() {
     contactNumber: '+91 98765 43210',
     clinicalNotes: '',
   })
+
+  // Unified Blood Incident: Live duplicate check as operator specifies hospital & blood group
+  useEffect(() => {
+    let active = true
+    if (form.facility && form.blood_group) {
+      const timer = setTimeout(() => {
+        api.checkDuplicateRequirement({ facility: form.facility, blood_group: form.blood_group })
+          .then(res => {
+            if (active) setDuplicateAdvisory(res)
+          })
+          .catch(() => {
+            if (active) setDuplicateAdvisory(null)
+          })
+      }, 250)
+      return () => {
+        active = false
+        clearTimeout(timer)
+      }
+    } else {
+      setDuplicateAdvisory(null)
+    }
+  }, [form.facility, form.blood_group])
 
   async function handleSubmitRequirement(e: React.FormEvent) {
     e.preventDefault()
@@ -357,6 +384,31 @@ export function CreateIncidentPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Unified Blood Incident Duplicate Advisory Notice */}
+              {duplicateAdvisory?.duplicate_found && (
+                <div className="p-4 rounded-xl bg-[#FEF7EC] border border-[#FEDF89] text-xs text-[#8D5A0F] space-y-2 animate-fade-in">
+                  <div className="flex items-center gap-2 font-bold text-xs text-[#B7791F]">
+                    <AlertTriangle size={16} />
+                    <span>Unified Blood Incident Coordination Alert</span>
+                  </div>
+                  <p className="leading-relaxed text-[#8D5A0F]">
+                    {duplicateAdvisory.message}
+                  </p>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/incidents/${duplicateAdvisory.incident_id}`)}
+                      className="px-3 py-1.5 rounded-lg bg-[#B7791F] hover:bg-[#8D5A0F] text-white font-bold text-xs transition-colors self-start shadow-xs flex items-center gap-1.5"
+                    >
+                      <span>Coordinate Under Active Incident ({duplicateAdvisory.incident_id}) →</span>
+                    </button>
+                    <span className="text-[11px] text-[#667085]">
+                      Or proceed below if this is a distinct concurrent patient case.
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Submit CTA */}
               <div className="pt-3 border-t border-[#F2F4F7] flex justify-end">

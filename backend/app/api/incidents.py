@@ -58,6 +58,7 @@ from app.core.exceptions import (
 )
 from app.services.incident_service import (
     create_requirement_and_incident,
+    check_duplicate_requirement,
     verify_incident_requirement,
     confirm_fulfilment as svc_confirm_fulfilment,
     cancel_incident as svc_cancel_incident,
@@ -214,6 +215,36 @@ async def create_incident(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create incident: {str(e)}")
+
+
+@router.get("/check-duplicate")
+async def check_duplicate_endpoint(
+    facility: str = Query(..., description="Requesting medical facility or hospital"),
+    blood_group: str = Query(..., description="Required ABO/Rh blood group"),
+    component: str = Query("Whole Blood", description="Blood component"),
+    db: Session = Depends(get_db),
+):
+    """
+    Identifies if an active canonical incident already exists for this facility, blood group, and component.
+    Adheres strictly to the Unified Blood Incident coordination model (Presentation Slide 3 & 4).
+    """
+    match = check_duplicate_requirement(db, facility=facility, blood_group=blood_group, component=component)
+    if match:
+        req = match.requirement
+        return {
+            "duplicate_found": True,
+            "incident_id": match.incident_id,
+            "status": match.status,
+            "facility": req.requesting_facility if req else facility,
+            "blood_group": req.blood_group if req else blood_group,
+            "units_requested": match.units_requested,
+            "units_secured": match.units_secured,
+            "message": f"Active incident '{match.incident_id}' is already coordinating {match.units_requested} units of {blood_group} for {facility}. Unified coordination recommends coordinating under this existing shared incident.",
+        }
+    return {
+        "duplicate_found": False,
+        "message": "No active duplicate requirement found. Requisition can proceed.",
+    }
 
 
 @router.post("/verify")

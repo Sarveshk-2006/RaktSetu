@@ -58,7 +58,55 @@ def validate_transition(current_status: str, target_status: str) -> None:
         )
 
 
-# ─── 2. CREATION & VERIFICATION ──────────────────────────────────────────────
+# ─── 2. CREATION, VERIFICATION & DUPLICATE DETECTION ────────────────────────
+
+def check_duplicate_requirement(
+    db: Session,
+    facility: str,
+    blood_group: str,
+    component: Optional[str] = None,
+    exclude_incident_id: Optional[str] = None,
+) -> Optional[Incident]:
+    """
+    Checks for potential duplicate active blood requirements.
+    Unified Incident Principle (Presentation Slide 3 & 4):
+    If an active requirement already exists for the same hospital, blood group, and component,
+    it identifies the existing canonical incident to prevent fragmented parallel outreach.
+    """
+    if not facility or not blood_group:
+        return None
+
+    fac_clean = facility.strip().lower()
+    bg_clean = blood_group.strip().upper()
+    comp_clean = component.strip().lower() if component else None
+
+    active_statuses = ["PendingVerification", "Verified", "Matching", "Mobilising", "Partially Fulfilled"]
+
+    query = (
+        db.query(Incident)
+        .join(BloodRequirement)
+        .filter(
+            Incident.status.in_(active_statuses),
+            BloodRequirement.blood_group == bg_clean,
+        )
+    )
+
+    if exclude_incident_id:
+        query = query.filter(Incident.incident_id != exclude_incident_id)
+
+    candidates = query.all()
+    for inc in candidates:
+        req = inc.requirement
+        if req and req.requesting_facility and req.requesting_facility.strip().lower() == fac_clean:
+            if comp_clean:
+                req_comp = (req.component or "").strip().lower()
+                if req_comp == comp_clean or comp_clean in req_comp or req_comp in comp_clean:
+                    return inc
+            else:
+                return inc
+
+    return None
+
 
 def create_requirement_and_incident(
     db: Session,

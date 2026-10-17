@@ -236,6 +236,29 @@ function getMockResponse(cleanEndpoint: string, options: RequestInit = {}): any 
     return ALL_INCIDENTS
   }
 
+  // Check Duplicate Requirement
+  if (path.startsWith('/incidents/check-duplicate')) {
+    const url = new URL(cleanEndpoint, 'http://localhost')
+    const fac = (url.searchParams.get('facility') || '').toLowerCase()
+    const bg = (url.searchParams.get('blood_group') || '').toUpperCase()
+    if (fac.includes('sahyadri') && (bg === 'O-' || bg === 'O+')) {
+      return {
+        duplicate_found: true,
+        incident_id: 'INC-PN-48291',
+        status: 'Mobilising',
+        facility: 'Sahyadri Hospital, Hadapsar',
+        blood_group: 'O-',
+        units_requested: 2,
+        units_secured: 0,
+        message: "Active incident 'INC-PN-48291' is already coordinating 2 units of O- for Sahyadri Hospital. Unified coordination recommends coordinating under this existing shared incident to prevent duplicate outreach.",
+      }
+    }
+    return {
+      duplicate_found: false,
+      message: 'No active duplicate requirement found. Requisition can proceed.',
+    }
+  }
+
   // Incident detail: /incidents/:id
   const incDetailMatch = path.match(/^\/incidents\/([^/]+)$/)
   if (incDetailMatch && method === 'GET') {
@@ -549,6 +572,23 @@ export const api = {
 
   async getIncident(incidentId: string) {
     return request<Incident>(`/incidents/${encodeURIComponent(incidentId)}`)
+  },
+
+  async checkDuplicateRequirement(params: { facility: string; blood_group: string; component?: string }) {
+    const q = new URLSearchParams()
+    q.set('facility', params.facility)
+    q.set('blood_group', params.blood_group)
+    if (params.component) q.set('component', params.component)
+    return request<{
+      duplicate_found: boolean
+      incident_id?: string
+      status?: string
+      facility?: string
+      blood_group?: string
+      units_requested?: number
+      units_secured?: number
+      message: string
+    }>(`/incidents/check-duplicate?${q.toString()}`)
   },
 
   async createIncident(payload: {

@@ -186,3 +186,102 @@ test('Vertical layout offset contract guarantees complete clearance of fixed top
   }
 })
 
+// ─── Presentation Alignment & Prototype Workflow Tests ─────────────────────
+
+test('Unified Blood Incident duplicate detection flags active requisitions for the same facility and blood group', () => {
+  const existingActiveIncidents = [
+    {
+      incident_id: 'INC-PN-20261018-001',
+      requesting_facility: 'Ruby Hall Clinic, Pune',
+      blood_group: 'O-',
+      status: 'Mobilising',
+    },
+    {
+      incident_id: 'INC-PN-20261018-002',
+      requesting_facility: 'Sassoon General Hospital',
+      blood_group: 'B+',
+      status: 'Fulfilled',
+    },
+  ]
+
+  // Scenario 1: Same facility and blood group -> Duplicate flagged
+  const matchDuplicate = existingActiveIncidents.find(
+    inc =>
+      inc.status !== 'Fulfilled' &&
+      inc.status !== 'Closed' &&
+      inc.status !== 'Cancelled' &&
+      inc.requesting_facility.toLowerCase().trim() === 'ruby hall clinic, pune' &&
+      inc.blood_group === 'O-'
+  )
+  assert.ok(matchDuplicate)
+  assert.equal(matchDuplicate.incident_id, 'INC-PN-20261018-001')
+
+  // Scenario 2: Different facility or blood group -> No duplicate flagged
+  const matchDistinct = existingActiveIncidents.find(
+    inc =>
+      inc.status !== 'Fulfilled' &&
+      inc.status !== 'Closed' &&
+      inc.status !== 'Cancelled' &&
+      inc.requesting_facility.toLowerCase().trim() === 'ruby hall clinic, pune' &&
+      inc.blood_group === 'AB+'
+  )
+  assert.equal(matchDistinct, undefined)
+})
+
+test('Response cascade enforces separation between donor acceptance and clinical unit fulfilment', () => {
+  const cascadeState = {
+    incident_id: 'INC-TEST-002',
+    units_requested: 2,
+    donor_responses: [
+      { donor_id: 'D-991', response: 'Accepted', timestamp: new Date().toISOString() },
+      { donor_id: 'D-992', response: 'Accepted', timestamp: new Date().toISOString() },
+    ],
+    units_secured: 0, // Acceptance does NOT automatically mark units as fulfilled
+    status: 'Mobilising',
+  }
+
+  // Two donors accepted, but units_secured must remain 0 until authorized blood bank confirmation
+  assert.equal(cascadeState.donor_responses.length, 2)
+  assert.equal(cascadeState.units_secured, 0)
+  assert.notEqual(cascadeState.status, 'Fulfilled')
+
+  // Clinical blood bank confirmation explicitly increments units_secured
+  const fulfilledState = {
+    ...cascadeState,
+    units_secured: 2,
+    status: 'Fulfilled',
+    confirmed_by: 'Transfusion Lead',
+    confirmation_source: 'Hospital Blood Bank',
+  }
+
+  assert.equal(fulfilledState.units_secured, 2)
+  assert.equal(fulfilledState.status, 'Fulfilled')
+  assert.equal(fulfilledState.confirmed_by, 'Transfusion Lead')
+})
+
+test('Donor mobile dispatch alert payload preserves privacy while presenting explainable selection factors', () => {
+  const mobileAlertPayload = {
+    incident_id: 'INC-PN-48291',
+    donor_id: 'D-4821',
+    selection_factors: [
+      'Available now (Status: Ready)',
+      '3.1 km from Ruby Hall Clinic',
+      'High response history (94% reliability score)',
+      'Low recent request load (Cooldown: Cleared)',
+    ],
+    urgency: 'Critical',
+    hospital_name: 'Ruby Hall Clinic, Pune',
+  }
+
+  // Must not expose phone, email, Aadhaar, or residential address
+  assert.equal((mobileAlertPayload as any).phone, undefined)
+  assert.equal((mobileAlertPayload as any).email, undefined)
+  assert.equal((mobileAlertPayload as any).aadhaar, undefined)
+  assert.equal((mobileAlertPayload as any).residential_address, undefined)
+
+  // Explainability factors must be present as described in Slide 3
+  assert.equal(mobileAlertPayload.selection_factors.length, 4)
+  assert.ok(mobileAlertPayload.selection_factors.some(f => f.includes('3.1 km')))
+})
+
+

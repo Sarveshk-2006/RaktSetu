@@ -20,6 +20,7 @@ from app.core.exceptions import (
 )
 from app.services.incident_service import (
     create_requirement_and_incident,
+    check_duplicate_requirement,
     verify_incident_requirement,
     confirm_fulfilment,
     cancel_incident,
@@ -275,3 +276,60 @@ def test_audit_event_rollback_on_failure(db_session):
 
     # Audits count must not have incremented for the failed operation
     assert db_session.query(AuditEvent).count() == initial_audits + 1
+
+
+def test_check_duplicate_requirement(db_session):
+    """
+    Verifies Unified Blood Incident principle (Presentation Slide 3 & 4):
+    Identifies active duplicate requirements for the same facility and blood group to prevent fragmented outreach.
+    """
+    req_dto = IncidentCreateRequest(
+        blood_group=BloodGroup.O_NEG,
+        units_requested=2,
+        urgency=IncidentUrgency.CRITICAL,
+        requesting_facility="Sahyadri Hospital, Hadapsar",
+        zone="Hadapsar",
+        lat=18.502,
+        lng=73.927,
+        auto_verify=True,
+    )
+    inc1 = create_requirement_and_incident(db_session, req_dto)
+
+    # Check for duplicate with identical facility and blood group
+    dup = check_duplicate_requirement(
+        db_session,
+        facility="Sahyadri Hospital, Hadapsar",
+        blood_group="O-",
+        component="Packed RBC",
+    )
+    assert dup is not None
+    assert dup.incident_id == inc1.incident_id
+
+    # Check for non-matching blood group
+    no_dup_bg = check_duplicate_requirement(
+        db_session,
+        facility="Sahyadri Hospital, Hadapsar",
+        blood_group="A+",
+        component="Whole Blood",
+    )
+    assert no_dup_bg is None
+
+    # Check for non-matching facility
+    no_dup_fac = check_duplicate_requirement(
+        db_session,
+        facility="Ruby Hall Clinic",
+        blood_group="O-",
+        component="Whole Blood",
+    )
+    assert no_dup_fac is None
+
+    # Once cancelled and closed, it should no longer flag as an active duplicate
+    cancel_incident(db_session, inc1.incident_id, cancelled_by="Operator", reason="Resolved via alternative mutual aid")
+    close_incident(db_session, inc1.incident_id, closed_by="Operator")
+    assert check_duplicate_requirement(
+        db_session,
+        facility="Sahyadri Hospital, Hadapsar",
+        blood_group="O-",
+        component="Packed RBC",
+    ) is None
+
