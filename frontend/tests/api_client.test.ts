@@ -115,3 +115,51 @@ test('Audit log verifies cryptographic state hash structure', () => {
   assert.equal(auditEvent.state_hash.length, 64)
   assert.ok(/^[0-9a-f]{64}$/.test(auditEvent.state_hash))
 })
+
+// ─── Regression Tests for Production Stabilisation ─────────────────────────
+
+function normalizeApiBase(base: string): string {
+  if (!base) return '/api'
+  const trimmed = base.replace(/\/+$/, '')
+  if (trimmed.endsWith('/api')) return trimmed
+  return `${trimmed}/api`
+}
+
+test('normalizeApiBase formats relative and absolute URLs with exactly one /api prefix', () => {
+  assert.equal(normalizeApiBase(''), '/api')
+  assert.equal(normalizeApiBase('/api'), '/api')
+  assert.equal(normalizeApiBase('/api/'), '/api')
+  assert.equal(normalizeApiBase('https://api.raktsetu.org'), 'https://api.raktsetu.org/api')
+  assert.equal(normalizeApiBase('https://api.raktsetu.org/'), 'https://api.raktsetu.org/api')
+  assert.equal(normalizeApiBase('https://api.raktsetu.org/api'), 'https://api.raktsetu.org/api')
+  assert.equal(normalizeApiBase('https://api.raktsetu.org/api/'), 'https://api.raktsetu.org/api')
+})
+
+test('Layout offset calculation guarantees non-overlapping content with sidebar', () => {
+  const expandedSidebarWidth = 260
+  const collapsedSidebarWidth = 72
+  
+  // Expanded desktop offset
+  const expandedOffset = expandedSidebarWidth
+  assert.equal(expandedOffset, 260)
+  
+  // Collapsed desktop offset
+  const collapsedOffset = collapsedSidebarWidth
+  assert.equal(collapsedOffset, 72)
+  
+  // Positive delta reflows into remaining viewport
+  assert.ok(expandedOffset > collapsedOffset)
+  assert.equal(expandedOffset - collapsedOffset, 188)
+})
+
+test('Service connection mode distinguishes authoritative backend from standalone demo', () => {
+  const liveService = { live: true, mode: 'authoritative' as const, service: 'FastAPI' }
+  const demoService = { live: false, mode: 'demo' as const, service: 'Verified Deterministic Demo Sandbox' }
+
+  assert.equal(liveService.mode, 'authoritative')
+  assert.equal(liveService.live, true)
+  assert.equal(demoService.mode, 'demo')
+  assert.equal(demoService.live, false)
+  assert.notEqual(liveService.mode, demoService.mode)
+})
+

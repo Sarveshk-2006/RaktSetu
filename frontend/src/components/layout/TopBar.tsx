@@ -1,11 +1,17 @@
 // RAKTSETU — Clean Light Top Navigation Bar with Smooth Microinteractions
 import { useState, useEffect, useRef } from 'react'
-import { Bell, Droplets, Search, Menu, X, ShieldCheck, ChevronRight, User, LogOut } from 'lucide-react'
+import {
+  Bell, Droplets, Search, Menu, X, ShieldCheck, ChevronRight,
+  User, LogOut, PanelLeftClose, PanelLeftOpen
+} from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { checkBackendHealth } from '@/lib/api'
 
 interface TopBarProps {
   onMobileMenuToggle?: () => void
   isMobileMenuOpen?: boolean
+  isSidebarCollapsed?: boolean
+  onToggleSidebar?: () => void
 }
 
 interface OperationalAlert {
@@ -40,17 +46,42 @@ const INITIAL_ALERTS: OperationalAlert[] = [
   },
 ]
 
-export function TopBar({ onMobileMenuToggle, isMobileMenuOpen }: TopBarProps) {
+export function TopBar({
+  onMobileMenuToggle,
+  isMobileMenuOpen,
+  isSidebarCollapsed = false,
+  onToggleSidebar,
+}: TopBarProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [showNotifications, setShowNotifications] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
   const [alerts, setAlerts] = useState<OperationalAlert[]>(INITIAL_ALERTS)
+  const [backendStatus, setBackendStatus] = useState<{
+    live: boolean
+    mode: 'authoritative' | 'demo'
+    service: string
+  }>({
+    live: false,
+    mode: 'demo',
+    service: 'Verified Deterministic Demo Sandbox',
+  })
   
   const notifRef = useRef<HTMLDivElement>(null)
   const profileRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
 
   const unreadCount = alerts.filter(a => !a.read).length
+
+  // Check backend health on mount
+  useEffect(() => {
+    let mounted = true
+    checkBackendHealth().then((status) => {
+      if (mounted) setBackendStatus(status)
+    })
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   // Global Ctrl+K shortcut and Escape key closing
   useEffect(() => {
@@ -105,14 +136,25 @@ export function TopBar({ onMobileMenuToggle, isMobileMenuOpen }: TopBarProps) {
   return (
     <header className="fixed top-0 left-0 right-0 h-[64px] z-50 bg-white border-b border-[#E6E8EC] shadow-[0_1px_2px_rgba(16,24,40,0.03)]">
       <div className="h-[64px] w-full px-4 sm:px-6 flex items-center justify-between gap-4">
-        {/* Left: Brand & Mobile Menu Toggle */}
-        <div className="flex items-center gap-3 shrink-0">
+        {/* Left: Brand & Menu Toggles */}
+        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+          {/* Mobile Menu Toggle */}
           <button
             onClick={onMobileMenuToggle}
             className="md:hidden p-1.5 rounded-lg text-[#667085] hover:text-[#17212B] hover:bg-[#F3F4F6] transition-colors active:scale-95"
             aria-label="Toggle Navigation Menu"
           >
             {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+
+          {/* Desktop Sidebar Toggle */}
+          <button
+            onClick={onToggleSidebar}
+            className="hidden md:flex items-center justify-center w-8 h-8 rounded-lg text-[#667085] hover:text-[#17212B] hover:bg-[#F3F4F6] transition-colors active:scale-95 border border-[#E6E8EC]"
+            aria-label={isSidebarCollapsed ? "Expand sidebar navigation" : "Collapse sidebar navigation"}
+            title={isSidebarCollapsed ? "Expand sidebar (Ctrl+\\)" : "Collapse sidebar (Ctrl+\\)"}
+          >
+            {isSidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
           </button>
 
           <div 
@@ -166,12 +208,27 @@ export function TopBar({ onMobileMenuToggle, isMobileMenuOpen }: TopBarProps) {
 
         {/* Right: Operational Status, Notifications & Profile */}
         <div className="flex items-center gap-3 shrink-0">
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EBFDF5] border border-[#A6F4C5] transition-all">
-            <span className="w-2 h-2 rounded-full bg-[#16805D] animate-pulse-sentinel" />
-            <span className="text-xs font-semibold text-[#085D40]">
-              Pune Network · Operational
-            </span>
-          </div>
+          {backendStatus.live ? (
+            <div
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EBFDF5] border border-[#A6F4C5] transition-all cursor-help"
+              title="Connected to authoritative FastAPI backend and managed database"
+            >
+              <span className="w-2 h-2 rounded-full bg-[#16805D] animate-pulse-sentinel" />
+              <span className="text-xs font-semibold text-[#085D40]">
+                Live Backend Connected
+              </span>
+            </div>
+          ) : (
+            <div 
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FEF7EC] border border-[#FEDF89] transition-all cursor-help"
+              title="Authoritative PostgreSQL & FastAPI backend offline. Operating in verified deterministic demo mode for Pune District."
+            >
+              <span className="w-2 h-2 rounded-full bg-[#B7791F]" />
+              <span className="text-xs font-semibold text-[#8D5A0F]">
+                Standalone Demo Sandbox
+              </span>
+            </div>
+          )}
 
           {/* Notifications Trigger & Dropdown */}
           <div className="relative" ref={notifRef}>

@@ -25,9 +25,16 @@ import {
 } from '@/data/demoData'
 import { PARTNERS_DATA } from '@/data/partnersData'
 
-const rawBase = import.meta.env.VITE_API_BASE_URL || '/api'
-const normalizedBase = rawBase.replace(/\/+$/, '')
-const BASE_URL = normalizedBase.endsWith('/api') ? normalizedBase : `${normalizedBase}/api`
+const rawBase = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() || ''
+
+export function normalizeApiBase(base: string): string {
+  if (!base) return '/api'
+  const trimmed = base.replace(/\/+$/, '')
+  if (trimmed.endsWith('/api')) return trimmed
+  return `${trimmed}/api`
+}
+
+export const BASE_URL = normalizeApiBase(rawBase)
 const AUTH_TOKEN_KEY = 'raktsetu_auth_token'
 
 export class ApiError extends Error {
@@ -40,6 +47,21 @@ export class ApiError extends Error {
     this.status = status
     this.detail = detail
   }
+}
+
+export async function checkBackendHealth(): Promise<{ live: boolean; service: string; mode: 'authoritative' | 'demo' }> {
+  try {
+    const res = await fetch(`${BASE_URL}/health`, {
+      headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(3000),
+    })
+    const ct = res.headers.get('content-type') || ''
+    if (res.ok && ct.includes('application/json')) {
+      const data = await res.json()
+      return { live: true, service: data.service || 'FastAPI Authoritative Backend', mode: 'authoritative' }
+    }
+  } catch {}
+  return { live: false, service: 'Verified Deterministic Demo Sandbox', mode: 'demo' }
 }
 
 const MOCK_DONORS = [
@@ -446,6 +468,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 export const api = {
   // ─── Health & Diagnostics ──────────────────────────────────────────────────
+  checkBackendHealth,
   async getHealth() {
     return request<{ status: string; service: string; environment: string }>('/health')
   },
