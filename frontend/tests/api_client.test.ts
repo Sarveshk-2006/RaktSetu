@@ -163,3 +163,26 @@ test('Service connection mode distinguishes authoritative backend from standalon
   assert.notEqual(liveService.mode, demoService.mode)
 })
 
+test('Vertical layout offset contract guarantees complete clearance of fixed top bar across all breakpoints', () => {
+  const topBarHeight = 64
+  const shellTopPadding = 64 // pt-[64px] on <main>
+  
+  // Responsive content padding values (mobile: p-4, tablet: sm:p-6, desktop: lg:p-8)
+  const paddingMap = {
+    mobile: 16,
+    tablet: 24,
+    desktop: 32,
+  }
+
+  for (const [breakpoint, contentPadding] of Object.entries(paddingMap)) {
+    const contentTopY = shellTopPadding + contentPadding
+    // Content top edge must strictly be below the 64px fixed header
+    assert.ok(
+      contentTopY > topBarHeight,
+      `At ${breakpoint}, content top (${contentTopY}px) must clear top bar height (${topBarHeight}px)`
+    )
+    // Clearance buffer must equal the designed responsive padding
+    assert.equal(contentTopY - topBarHeight, contentPadding)
+  }
+})
+

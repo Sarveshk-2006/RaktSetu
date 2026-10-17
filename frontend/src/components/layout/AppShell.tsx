@@ -54,12 +54,14 @@ export function AppShell() {
       />
       <main
         className={cn(
-          "pt-[64px] min-h-[calc(100vh-64px)] bg-[#F7F8FA] transition-[margin-left] duration-200 ease-in-out p-4 sm:p-6 lg:p-8 min-w-0",
+          "min-h-screen bg-[#F7F8FA] transition-[margin-left] duration-200 ease-in-out min-w-0 pt-[64px]",
           isCollapsed ? "md:ml-[72px]" : "md:ml-[260px]"
         )}
       >
-        <div key={location.pathname} className="max-w-[1600px] w-full mx-auto animate-page-entrance min-w-0">
-          <Outlet />
+        <div className="w-full p-4 sm:p-6 lg:p-8 min-w-0">
+          <div key={location.pathname} className="max-w-[1600px] w-full mx-auto animate-page-entrance min-w-0">
+            <Outlet />
+          </div>
         </div>
       </main>
     </div>
