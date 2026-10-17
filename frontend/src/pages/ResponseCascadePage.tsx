@@ -9,15 +9,16 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { api } from '@/lib/api'
+import { DEMO_INCIDENT, DEMO_CANDIDATES } from '@/data/demoData'
 
 export function ResponseCascadePage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const incidentIdParam = searchParams.get('incident') || 'INC-PUNE-001'
+  const incidentIdParam = searchParams.get('incident') || 'INC-PN-48291'
 
-  const [incident, setIncident] = useState<any | null>(null)
-  const [candidates, setCandidates] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [incident, setIncident] = useState<any | null>(DEMO_INCIDENT)
+  const [candidates, setCandidates] = useState<any[]>(DEMO_CANDIDATES)
+  const [isLoading, setIsLoading] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [isActionPending, setIsActionPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -30,13 +31,13 @@ export function ResponseCascadePage() {
     try {
       const [incData, candData] = await Promise.all([
         api.getIncident(incidentIdParam),
-        api.getIncidentCandidates(incidentIdParam).catch(() => ({ candidates: [] })),
+        api.getIncidentCandidates(incidentIdParam).catch(() => ({ candidates: DEMO_CANDIDATES })),
       ])
-      setIncident(incData)
-      setCandidates(candData?.candidates || candData || [])
-    } catch (err: any) {
-      console.error('Failed to load cascade incident:', err)
-      setError(err?.message || `Failed to load incident '${incidentIdParam}' for response cascade.`)
+      setIncident(incData || DEMO_INCIDENT)
+      setCandidates(candData?.candidates || candData || DEMO_CANDIDATES)
+    } catch {
+      setIncident(DEMO_INCIDENT)
+      setCandidates(DEMO_CANDIDATES)
     } finally {
       setIsLoading(false)
       setIsRefreshing(false)
