@@ -66,6 +66,18 @@ def test_production_config_validation_safeguards():
     )
     s_valid.validate_production_configuration()
 
+    # 5. Cloud postgres:// URL normalization and comma-separated origins
+    s_norm = Settings(
+        ENVIRONMENT="production",
+        AUTH_STRICT=True,
+        SECRET_KEY="x" * 48,
+        DATABASE_URL="postgres://user:pass@prod-db.host:5432/raktsetu",
+        ALLOWED_ORIGINS="https://raktsetu.vercel.app, https://raktsetu-demo.vercel.app",
+    )
+    assert s_norm.DATABASE_URL == "postgresql://user:pass@prod-db.host:5432/raktsetu"
+    assert s_norm.ALLOWED_ORIGINS == ["https://raktsetu.vercel.app", "https://raktsetu-demo.vercel.app"]
+    s_norm.validate_production_configuration()
+
 
 def test_seed_blocked_in_production(db_session):
     """Verifies that seed_database refuses to run when ENVIRONMENT is production."""

@@ -4,8 +4,10 @@ Reads settings from environment variables with sensible defaults.
 Never hardcode secrets here.
 """
 
+import json
+from typing import List, Union
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
-from typing import List
 
 
 class Settings(BaseSettings):
@@ -31,6 +33,28 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./raktsetu.db"
     DATABASE_ECHO: bool = False
     REDIS_URL: str = ""
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def normalize_database_url(cls, v: str) -> str:
+        if isinstance(v, str) and v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql://", 1)
+        return v
+
+    @field_validator("ALLOWED_ORIGINS", mode="before")
+    @classmethod
+    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+        if isinstance(v, str):
+            v_stripped = v.strip()
+            if v_stripped.startswith("[") and v_stripped.endswith("]"):
+                try:
+                    return json.loads(v_stripped)
+                except Exception:
+                    pass
+            return [i.strip() for i in v_stripped.split(",") if i.strip()]
+        elif isinstance(v, list):
+            return v
+        return []
 
     # Security & Authentication
     SECRET_KEY: str = "raktsetu-super-secure-production-ready-secret-key-change-in-env-2026"
