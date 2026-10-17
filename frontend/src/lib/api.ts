@@ -14,7 +14,9 @@ import type {
   StressRunRequest,
 } from '@/types'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
+const rawBase = import.meta.env.VITE_API_BASE_URL || '/api'
+const normalizedBase = rawBase.replace(/\/+$/, '')
+const BASE_URL = normalizedBase.endsWith('/api') ? normalizedBase : `${normalizedBase}/api`
 const AUTH_TOKEN_KEY = 'raktsetu_auth_token'
 
 export class ApiError extends Error {
@@ -30,7 +32,8 @@ export class ApiError extends Error {
 }
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const url = `${BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`
+  const url = `${BASE_URL}${cleanEndpoint}`
   const token = typeof window !== 'undefined' ? localStorage.getItem(AUTH_TOKEN_KEY) : null
   const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {}
   const headers = {
