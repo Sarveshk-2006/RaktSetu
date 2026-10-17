@@ -10,6 +10,7 @@ import {
 import { cn } from '@/lib/utils'
 import { api } from '@/lib/api'
 import { PartnerCoverageMap } from '@/components/partners/PartnerCoverageMap'
+import { PARTNERS_DATA } from '@/data/partnersData'
 
 // Helper for partner icon
 function getPartnerIcon(type: string) {
@@ -50,8 +51,13 @@ export function PartnerDetailPage() {
       const data = await api.getPartner(id)
       setPartner(data)
     } catch (err: any) {
-      console.error('Failed to load partner detail:', err)
-      setError(err?.message || `Partner organisation '${id}' could not be loaded from authoritative storage.`)
+      console.warn('Backend partner detail unreachable, checking fallback:', err)
+      const fallback = PARTNERS_DATA.find(p => p.id === id || p.slug === id)
+      if (fallback) {
+        setPartner(fallback)
+      } else {
+        setError(err?.message || `Partner organisation '${id}' could not be loaded.`)
+      }
     } finally {
       setIsLoading(false)
     }

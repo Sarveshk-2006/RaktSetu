@@ -53,15 +53,26 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     )
   }
 
+  const contentType = response.headers.get('content-type') || ''
+
   if (!response.ok) {
     let detail = response.statusText
-    try {
-      const errorJson = await response.json()
-      detail = errorJson.detail || errorJson.message || JSON.stringify(errorJson)
-    } catch {
-      // response is not JSON
+    if (contentType.includes('application/json')) {
+      try {
+        const errorJson = await response.json()
+        detail = errorJson.detail || errorJson.message || JSON.stringify(errorJson)
+      } catch {
+        // response is not JSON
+      }
     }
     throw new ApiError(response.status, detail)
+  }
+
+  if (!contentType.includes('application/json')) {
+    throw new ApiError(
+      502,
+      `API endpoint returned non-JSON response (${contentType || 'HTML rewrite'}). Backend service is unreachable or unconfigured.`
+    )
   }
 
   return response.json()

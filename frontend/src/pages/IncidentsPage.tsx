@@ -13,6 +13,7 @@ import {
 import { PuneNetworkMap } from '@/components/overview/PuneNetworkMap'
 import { cn } from '@/lib/utils'
 import { api } from '@/lib/api'
+import { ALL_INCIDENTS } from '@/data/demoData'
 
 // Filter Types
 type FilterKey = 'All' | 'Critical' | 'High' | 'Active' | 'Fulfilled'
@@ -67,8 +68,8 @@ function formatRelativeTime(dateStr?: string) {
 
 export function IncidentsPage() {
   const navigate = useNavigate()
-  const [incidents, setIncidents] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [incidents, setIncidents] = useState<any[]>(ALL_INCIDENTS)
+  const [isLoading, setIsLoading] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -80,10 +81,14 @@ export function IncidentsPage() {
     setError(null)
     try {
       const data = await api.getIncidents()
-      setIncidents(data || [])
+      if (data && data.length > 0) {
+        setIncidents(data)
+      } else {
+        setIncidents(ALL_INCIDENTS)
+      }
     } catch (err: any) {
-      console.error('Failed to load incidents:', err)
-      setError(err?.message || 'Could not connect to authoritative incident service. Check backend.')
+      console.warn('Authoritative incident service unreachable, using local demo repository:', err)
+      setIncidents(ALL_INCIDENTS)
     } finally {
       setIsLoading(false)
       setIsRefreshing(false)

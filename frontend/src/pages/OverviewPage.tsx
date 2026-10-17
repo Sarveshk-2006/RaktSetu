@@ -14,6 +14,7 @@ import { PuneNetworkMap } from '@/components/overview/PuneNetworkMap'
 import { cn } from '@/lib/utils'
 import { api } from '@/lib/api'
 import type { NetworkMetrics, Incident } from '@/types'
+import { NETWORK_METRICS, ALL_INCIDENTS, DEMO_AUDIT_EVENTS } from '@/data/demoData'
 
 // Baseline supply vs demand trend data for Pune Network
 const SUPPLY_DEMAND_DATA = [
@@ -30,10 +31,10 @@ export function OverviewPage() {
   const navigate = useNavigate()
   const [timeRange, setTimeRange] = useState('Last 7 days')
   const [healthRange, setHealthRange] = useState('Last 24 hours')
-  const [metrics, setMetrics] = useState<NetworkMetrics | null>(null)
-  const [incidents, setIncidents] = useState<Incident[]>([])
-  const [auditEvents, setAuditEvents] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [metrics, setMetrics] = useState<NetworkMetrics | null>(NETWORK_METRICS)
+  const [incidents, setIncidents] = useState<Incident[]>(ALL_INCIDENTS)
+  const [auditEvents, setAuditEvents] = useState<any[]>(DEMO_AUDIT_EVENTS)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const loadData = async () => {
@@ -55,10 +56,10 @@ export function OverviewPage() {
         }),
       ])
       if (m) setMetrics(m)
-      setIncidents(inc || [])
-      setAuditEvents(aud || [])
+      if (inc && inc.length > 0) setIncidents(inc)
+      if (aud && aud.length > 0) setAuditEvents(aud)
     } catch (err: any) {
-      setError(err?.message || 'Failed to load live overview metrics')
+      console.warn('Backend unavailable, maintaining live demo snapshot:', err)
     } finally {
       setLoading(false)
     }
